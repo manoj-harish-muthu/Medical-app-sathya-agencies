@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.text.Text?>
+
+<StackPane xmlns:fx="http://javafx.com/fxml" fx:controller="com.pharmacyerp.controller.LoginController" styleClass="root" stylesheets="@../css/style.css">
+    <VBox alignment="CENTER" spacing="20" maxWidth="400" maxHeight="450" styleClass="card">
+        
+        <VBox alignment="CENTER" spacing="10">
+            <Label text="PharmaERP" styleClass="page-title"/>
+            <Label text="Sign in to your account" styleClass="secondary-text"/>
+        </VBox>
+
+        <VBox spacing="8">
+            <Label text="Username"/>
+            <TextField fx:id="usernameField" promptText="Enter your username" styleClass="text-field"/>
+        </VBox>
+
+        <VBox spacing="8">
+            <Label text="Password"/>
+            <PasswordField fx:id="passwordField" promptText="Enter your password" styleClass="password-field"/>
+        </VBox>
+        
+        <Label fx:id="errorLabel" styleClass="error-label" visible="false"/>
+
+        <Button text="Sign In" onAction="#handleLogin" styleClass="button-primary" maxWidth="Infinity" defaultButton="true">
+            <VBox.margin>
+                <Insets top="10"/>
+            </VBox.margin>
+        </Button>
+        
+        <Label text="Demo: admin / admin123" styleClass="secondary-text">
+            <VBox.margin>
+                <Insets top="15"/>
+            </VBox.margin>
+        </Label>
+        
+    </VBox>
+</StackPane>

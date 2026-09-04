@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.geometry.Insets?>
+
+<BorderPane xmlns:fx="http://javafx.com/fxml" fx:controller="com.pharmacyerp.controller.OutstandingBillsController" styleClass="root" stylesheets="@../css/style.css">
+    
+    <left>
+        <fx:include source="Sidebar.fxml"/>
+    </left>
+    
+    <center>
+        <VBox spacing="20">
+            <padding>
+                <Insets top="24" right="24" bottom="24" left="24"/>
+            </padding>
+            
+            <Label text="Credit / Outstanding Bills" styleClass="page-title"/>
+            
+            <HBox spacing="20" VBox.vgrow="ALWAYS">
+                <!-- Outstanding List -->
+                <VBox styleClass="card" HBox.hgrow="ALWAYS" spacing="15">
+                    <Label text="Pending Invoices" styleClass="section-title"/>
+                    <TableView fx:id="outstandingTable" VBox.vgrow="ALWAYS">
+                        <columns>
+                            <TableColumn fx:id="colInvoiceNo" text="Invoice No" prefWidth="120"/>
+                            <TableColumn fx:id="colDate" text="Date" prefWidth="120"/>
+                            <TableColumn fx:id="colCustomer" text="Customer" prefWidth="150"/>
+                            <TableColumn fx:id="colPhone" text="Phone" prefWidth="100"/>
+                            <TableColumn fx:id="colTotal" text="Total Amount" prefWidth="100"/>
+                            <TableColumn fx:id="colPaid" text="Paid" prefWidth="100"/>
+                            <TableColumn fx:id="colBalance" text="Balance" prefWidth="100"/>
+                        </columns>
+                    </TableView>
+                </VBox>
+                
+                <!-- Payment Pane -->
+                <VBox fx:id="paymentPane" styleClass="card" prefWidth="350" spacing="15" disable="true">
+                    <Label text="Receive Payment" styleClass="section-title"/>
+                    
+                    <VBox spacing="8">
+                        <Label text="Selected Invoice"/>
+                        <Label fx:id="selectedInvoiceLabel" text="None" style="-fx-font-weight: bold;"/>
+                    </VBox>
+                    
+                    <VBox spacing="8">
+                        <Label text="Pending Balance"/>
+                        <Label fx:id="selectedBalanceLabel" text="₹ 0.00" style="-fx-font-weight: bold; -fx-text-fill: #DC2626; -fx-font-size: 16px;"/>
+                    </VBox>
+                    
+                    <VBox spacing="8">
+                        <Label text="Payment Amount"/>
+                        <TextField fx:id="paymentAmountField" styleClass="text-field" promptText="0.00"/>
+                    </VBox>
+                    
+                    <VBox spacing="8">
+                        <Label text="Payment Mode"/>
+                        <ComboBox fx:id="paymentModeCombo" maxWidth="Infinity" styleClass="text-field"/>
+                    </VBox>
+                    
+                    <VBox spacing="8">
+                        <Label text="Notes / Reference"/>
+                        <TextField fx:id="paymentNotesField" styleClass="text-field" promptText="Optional notes..."/>
+                    </VBox>
+                    
+                    <Region VBox.vgrow="ALWAYS"/>
+                    
+                    <Button text="Process Payment" onAction="#handleProcessPayment" styleClass="button-primary" maxWidth="Infinity"/>
+                    <Button text="Send WhatsApp Reminder" onAction="#handleWhatsAppReminder" styleClass="button-outline" style="-fx-text-fill: #16A34A; -fx-border-color: #16A34A;" maxWidth="Infinity"/>
+                </VBox>
+            </HBox>
+        </VBox>
+    </center>
+
+</BorderPane>

@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.geometry.Insets?>
+
+<BorderPane xmlns:fx="http://javafx.com/fxml" fx:controller="com.pharmacyerp.controller.InventorySaltMasterController" styleClass="root" stylesheets="@../css/style.css">
+    <left>
+        <fx:include source="Sidebar.fxml"/>
+    </left>
+    <center>
+        <VBox spacing="20">
+            <padding>
+                <Insets top="24" right="24" bottom="24" left="24"/>
+            </padding>
+            <HBox alignment="CENTER_LEFT">
+                <Label text="Salt Master" styleClass="page-title"/>
+                <Region HBox.hgrow="ALWAYS"/>
+                <Button text="New Salt" styleClass="button-primary"/>
+            </HBox>
+            <VBox styleClass="card" VBox.vgrow="ALWAYS" spacing="15">
+                <Label text="Salts List" styleClass="section-title"/>
+                <TableView VBox.vgrow="ALWAYS">
+                    <columns>
+                        <TableColumn text="Salt Code" prefWidth="120"/>
+                        <TableColumn text="Salt Name" prefWidth="250"/>
+                        <TableColumn text="Description" prefWidth="300"/>
+                        <TableColumn text="Action" prefWidth="150"/>
+                    </columns>
+                </TableView>
+            </VBox>
+        </VBox>
+    </center>
+</BorderPane>

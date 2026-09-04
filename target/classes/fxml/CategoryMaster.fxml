@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.cell.PropertyValueFactory?>
+
+<BorderPane xmlns:fx="http://javafx.com/fxml" fx:controller="com.pharmacyerp.controller.CategoryController" styleClass="root" stylesheets="@../css/style.css">
+    
+    <top>
+        <HBox alignment="CENTER_LEFT" spacing="20" style="-fx-background-color: #FFFFFF; -fx-border-color: #E2E8F0; -fx-border-width: 0 0 1 0; -fx-padding: 15 24;">
+            <Button text="← Back to Dashboard" onAction="#handleDashboard" styleClass="button-outline"/>
+            <Region HBox.hgrow="ALWAYS"/>
+            <Label text="Category Master" styleClass="section-title"/>
+            <Region HBox.hgrow="ALWAYS"/>
+        </HBox>
+    </top>
+
+    <left>
+        <fx:include source="Sidebar.fxml"/>
+    </left>
+
+    <center>
+        <HBox spacing="20">
+            <padding>
+                <Insets top="20" right="20" bottom="20" left="20"/>
+            </padding>
+            
+            <VBox spacing="15" prefWidth="350" styleClass="card">
+                <Label text="Add / Edit Category" styleClass="section-title"/>
+                <Label text="Category Name *"/>
+                <TextField fx:id="nameField" promptText="Enter category name" styleClass="text-field"/>
+                
+                <Label text="Description"/>
+                <TextArea fx:id="descriptionArea" promptText="Enter description" styleClass="text-field" prefRowCount="3"/>
+                
+                <HBox spacing="10" alignment="CENTER_RIGHT">
+                    <Button text="Clear" onAction="#handleClear" styleClass="button-outline"/>
+                    <Button text="Save" onAction="#handleSave" styleClass="button-primary"/>
+                </HBox>
+            </VBox>
+            
+            <VBox spacing="15" HBox.hgrow="ALWAYS" styleClass="card">
+                <HBox alignment="CENTER_LEFT" spacing="10">
+                    <TextField fx:id="searchField" promptText="Search Category..." styleClass="text-field" prefWidth="250"/>
+                </HBox>
+                <TableView fx:id="categoryTable" VBox.vgrow="ALWAYS">
+                    <columns>
+                        <TableColumn fx:id="colName" text="Category Name" prefWidth="250">
+                            <cellValueFactory><PropertyValueFactory property="categoryName"/></cellValueFactory>
+                        </TableColumn>
+                        <TableColumn fx:id="colDesc" text="Description" prefWidth="400">
+                            <cellValueFactory><PropertyValueFactory property="description"/></cellValueFactory>
+                        </TableColumn>
+                        <TableColumn fx:id="colAction" text="Action" prefWidth="100"/>
+                    </columns>
+                </TableView>
+            </VBox>
+        </HBox>
+    </center>
+</BorderPane>

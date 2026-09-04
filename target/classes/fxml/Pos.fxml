@@ -1,0 +1,139 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.cell.PropertyValueFactory?>
+
+<BorderPane xmlns:fx="http://javafx.com/fxml" fx:controller="com.pharmacyerp.controller.PosController" styleClass="root" stylesheets="@../css/style.css">
+    
+    <!-- Top Navbar -->
+    <top>
+        <HBox alignment="CENTER_LEFT" spacing="20" style="-fx-background-color: #FFFFFF; -fx-border-color: #E2E8F0; -fx-border-width: 0 0 1 0; -fx-padding: 15 24;">
+            <Button text="← Back to Dashboard" onAction="#handleDashboard" styleClass="button-outline"/>
+            <Region HBox.hgrow="ALWAYS"/>
+            <Label text="New Bill / POS" styleClass="section-title"/>
+            <Region HBox.hgrow="ALWAYS"/>
+            <Label text="Date: " styleClass="secondary-text"/>
+            <Label fx:id="dateLabel" text="01/09/2026" style="-fx-font-weight: bold;"/>
+        </HBox>
+    </top>
+
+    <!-- Sidebar -->
+    <left>
+        <fx:include source="Sidebar.fxml"/>
+    </left>
+
+    <!-- Main Content -->
+    <center>
+        <HBox spacing="20">
+            <padding>
+                <Insets top="20" right="20" bottom="20" left="20"/>
+            </padding>
+            
+            <!-- Left Side: Medicine Search and Cart -->
+            <VBox spacing="15" HBox.hgrow="ALWAYS">
+                <!-- Search Box -->
+                <VBox styleClass="card" spacing="10">
+                    <HBox spacing="10" alignment="CENTER_LEFT">
+                        <Label text="Find Medicine (F1) / Barcode" style="-fx-font-weight: bold;"/>
+                        <Region HBox.hgrow="ALWAYS"/>
+                        <Label text="Type to search..." styleClass="secondary-text"/>
+                    </HBox>
+                    <HBox spacing="10">
+                        <TextField fx:id="medicineSearchField" promptText="Enter medicine name, salt, or scan barcode..." styleClass="text-field" HBox.hgrow="ALWAYS"/>
+                        <Button text="Search" styleClass="button-primary"/>
+                    </HBox>
+                </VBox>
+                
+                <!-- Cart -->
+                <VBox styleClass="card" VBox.vgrow="ALWAYS" spacing="10">
+                    <Label text="Cart Items" style="-fx-font-weight: bold;"/>
+                    <TableView fx:id="cartTable" VBox.vgrow="ALWAYS">
+                        <columns>
+                            <TableColumn fx:id="colMfr" text="MFR" prefWidth="80"/>
+                            <TableColumn fx:id="colHsn" text="HSN Code" prefWidth="80"/>
+                            <TableColumn fx:id="colMrp" text="M.R.P" prefWidth="70"/>
+                            <TableColumn fx:id="colBatch" text="BATCH" prefWidth="90"/>
+                            <TableColumn fx:id="colExp" text="EXP" prefWidth="60"/>
+                            <TableColumn fx:id="colItem" text="ITEM DESCRIPTION" prefWidth="200"/>
+                            <TableColumn fx:id="colPack" text="PACK" prefWidth="60"/>
+                            <TableColumn fx:id="colQty" text="QTY" prefWidth="50"/>
+                            <TableColumn fx:id="colRate" text="RATE" prefWidth="70"/>
+                            <TableColumn fx:id="colDisc" text="Dis %" prefWidth="60"/>
+                            <TableColumn fx:id="colGst" text="GST%" prefWidth="60"/>
+                            <TableColumn fx:id="colAmount" text="Amount" prefWidth="80"/>
+                            <TableColumn fx:id="colAction" text="Action" prefWidth="80"/>
+                        </columns>
+                    </TableView>
+                </VBox>
+            </VBox>
+
+            <!-- Right Side: Customer & Payment -->
+            <VBox spacing="15" prefWidth="350">
+                
+                <!-- Customer Details -->
+                <VBox styleClass="card" spacing="10">
+                    <HBox alignment="CENTER_LEFT">
+                        <Label text="Customer (F2)" style="-fx-font-weight: bold;"/>
+                        <Region HBox.hgrow="ALWAYS"/>
+                        <Button text="Search" style="-fx-font-size: 11px;" styleClass="button-outline"/>
+                    </HBox>
+                    <TextField fx:id="customerPhoneField" promptText="Phone Number" styleClass="text-field"/>
+                    <TextField fx:id="customerNameField" promptText="Patient / Customer Name" styleClass="text-field"/>
+                    <TextField fx:id="doctorNameField" promptText="Doctor Name (Optional)" styleClass="text-field"/>
+                </VBox>
+                
+                <!-- Bill Summary -->
+                <VBox styleClass="card" spacing="12">
+                    <Label text="Bill Summary" style="-fx-font-weight: bold;"/>
+                    
+                    <HBox>
+                        <Label text="Subtotal"/>
+                        <Region HBox.hgrow="ALWAYS"/>
+                        <Label fx:id="subtotalLabel" text="₹ 0.00"/>
+                    </HBox>
+                    
+                    <HBox>
+                        <Label text="Discount"/>
+                        <Region HBox.hgrow="ALWAYS"/>
+                        <Label fx:id="discountLabel" text="₹ 0.00" style="-fx-text-fill: #16A34A;"/>
+                    </HBox>
+                    
+                    <HBox>
+                        <Label text="CGST + SGST"/>
+                        <Region HBox.hgrow="ALWAYS"/>
+                        <Label fx:id="taxLabel" text="₹ 0.00"/>
+                    </HBox>
+                    
+                    <Separator/>
+                    
+                    <HBox>
+                        <Label text="Grand Total" style="-fx-font-weight: bold; -fx-font-size: 16px;"/>
+                        <Region HBox.hgrow="ALWAYS"/>
+                        <Label fx:id="totalLabel" text="₹ 0.00" style="-fx-font-weight: bold; -fx-font-size: 24px; -fx-text-fill: #111827;"/>
+                    </HBox>
+                    
+                    <HBox alignment="CENTER_LEFT" spacing="10">
+                        <Label text="Paid Amount" style="-fx-font-weight: bold;"/>
+                        <Region HBox.hgrow="ALWAYS"/>
+                        <TextField fx:id="paidAmountField" promptText="0.00" styleClass="text-field" prefWidth="120" alignment="CENTER_RIGHT" style="-fx-font-weight: bold;"/>
+                    </HBox>
+                    
+                    <HBox alignment="CENTER_LEFT">
+                        <Label text="Balance"/>
+                        <Region HBox.hgrow="ALWAYS"/>
+                        <Label fx:id="balanceLabel" text="₹ 0.00" style="-fx-font-weight: bold; -fx-text-fill: #DC2626; -fx-font-size: 16px;"/>
+                    </HBox>
+                </VBox>
+                
+                <!-- Payment Actions -->
+                <VBox styleClass="card" spacing="10" VBox.vgrow="ALWAYS" alignment="BOTTOM_CENTER">
+                    <ComboBox fx:id="paymentModeCombo" promptText="Payment Mode" maxWidth="Infinity" styleClass="text-field"/>
+                    <Button text="Complete Sale (F12)" onAction="#handleCompleteSale" styleClass="button-primary" maxWidth="Infinity" style="-fx-font-size: 16px; -fx-padding: 15px;"/>
+                    <Button text="Suspend Bill (Ctrl+S)" styleClass="button-outline" maxWidth="Infinity"/>
+                    <Button text="Clear Bill (F3)" style="-fx-text-fill: #DC2626; -fx-background-color: transparent; -fx-border-color: #DC2626; -fx-border-radius: 6px;" maxWidth="Infinity"/>
+                </VBox>
+            </VBox>
+        </HBox>
+    </center>
+</BorderPane>

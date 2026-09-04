@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.cell.PropertyValueFactory?>
+
+<BorderPane xmlns:fx="http://javafx.com/fxml" fx:controller="com.pharmacyerp.controller.ManufacturerController" styleClass="root" stylesheets="@../css/style.css">
+    
+    <top>
+        <HBox alignment="CENTER_LEFT" spacing="20" style="-fx-background-color: #FFFFFF; -fx-border-color: #E2E8F0; -fx-border-width: 0 0 1 0; -fx-padding: 15 24;">
+            <Button text="← Back to Dashboard" onAction="#handleDashboard" styleClass="button-outline"/>
+            <Region HBox.hgrow="ALWAYS"/>
+            <Label text="Manufacturer / Company Master" styleClass="section-title"/>
+            <Region HBox.hgrow="ALWAYS"/>
+        </HBox>
+    </top>
+
+    <left>
+        <fx:include source="Sidebar.fxml"/>
+    </left>
+
+    <center>
+        <HBox spacing="20">
+            <padding>
+                <Insets top="20" right="20" bottom="20" left="20"/>
+            </padding>
+            
+            <VBox spacing="15" prefWidth="350" styleClass="card">
+                <Label text="Add / Edit Manufacturer" styleClass="section-title"/>
+                <Label text="Company Name *"/>
+                <TextField fx:id="nameField" promptText="Enter company name" styleClass="text-field"/>
+                
+                <Label text="Contact Person"/>
+                <TextField fx:id="contactField" promptText="Enter contact person" styleClass="text-field"/>
+                
+                <Label text="Phone"/>
+                <TextField fx:id="phoneField" promptText="Enter phone number" styleClass="text-field"/>
+                
+                <Label text="Email"/>
+                <TextField fx:id="emailField" promptText="Enter email" styleClass="text-field"/>
+                
+                <HBox spacing="10" alignment="CENTER_RIGHT">
+                    <Button text="Clear" onAction="#handleClear" styleClass="button-outline"/>
+                    <Button text="Save" onAction="#handleSave" styleClass="button-primary"/>
+                </HBox>
+            </VBox>
+            
+            <VBox spacing="15" HBox.hgrow="ALWAYS" styleClass="card">
+                <HBox alignment="CENTER_LEFT" spacing="10">
+                    <TextField fx:id="searchField" promptText="Search Manufacturer..." styleClass="text-field" prefWidth="250"/>
+                </HBox>
+                <TableView fx:id="manufacturerTable" VBox.vgrow="ALWAYS">
+                    <columns>
+                        <TableColumn fx:id="colName" text="Company Name" prefWidth="250">
+                            <cellValueFactory><PropertyValueFactory property="companyName"/></cellValueFactory>
+                        </TableColumn>
+                        <TableColumn fx:id="colContact" text="Contact Person" prefWidth="200">
+                            <cellValueFactory><PropertyValueFactory property="contactPerson"/></cellValueFactory>
+                        </TableColumn>
+                        <TableColumn fx:id="colPhone" text="Phone" prefWidth="150">
+                            <cellValueFactory><PropertyValueFactory property="phone"/></cellValueFactory>
+                        </TableColumn>
+                        <TableColumn fx:id="colEmail" text="Email" prefWidth="200">
+                            <cellValueFactory><PropertyValueFactory property="email"/></cellValueFactory>
+                        </TableColumn>
+                        <TableColumn fx:id="colAction" text="Action" prefWidth="100"/>
+                    </columns>
+                </TableView>
+            </VBox>
+        </HBox>
+    </center>
+</BorderPane>

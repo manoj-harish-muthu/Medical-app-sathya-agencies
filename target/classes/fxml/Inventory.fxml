@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.cell.PropertyValueFactory?>
+
+<BorderPane xmlns:fx="http://javafx.com/fxml" fx:controller="com.pharmacyerp.controller.InventoryController" styleClass="root" stylesheets="@../css/style.css">
+    
+    <!-- Sidebar -->
+    <left>
+        <fx:include source="Sidebar.fxml"/>
+    </left>
+    
+    <!-- Main Content -->
+    <center>
+        <VBox spacing="20">
+            <padding>
+                <Insets top="24" right="24" bottom="24" left="24"/>
+            </padding>
+            
+            <HBox alignment="CENTER_LEFT">
+                <Label text="Inventory Management" styleClass="page-title"/>
+                <Region HBox.hgrow="ALWAYS"/>
+                <Button text="Stock Adjustment" styleClass="button-outline"/>
+            </HBox>
+            
+            <VBox styleClass="card" VBox.vgrow="ALWAYS" spacing="15">
+                <Label text="Low Stock &amp; Expiry Alerts" styleClass="section-title"/>
+                
+                <HBox spacing="10">
+                    <Button text="All Stock" onAction="#handleShowAll" styleClass="button-outline"/>
+                    <Button text="Low/Zero Stock" onAction="#handleShowLowStock" styleClass="button-outline"/>
+                    <Button text="Near Expiry" onAction="#handleShowNearExpiry" styleClass="button-outline"/>
+                    <Button text="Expired" onAction="#handleShowExpired" styleClass="button-outline" style="-fx-border-color: red; -fx-text-fill: red;"/>
+                </HBox>
+
+                <TableView fx:id="inventoryTable" VBox.vgrow="ALWAYS">
+                    <columns>
+                        <TableColumn fx:id="colName" text="Medicine Name" prefWidth="250">
+                            <cellValueFactory><PropertyValueFactory property="medicineName"/></cellValueFactory>
+                        </TableColumn>
+                        <TableColumn fx:id="colBatch" text="Batch" prefWidth="120">
+                            <cellValueFactory><PropertyValueFactory property="batchNumber"/></cellValueFactory>
+                        </TableColumn>
+                        <TableColumn fx:id="colExpiry" text="Expiry Date" prefWidth="120">
+                            <cellValueFactory><PropertyValueFactory property="expiryDate"/></cellValueFactory>
+                        </TableColumn>
+                        <TableColumn fx:id="colStock" text="Current Stock" prefWidth="120">
+                            <cellValueFactory><PropertyValueFactory property="currentStock"/></cellValueFactory>
+                        </TableColumn>
+                        <TableColumn fx:id="colMin" text="Min Stock" prefWidth="120">
+                            <cellValueFactory><PropertyValueFactory property="minStock"/></cellValueFactory>
+                        </TableColumn>
+                        <TableColumn fx:id="colMrp" text="M.R.P" prefWidth="120">
+                            <cellValueFactory><PropertyValueFactory property="mrp"/></cellValueFactory>
+                        </TableColumn>
+                        <TableColumn fx:id="colStatus" text="Status" prefWidth="150">
+                            <cellValueFactory><PropertyValueFactory property="status"/></cellValueFactory>
+                        </TableColumn>
+                    </columns>
+                </TableView>
+            </VBox>
+        </VBox>
+    </center>
+</BorderPane>

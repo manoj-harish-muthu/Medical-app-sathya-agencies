@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.cell.PropertyValueFactory?>
+
+<BorderPane xmlns:fx="http://javafx.com/fxml" fx:controller="com.pharmacyerp.controller.MedicineController" styleClass="root" stylesheets="@../css/style.css">
+    
+    <!-- Sidebar -->
+    <left>
+        <fx:include source="Sidebar.fxml"/>
+    </left>
+    
+    <!-- Main Content -->
+    <center>
+        <VBox spacing="20">
+            <padding>
+                <Insets top="24" right="24" bottom="24" left="24"/>
+            </padding>
+            
+            <HBox alignment="CENTER_LEFT">
+                <Label text="Medicine Master" styleClass="page-title"/>
+                <Region HBox.hgrow="ALWAYS"/>
+                <Button text="+ Add Medicine" onAction="#handleAddMedicine" styleClass="button-primary"/>
+            </HBox>
+            
+            <VBox styleClass="card" VBox.vgrow="ALWAYS" spacing="15">
+                <HBox spacing="10">
+                    <TextField fx:id="searchField" promptText="Search medicine, salt, or company..." styleClass="text-field" prefWidth="400"/>
+                    <Button text="Search" styleClass="button-outline"/>
+                </HBox>
+                
+                <TableView fx:id="medicineTable" VBox.vgrow="ALWAYS">
+                    <columns>
+                        <TableColumn text="Medicine Name" prefWidth="250">
+                            <cellValueFactory><PropertyValueFactory property="medicineName" /></cellValueFactory>
+                        </TableColumn>
+                        <TableColumn text="Salt/Generic" prefWidth="150">
+                            <cellValueFactory><PropertyValueFactory property="saltName" /></cellValueFactory>
+                        </TableColumn>
+                        <TableColumn text="Packing" prefWidth="100">
+                            <cellValueFactory><PropertyValueFactory property="packing" /></cellValueFactory>
+                        </TableColumn>
+                        <TableColumn text="Batch" prefWidth="100">
+                            <cellValueFactory><PropertyValueFactory property="batchNumber" /></cellValueFactory>
+                        </TableColumn>
+                        <TableColumn text="Stock" prefWidth="80">
+                            <cellValueFactory><PropertyValueFactory property="totalStock" /></cellValueFactory>
+                        </TableColumn>
+                        <TableColumn text="MRP" prefWidth="80">
+                            <cellValueFactory><PropertyValueFactory property="currentMrp" /></cellValueFactory>
+                        </TableColumn>
+                        <TableColumn fx:id="actionColumn" text="Action" prefWidth="140">
+                            <!-- Cell factory added in controller -->
+                        </TableColumn>
+                    </columns>
+                </TableView>
+            </VBox>
+        </VBox>
+    </center>
+</BorderPane>

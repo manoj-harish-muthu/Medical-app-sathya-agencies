@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.geometry.Insets?>
+
+<BorderPane xmlns:fx="http://javafx.com/fxml" fx:controller="com.pharmacyerp.controller.MedSubstituteController" styleClass="root" stylesheets="@../css/style.css">
+    <left>
+        <fx:include source="Sidebar.fxml"/>
+    </left>
+    <center>
+        <VBox spacing="20">
+            <padding>
+                <Insets top="24" right="24" bottom="24" left="24"/>
+            </padding>
+            <HBox alignment="CENTER_LEFT">
+                <Label text="Substitute Medicines" styleClass="page-title"/>
+                <Region HBox.hgrow="ALWAYS"/>
+                <Button text="Link Substitute" styleClass="button-primary"/>
+            </HBox>
+            <VBox styleClass="card" VBox.vgrow="ALWAYS" spacing="15">
+                <Label text="Substitutes Matrix" styleClass="section-title"/>
+                <TableView VBox.vgrow="ALWAYS">
+                    <columns>
+                        <TableColumn text="Primary Medicine" prefWidth="250"/>
+                        <TableColumn text="Substitute Medicine" prefWidth="250"/>
+                        <TableColumn text="Match %" prefWidth="100"/>
+                    </columns>
+                </TableView>
+            </VBox>
+        </VBox>
+    </center>
+</BorderPane>

@@ -1,0 +1,140 @@
+/* Modern Premium Pharmacy ERP Theme */
+
+.root {
+    -fx-font-family: "Segoe UI", "Inter", "Geist", "Plus Jakarta Sans", sans-serif;
+    -fx-background-color: #F8FAFC;
+}
+
+/* Typography */
+.page-title {
+    -fx-font-size: 28px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #111827;
+}
+
+.section-title {
+    -fx-font-size: 20px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #111827;
+}
+
+.body-text {
+    -fx-font-size: 14px;
+    -fx-text-fill: #111827;
+}
+
+.secondary-text {
+    -fx-font-size: 13px;
+    -fx-text-fill: #64748B;
+}
+
+/* Cards */
+.card {
+    -fx-background-color: #FFFFFF;
+    -fx-background-radius: 8px;
+    -fx-border-color: #E2E8F0;
+    -fx-border-radius: 8px;
+    -fx-border-width: 1px;
+    -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.02), 10, 0, 0, 4);
+    -fx-padding: 24px;
+}
+
+/* Inputs */
+.text-field, .password-field {
+    -fx-background-color: #FFFFFF;
+    -fx-border-color: #E2E8F0;
+    -fx-border-radius: 6px;
+    -fx-background-radius: 6px;
+    -fx-padding: 10px 14px;
+    -fx-font-size: 14px;
+    -fx-text-fill: #111827;
+}
+
+.text-field:focused, .password-field:focused {
+    -fx-border-color: #16A6A1;
+    -fx-effect: dropshadow(three-pass-box, rgba(22, 166, 161, 0.2), 4, 0, 0, 0);
+}
+
+.label {
+    -fx-font-size: 14px;
+    -fx-font-weight: 500;
+    -fx-text-fill: #334155;
+}
+
+/* Buttons */
+.button-primary {
+    -fx-background-color: #16A6A1;
+    -fx-text-fill: white;
+    -fx-font-size: 14px;
+    -fx-font-weight: bold;
+    -fx-padding: 10px 24px;
+    -fx-background-radius: 6px;
+    -fx-cursor: hand;
+}
+
+.button-primary:hover {
+    -fx-background-color: #0EA5A4;
+}
+
+.button-primary:pressed {
+    -fx-background-color: #0F8C8B;
+}
+
+/* Error Labels */
+.error-label {
+    -fx-text-fill: #DC2626;
+    -fx-font-size: 12px;
+}
+
+/* Sidebar Buttons */
+.sidebar-button {
+    -fx-background-color: transparent;
+    -fx-text-fill: #64748B;
+    -fx-font-size: 14px;
+    -fx-padding: 12px 20px;
+    -fx-cursor: hand;
+    -fx-font-weight: 500;
+}
+
+.sidebar-button:hover {
+    -fx-background-color: #F1F5F9;
+    -fx-text-fill: #111827;
+}
+
+.active-sidebar-button {
+    -fx-background-color: #E0F2F1;
+    -fx-text-fill: #16A6A1;
+    -fx-font-weight: bold;
+    -fx-border-color: #16A6A1;
+    -fx-border-width: 0 0 0 3px;
+}
+
+/* Outline Buttons */
+.button-outline {
+    -fx-background-color: transparent;
+    -fx-border-color: #E2E8F0;
+    -fx-border-radius: 6px;
+    -fx-text-fill: #334155;
+    -fx-font-size: 14px;
+    -fx-padding: 8px 16px;
+    -fx-cursor: hand;
+}
+
+.button-outline:hover {
+    -fx-background-color: #F8FAFC;
+    -fx-border-color: #CBD5E1;
+}
+
+/* Sidebar Sub-Buttons */
+.sidebar-sub-button {
+    -fx-background-color: transparent;
+    -fx-text-fill: #94A3B8;
+    -fx-font-size: 13px;
+    -fx-padding: 8px 20px 8px 40px; /* Extra left padding for indentation */
+    -fx-cursor: hand;
+}
+
+.sidebar-sub-button:hover {
+    -fx-background-color: #F1F5F9;
+    -fx-text-fill: #16A6A1;
+}

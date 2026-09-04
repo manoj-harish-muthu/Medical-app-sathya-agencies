@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.cell.PropertyValueFactory?>
+
+<BorderPane xmlns:fx="http://javafx.com/fxml" fx:controller="com.pharmacyerp.controller.StockAdjustmentController" styleClass="root" stylesheets="@../css/style.css">
+    
+    <top>
+        <HBox alignment="CENTER_LEFT" spacing="20" style="-fx-background-color: #FFFFFF; -fx-border-color: #E2E8F0; -fx-border-width: 0 0 1 0; -fx-padding: 15 24;">
+            <Button text="← Back to Dashboard" onAction="#handleDashboard" styleClass="button-outline"/>
+            <Region HBox.hgrow="ALWAYS"/>
+            <Label text="Stock Adjustment" styleClass="section-title"/>
+            <Region HBox.hgrow="ALWAYS"/>
+        </HBox>
+    </top>
+
+    <left>
+        <fx:include source="Sidebar.fxml"/>
+    </left>
+
+    <center>
+        <HBox spacing="20">
+            <padding>
+                <Insets top="20" right="20" bottom="20" left="20"/>
+            </padding>
+            
+            <VBox spacing="15" prefWidth="400" styleClass="card">
+                <Label text="Adjust Stock Quantity" styleClass="section-title"/>
+                <Label text="Search Medicine Batch"/>
+                <TextField fx:id="searchField" promptText="Enter batch or medicine name" styleClass="text-field"/>
+                
+                <Label text="Selected Batch"/>
+                <TextField fx:id="selectedBatchField" editable="false" styleClass="text-field"/>
+                
+                <Label text="Current Quantity"/>
+                <TextField fx:id="currentQtyField" editable="false" styleClass="text-field"/>
+                
+                <Label text="New Quantity *"/>
+                <TextField fx:id="newQtyField" promptText="Enter the actual physical quantity" styleClass="text-field"/>
+                
+                <Label text="Reason for Adjustment"/>
+                <ComboBox fx:id="reasonCombo" prefWidth="400" styleClass="text-field"/>
+                
+                <HBox spacing="10" alignment="CENTER_RIGHT">
+                    <Button text="Clear" onAction="#handleClear" styleClass="button-outline"/>
+                    <Button text="Update Stock" onAction="#handleUpdate" styleClass="button-primary"/>
+                </HBox>
+            </VBox>
+            
+            <VBox spacing="15" HBox.hgrow="ALWAYS" styleClass="card">
+                <Label text="Search Results" styleClass="section-title"/>
+                <TableView fx:id="resultsTable" VBox.vgrow="ALWAYS">
+                    <columns>
+                        <TableColumn fx:id="colName" text="Medicine Name" prefWidth="250">
+                            <cellValueFactory><PropertyValueFactory property="medicineName"/></cellValueFactory>
+                        </TableColumn>
+                        <TableColumn fx:id="colBatch" text="Batch" prefWidth="120">
+                            <cellValueFactory><PropertyValueFactory property="batchNumber"/></cellValueFactory>
+                        </TableColumn>
+                        <TableColumn fx:id="colStock" text="Current Stock" prefWidth="120">
+                            <cellValueFactory><PropertyValueFactory property="currentStock"/></cellValueFactory>
+                        </TableColumn>
+                        <TableColumn fx:id="colAction" text="Action" prefWidth="100"/>
+                    </columns>
+                </TableView>
+            </VBox>
+        </HBox>
+    </center>
+</BorderPane>

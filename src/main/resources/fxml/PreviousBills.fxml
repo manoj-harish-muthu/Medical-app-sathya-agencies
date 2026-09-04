@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.cell.PropertyValueFactory?>
+
+<BorderPane xmlns:fx="http://javafx.com/fxml" fx:controller="com.pharmacyerp.controller.PreviousBillsController" styleClass="root" stylesheets="@../css/style.css">
+    
+    <top>
+        <HBox alignment="CENTER_LEFT" spacing="20" style="-fx-background-color: #FFFFFF; -fx-border-color: #E2E8F0; -fx-border-width: 0 0 1 0; -fx-padding: 15 24;">
+            <Button text="← Back to Dashboard" onAction="#handleDashboard" styleClass="button-outline"/>
+            <Region HBox.hgrow="ALWAYS"/>
+            <Label text="Previous Bills / Sales History" styleClass="section-title"/>
+            <Region HBox.hgrow="ALWAYS"/>
+        </HBox>
+    </top>
+
+    <left>
+        <fx:include source="Sidebar.fxml"/>
+    </left>
+
+    <center>
+        <VBox spacing="20">
+            <padding>
+                <Insets top="20" right="20" bottom="20" left="20"/>
+            </padding>
+            
+            <HBox spacing="15" alignment="CENTER_LEFT">
+                <TextField fx:id="searchField" promptText="Search Invoice No, Customer, Phone..." styleClass="text-field" prefWidth="300"/>
+                <DatePicker fx:id="fromDate" promptText="From Date" styleClass="text-field"/>
+                <DatePicker fx:id="toDate" promptText="To Date" styleClass="text-field"/>
+                <Button text="Search" onAction="#handleSearch" styleClass="button-primary"/>
+                <Button text="Clear" onAction="#handleClear" styleClass="button-outline"/>
+            </HBox>
+
+            <TableView fx:id="billsTable" VBox.vgrow="ALWAYS">
+                <columns>
+                    <TableColumn fx:id="colInvoice" text="Invoice No" prefWidth="150">
+                        <cellValueFactory><PropertyValueFactory property="invoiceNo"/></cellValueFactory>
+                    </TableColumn>
+                    <TableColumn fx:id="colDate" text="Date &amp; Time" prefWidth="150">
+                        <cellValueFactory><PropertyValueFactory property="saleDate"/></cellValueFactory>
+                    </TableColumn>
+                    <TableColumn fx:id="colCustomer" text="Customer" prefWidth="180">
+                        <cellValueFactory><PropertyValueFactory property="customerName"/></cellValueFactory>
+                    </TableColumn>
+                    <TableColumn fx:id="colPhone" text="Phone" prefWidth="120">
+                        <cellValueFactory><PropertyValueFactory property="customerPhone"/></cellValueFactory>
+                    </TableColumn>
+                    <TableColumn fx:id="colAmount" text="Grand Total" prefWidth="120">
+                        <cellValueFactory><PropertyValueFactory property="grandTotal"/></cellValueFactory>
+                    </TableColumn>
+                    <TableColumn fx:id="colStatus" text="Status" prefWidth="100">
+                        <cellValueFactory><PropertyValueFactory property="status"/></cellValueFactory>
+                    </TableColumn>
+                    <TableColumn fx:id="colAction" text="Action" prefWidth="150"/>
+                </columns>
+            </TableView>
+        </VBox>
+    </center>
+</BorderPane>
