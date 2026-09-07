@@ -67,7 +67,7 @@ public class DayEndClosingController {
             FXMLLoader loader = new FXMLLoader(getClass().getResource(fxmlPath));
             Parent root = loader.load();
             Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
-            stage.setScene(new Scene(root, 1366, 768));
+            stage.getScene().setRoot(root);
         } catch (IOException e) {
             e.printStackTrace();
         }

@@ -44,15 +44,16 @@ public class MedicineController {
                 return new TableCell<>() {
                     private final Button editBtn = new Button("Edit");
                     private final Button deleteBtn = new Button("Delete");
-                    private final javafx.scene.layout.HBox pane = new javafx.scene.layout.HBox(10, editBtn, deleteBtn);
+                    private final javafx.scene.layout.HBox pane = new javafx.scene.layout.HBox(8, editBtn, deleteBtn);
                     {
-                        editBtn.getStyleClass().add("button-primary");
+                        pane.setAlignment(javafx.geometry.Pos.CENTER);
+                        editBtn.getStyleClass().addAll("button-action", "button-edit");
                         editBtn.setOnAction((ActionEvent event) -> {
                             Medicine data = getTableView().getItems().get(getIndex());
                             openEditDialog(data);
                         });
 
-                        deleteBtn.setStyle("-fx-background-color: #EF4444; -fx-text-fill: white; -fx-cursor: hand;");
+                        deleteBtn.getStyleClass().addAll("button-action", "button-delete");
                         deleteBtn.setOnAction((ActionEvent event) -> {
                             Medicine data = getTableView().getItems().get(getIndex());
                             if (repository.deleteMedicine(data.getMedicineId())) {
@@ -134,7 +135,7 @@ public class MedicineController {
             FXMLLoader loader = new FXMLLoader(getClass().getResource(fxmlPath));
             Parent root = loader.load();
             Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
-            stage.setScene(new Scene(root, 1366, 768));
+            stage.getScene().setRoot(root);
         } catch (IOException e) {
             e.printStackTrace();
         }

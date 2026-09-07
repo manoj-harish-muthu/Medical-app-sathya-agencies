@@ -23,6 +23,7 @@ public class Main extends Application {
             
             primaryStage.setTitle("PharmaERP - Premium Pharmacy Management");
             primaryStage.setScene(new javafx.scene.Scene(root, 1366, 768));
+            primaryStage.setMaximized(true);
             primaryStage.show();
             logger.info("Application started successfully.");
         } catch (Exception e) {

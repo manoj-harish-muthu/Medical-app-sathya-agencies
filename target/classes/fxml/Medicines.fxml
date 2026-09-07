@@ -50,10 +50,13 @@
                         <TableColumn text="MRP" prefWidth="80">
                             <cellValueFactory><PropertyValueFactory property="currentMrp" /></cellValueFactory>
                         </TableColumn>
-                        <TableColumn fx:id="actionColumn" text="Action" prefWidth="140">
+                        <TableColumn fx:id="actionColumn" text="Action" prefWidth="140" style="-fx-alignment: CENTER;">
                             <!-- Cell factory added in controller -->
                         </TableColumn>
                     </columns>
+                    <columnResizePolicy>
+                        <TableView fx:constant="UNCONSTRAINED_RESIZE_POLICY" />
+                    </columnResizePolicy>
                 </TableView>
             </VBox>
         </VBox>
