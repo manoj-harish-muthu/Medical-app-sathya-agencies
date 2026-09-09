@@ -1,0 +1,6 @@
+target/
+*.class
+*.pdf
+.idea/
+.vscode/
+*.log
