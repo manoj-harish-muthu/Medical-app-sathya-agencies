@@ -104,43 +104,6 @@ CREATE TABLE suppliers (
     updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 );
 
-CREATE TABLE sales (
-    sale_id INT AUTO_INCREMENT PRIMARY KEY,
-    invoice_number VARCHAR(100) NOT NULL UNIQUE,
-    sale_date DATETIME DEFAULT CURRENT_TIMESTAMP,
-    customer_id INT,
-    branch_id INT NOT NULL,
-    user_id INT NOT NULL,
-    doctor_name VARCHAR(255),
-    prescription_id INT,
-    total_amount DECIMAL(10,2) NOT NULL,
-    discount_amount DECIMAL(10,2) DEFAULT 0.00,
-    tax_amount DECIMAL(10,2) NOT NULL,
-    net_amount DECIMAL(10,2) NOT NULL,
-    payment_mode VARCHAR(50) NOT NULL,
-    status VARCHAR(50) DEFAULT 'COMPLETED',
-    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    FOREIGN KEY (customer_id) REFERENCES customers(customer_id),
-    FOREIGN KEY (branch_id) REFERENCES branches(branch_id),
-    FOREIGN KEY (user_id) REFERENCES users(user_id)
-);
-
-CREATE TABLE sale_items (
-    sale_item_id INT AUTO_INCREMENT PRIMARY KEY,
-    sale_id INT NOT NULL,
-    medicine_id INT NOT NULL,
-    batch_id INT NOT NULL,
-    quantity INT NOT NULL,
-    rate DECIMAL(10,2) NOT NULL,
-    discount DECIMAL(10,2) DEFAULT 0.00,
-    tax DECIMAL(10,2) NOT NULL,
-    total DECIMAL(10,2) NOT NULL,
-    FOREIGN KEY (sale_id) REFERENCES sales(sale_id),
-    FOREIGN KEY (medicine_id) REFERENCES medicines(medicine_id),
-    FOREIGN KEY (batch_id) REFERENCES medicine_batches(batch_id)
-);
-
 -- Seed basic data
 INSERT INTO branches (branch_name, is_main) VALUES ('Main Store', 1);
 

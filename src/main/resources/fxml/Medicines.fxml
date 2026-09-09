@@ -27,7 +27,7 @@
             <VBox styleClass="card" VBox.vgrow="ALWAYS" spacing="15">
                 <HBox spacing="10">
                     <TextField fx:id="searchField" promptText="Search medicine, salt, or company..." styleClass="text-field" prefWidth="400"/>
-                    <Button text="Search" styleClass="button-outline"/>
+                    <Button text="Search" onAction="#handleSearch" styleClass="button-outline"/>
                 </HBox>
                 
                 <TableView fx:id="medicineTable" VBox.vgrow="ALWAYS">

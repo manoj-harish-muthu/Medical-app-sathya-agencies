@@ -20,8 +20,8 @@ public class Main extends Application {
             logger.info("Initializing JavaFX stage...");
             javafx.fxml.FXMLLoader loader = new javafx.fxml.FXMLLoader(getClass().getResource("/fxml/Login.fxml"));
             javafx.scene.Parent root = loader.load();
-            
-            primaryStage.setTitle("PharmaERP - Premium Pharmacy Management");
+
+            primaryStage.setTitle("Sathya Agencies - Premium Pharmacy Management");
             primaryStage.setScene(new javafx.scene.Scene(root, 1366, 768));
             primaryStage.setMaximized(true);
             primaryStage.show();

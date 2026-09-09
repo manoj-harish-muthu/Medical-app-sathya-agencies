@@ -34,6 +34,13 @@ public class MedicineController {
         repository = new MedicineRepository();
         setupActionColumn();
         loadMedicines();
+
+        if (searchField != null) {
+            searchField.textProperty().addListener((obs, oldVal, newVal) -> {
+                filterMedicines(newVal);
+            });
+            searchField.setOnAction(e -> filterMedicines(searchField.getText()));
+        }
     }
 
     private void setupActionColumn() {
@@ -80,6 +87,18 @@ public class MedicineController {
         List<Medicine> medicines = repository.getAllActiveMedicines();
         ObservableList<Medicine> observableList = FXCollections.observableArrayList(medicines);
         medicineTable.setItems(observableList);
+    }
+
+    @FXML
+    private void handleSearch(ActionEvent event) {
+        if (searchField != null) {
+            filterMedicines(searchField.getText());
+        }
+    }
+
+    private void filterMedicines(String query) {
+        List<Medicine> medicines = repository.searchMedicines(query);
+        medicineTable.setItems(FXCollections.observableArrayList(medicines));
     }
 
     @FXML

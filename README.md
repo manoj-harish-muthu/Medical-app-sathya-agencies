@@ -21,16 +21,35 @@ PharmaERP is a comprehensive, offline-first, production-ready Java Desktop Appli
 * **POS UI**: Professional billing screen with cart, payment modes, and keyboard shortcut placeholders.
 * **Inventory & Purchases**: Starter UI implementations.
 
+## Configuration & Credentials
+Database connection and application settings are decoupled from source code using `.env` (or environment variables).
+1. Copy `.env.example` to `.env`:
+   ```bash
+   cp .env.example .env
+   ```
+2. Configure your MySQL credentials in `.env`:
+   ```env
+   DB_HOST=localhost
+   DB_PORT=3306
+   DB_NAME=pharmacy_erp
+   DB_USER=root
+   DB_PASSWORD=your_password_here
+   DB_POOL_SIZE=10
+   ALLOW_DEMO_LOGIN=false
+   ```
+*(Note: `.env` is automatically ignored by Git so secrets won't be leaked)*
+
 ## How to Run
 
-1. **Prerequisites**: Ensure Java 17+ and Maven are installed.
+1. **Prerequisites**: Ensure Java 21+ and MySQL are installed.
 2. **Compile and Run**:
    ```bash
-   mvn clean compile javafx:run
+   .\apache-maven-3.9.9\bin\mvn.cmd javafx:run
    ```
+   *(or `mvn javafx:run` if Maven is on your system PATH)*
 3. **Run from Fat JAR**:
    ```bash
-   mvn clean package
+   .\apache-maven-3.9.9\bin\mvn.cmd clean package -DskipTests
    java -jar target/pharmacy-erp-1.0-SNAPSHOT-shaded.jar
    ```
 

@@ -11,47 +11,122 @@ import java.util.List;
 
 public class MedicineRepository {
 
+    private static final String BASE_SELECT = 
+        "SELECT m.*, c.category_name, comp.company_name, " +
+        "(SELECT COALESCE(SUM(current_quantity), 0) FROM medicine_batches WHERE medicine_id = m.medicine_id AND (expiry_date IS NULL OR expiry_date >= CURDATE())) as total_stock, " +
+        "(SELECT mrp FROM medicine_batches WHERE medicine_id = m.medicine_id ORDER BY (current_quantity > 0) DESC, expiry_date ASC LIMIT 1) as current_mrp, " +
+        "(SELECT batch_number FROM medicine_batches WHERE medicine_id = m.medicine_id ORDER BY (current_quantity > 0) DESC, expiry_date ASC LIMIT 1) as batch_number, " +
+        "(SELECT expiry_date FROM medicine_batches WHERE medicine_id = m.medicine_id ORDER BY (current_quantity > 0) DESC, expiry_date ASC LIMIT 1) as expiry_date, " +
+        "(SELECT purchase_rate FROM medicine_batches WHERE medicine_id = m.medicine_id ORDER BY (current_quantity > 0) DESC, expiry_date ASC LIMIT 1) as purchase_rate, " +
+        "(SELECT selling_rate FROM medicine_batches WHERE medicine_id = m.medicine_id ORDER BY (current_quantity > 0) DESC, expiry_date ASC LIMIT 1) as selling_rate, " +
+        "(SELECT rate_a FROM medicine_batches WHERE medicine_id = m.medicine_id ORDER BY (current_quantity > 0) DESC, expiry_date ASC LIMIT 1) as rate_a, " +
+        "(SELECT rate_b FROM medicine_batches WHERE medicine_id = m.medicine_id ORDER BY (current_quantity > 0) DESC, expiry_date ASC LIMIT 1) as rate_b, " +
+        "(SELECT rate_c FROM medicine_batches WHERE medicine_id = m.medicine_id ORDER BY (current_quantity > 0) DESC, expiry_date ASC LIMIT 1) as rate_c, " +
+        "(SELECT cost_per_pcs FROM medicine_batches WHERE medicine_id = m.medicine_id ORDER BY (current_quantity > 0) DESC, expiry_date ASC LIMIT 1) as cost_per_pcs, " +
+        "(SELECT conv_str FROM medicine_batches WHERE medicine_id = m.medicine_id ORDER BY (current_quantity > 0) DESC, expiry_date ASC LIMIT 1) as conv_str, " +
+        "(SELECT conv_cas FROM medicine_batches WHERE medicine_id = m.medicine_id ORDER BY (current_quantity > 0) DESC, expiry_date ASC LIMIT 1) as conv_cas " +
+        "FROM medicines m " +
+        "LEFT JOIN medicine_categories c ON m.category_id = c.category_id " +
+        "LEFT JOIN medicine_companies comp ON m.company_id = comp.company_id " +
+        "WHERE m.active = 1 ";
+
     public List<Medicine> getAllActiveMedicines() {
         List<Medicine> medicines = new ArrayList<>();
-        String sql = "SELECT m.*, c.category_name, comp.company_name, " +
-                     "(SELECT SUM(current_quantity) FROM medicine_batches WHERE medicine_id = m.medicine_id AND expiry_date > date('now')) as total_stock, " +
-                     "(SELECT mrp FROM medicine_batches WHERE medicine_id = m.medicine_id AND current_quantity > 0 ORDER BY expiry_date ASC LIMIT 1) as current_mrp, " +
-                     "(SELECT batch_number FROM medicine_batches WHERE medicine_id = m.medicine_id ORDER BY expiry_date ASC LIMIT 1) as batch_number " +
-                     "FROM medicines m " +
-                     "LEFT JOIN medicine_categories c ON m.category_id = c.category_id " +
-                     "LEFT JOIN medicine_companies comp ON m.company_id = comp.company_id " +
-                     "WHERE m.active = 1";
+        String sql = BASE_SELECT + "ORDER BY m.medicine_name ASC";
 
         try (Connection conn = DatabaseManager.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql);
              ResultSet rs = stmt.executeQuery()) {
 
             while (rs.next()) {
-                Medicine med = new Medicine();
-                med.setMedicineId(rs.getInt("medicine_id"));
-                med.setMedicineName(rs.getString("medicine_name"));
-                med.setSaltName(rs.getString("salt_name"));
-                med.setCompanyId(rs.getInt("company_id"));
-                med.setCategoryId(rs.getInt("category_id"));
-                med.setHsnCode(rs.getString("hsn_code"));
-                med.setGstRate(rs.getDouble("gst_rate"));
-                med.setPrescriptionRequired(rs.getBoolean("prescription_required"));
-                med.setScheduleType(rs.getString("schedule_type"));
-                med.setPackSize(rs.getString("pack_size"));
-                med.setPacking(rs.getString("packing"));
-                med.setBatchNumber(rs.getString("batch_number"));
-                
-                med.setCategoryName(rs.getString("category_name"));
-                med.setCompanyName(rs.getString("company_name"));
-                med.setTotalStock(rs.getInt("total_stock"));
-                med.setCurrentMrp(rs.getDouble("current_mrp"));
-                
-                medicines.add(med);
+                medicines.add(mapResultSetToMedicine(rs));
             }
         } catch (Exception e) {
             e.printStackTrace();
         }
         return medicines;
+    }
+
+    public List<Medicine> searchMedicines(String query) {
+        List<Medicine> medicines = new ArrayList<>();
+        if (query == null || query.trim().isEmpty()) {
+            return getAllActiveMedicines();
+        }
+        String trimmed = query.trim();
+        String sql = BASE_SELECT + "AND (m.medicine_name LIKE ? OR m.salt_name LIKE ? OR comp.company_name LIKE ? OR c.category_name LIKE ? OR m.hsn_code LIKE ?) " +
+                     "ORDER BY (m.medicine_name LIKE ?) DESC, m.medicine_name ASC";
+
+        try (Connection conn = DatabaseManager.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+
+            String param = "%" + trimmed + "%";
+            stmt.setString(1, param);
+            stmt.setString(2, param);
+            stmt.setString(3, param);
+            stmt.setString(4, param);
+            stmt.setString(5, param);
+            stmt.setString(6, trimmed + "%");
+
+            try (ResultSet rs = stmt.executeQuery()) {
+                while (rs.next()) {
+                    medicines.add(mapResultSetToMedicine(rs));
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return medicines;
+    }
+
+    private Medicine mapResultSetToMedicine(ResultSet rs) throws java.sql.SQLException {
+        Medicine med = new Medicine();
+        med.setMedicineId(rs.getInt("medicine_id"));
+        med.setMedicineName(rs.getString("medicine_name"));
+        med.setSaltName(rs.getString("salt_name") != null ? rs.getString("salt_name") : "");
+        med.setCompanyId(rs.getInt("company_id"));
+        med.setCategoryId(rs.getInt("category_id"));
+        med.setHsnCode(rs.getString("hsn_code") != null ? rs.getString("hsn_code") : "");
+        med.setGstRate(rs.getDouble("gst_rate"));
+        med.setPrescriptionRequired(rs.getBoolean("prescription_required"));
+        med.setScheduleType(rs.getString("schedule_type") != null ? rs.getString("schedule_type") : "");
+        med.setPackSize(rs.getString("pack_size") != null ? rs.getString("pack_size") : "");
+        med.setPacking(rs.getString("packing") != null ? rs.getString("packing") : "");
+        med.setBatchNumber(rs.getString("batch_number") != null ? rs.getString("batch_number") : "");
+        
+        med.setCategoryName(rs.getString("category_name") != null ? rs.getString("category_name") : "");
+        med.setCompanyName(rs.getString("company_name") != null ? rs.getString("company_name") : "");
+        med.setTotalStock(rs.getInt("total_stock"));
+        med.setCurrentMrp(rs.getDouble("current_mrp"));
+
+        // Extended Marg ERP fields
+        med.setUnit1st(rs.getString("unit_1st") != null ? rs.getString("unit_1st") : "");
+        med.setUnit2nd(rs.getString("unit_2nd") != null ? rs.getString("unit_2nd") : "");
+        med.setDecimalAllowed(rs.getString("decimal_allowed") != null ? rs.getString("decimal_allowed") : "No");
+        med.setColorType(rs.getString("color_type") != null ? rs.getString("color_type") : "NORMAL");
+        med.setItemType(rs.getString("item_type") != null ? rs.getString("item_type") : "1 NORMAL");
+        med.setCgst(rs.getDouble("cgst"));
+        med.setSgst(rs.getDouble("sgst"));
+        med.setIgst(rs.getDouble("igst"));
+        med.setLocalTaxType(rs.getString("local_tax_type") != null ? rs.getString("local_tax_type") : "Taxable");
+        med.setCentralTaxType(rs.getString("central_tax_type") != null ? rs.getString("central_tax_type") : "Taxable");
+        med.setNegativeAllowed(rs.getString("negative_allowed") != null ? rs.getString("negative_allowed") : "No");
+
+        // Batch pricing fields
+        java.sql.Date expDate = rs.getDate("expiry_date");
+        if (expDate != null) {
+            med.setExpiryDate(expDate.toLocalDate());
+        }
+        med.setMrp(rs.getDouble("current_mrp"));
+        med.setPurchaseRate(rs.getDouble("purchase_rate"));
+        med.setSellingRate(rs.getDouble("selling_rate"));
+        med.setRateA(rs.getDouble("rate_a"));
+        med.setRateB(rs.getDouble("rate_b"));
+        med.setRateC(rs.getDouble("rate_c"));
+        med.setCostPerPcs(rs.getDouble("cost_per_pcs"));
+        med.setConvStr(rs.getInt("conv_str"));
+        med.setConvCas(rs.getInt("conv_cas"));
+
+        return med;
     }
 
     public boolean saveMedicineWithBatch(Medicine med) {

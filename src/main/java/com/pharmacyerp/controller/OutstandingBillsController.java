@@ -10,7 +10,6 @@ import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.layout.VBox;
 import java.math.BigDecimal;
-import java.util.Optional;
 
 public class OutstandingBillsController {
     

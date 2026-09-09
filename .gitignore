@@ -4,3 +4,12 @@ target/
 .idea/
 .vscode/
 *.log
+
+# Environment & Credentials
+.env
+.env.*
+!.env.example
+config.properties
+data/.env
+data/config.properties
+

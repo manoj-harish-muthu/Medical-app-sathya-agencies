@@ -17,10 +17,10 @@
     <center>
         <VBox>
             <!-- Top Navbar -->
-            <HBox alignment="CENTER_LEFT" spacing="20" style="-fx-background-color: #FFFFFF; -fx-border-color: #E2E8F0; -fx-border-width: 0 0 1 0; -fx-padding: 15 24;">
-                <TextField promptText="Global Search (Ctrl+K)..." styleClass="text-field" prefWidth="300"/>
+            <HBox alignment="CENTER_LEFT" spacing="20" styleClass="top-navbar">
+                <TextField fx:id="globalSearchField" promptText="Global Search (Medicine / Bill No / Phone)..." onAction="#handleGlobalSearch" styleClass="text-field" prefWidth="340"/>
                 <Region HBox.hgrow="ALWAYS"/>
-                <Button fx:id="alertsButton" text="🔔 Alerts" onAction="#handleShowAlerts" style="-fx-background-color: transparent; -fx-text-fill: #111827; -fx-font-weight: bold;"/>
+                <Button fx:id="alertsButton" text="🔔 Alerts" onAction="#handleShowAlerts" style="-fx-background-color: transparent; -fx-text-fill: #111827; -fx-font-weight: bold; -fx-cursor: hand;"/>
                 <Label text="Main Store" styleClass="secondary-text"/>
                 <Label fx:id="userNameLabel" text="Admin User" style="-fx-font-weight: bold; -fx-text-fill: #111827;"/>
                 <Button text="Logout" onAction="#handleLogout" styleClass="button-outline"/>
@@ -33,36 +33,40 @@
                         <Insets top="24" right="24" bottom="24" left="24"/>
                     </padding>
                     
-                    <HBox alignment="CENTER_LEFT">
+                    <HBox alignment="CENTER_LEFT" spacing="10">
                         <Label text="Dashboard Overview" styleClass="page-title"/>
                         <Region HBox.hgrow="ALWAYS"/>
                         <Button text="+ New Bill" onAction="#handlePos" styleClass="button-primary"/>
+                        <Button text="📋 Previous Bills" onAction="#handlePreviousBills" styleClass="button-outline"/>
+                        <Button text="💊 Medicines" onAction="#handleMedicines" styleClass="button-outline"/>
+                        <Button text="📦 Inventory" onAction="#handleInventory" styleClass="button-outline"/>
+                        <Button text="🤖 Agent Orders" onAction="#handleAgentOrders" styleClass="button-outline"/>
                     </HBox>
                     
                     <!-- KPI Cards Row -->
                     <HBox spacing="24">
-                        <VBox styleClass="card" HBox.hgrow="ALWAYS" spacing="10">
+                        <VBox onMouseClicked="#handleSalesKpi" styleClass="card" HBox.hgrow="ALWAYS" spacing="10" style="-fx-cursor: hand;">
                             <Label text="Today's Sales" styleClass="secondary-text"/>
                             <Label fx:id="salesLabel" text="₹ 0" style="-fx-font-size: 28px; -fx-font-weight: bold; -fx-text-fill: #111827;"/>
-                            <Label text="Calculated daily" style="-fx-text-fill: #16A34A; -fx-font-size: 12px;"/>
+                            <Label text="View sales report →" style="-fx-text-fill: #16A34A; -fx-font-size: 12px;"/>
                         </VBox>
                         
-                        <VBox styleClass="card" HBox.hgrow="ALWAYS" spacing="10">
+                        <VBox onMouseClicked="#handleBillsKpi" styleClass="card" HBox.hgrow="ALWAYS" spacing="10" style="-fx-cursor: hand;">
                             <Label text="Today's Bills" styleClass="secondary-text"/>
                             <Label fx:id="billsLabel" text="0" style="-fx-font-size: 28px; -fx-font-weight: bold; -fx-text-fill: #111827;"/>
-                            <Label text="Generated today" style="-fx-text-fill: #16A34A; -fx-font-size: 12px;"/>
+                            <Label text="View all bills →" style="-fx-text-fill: #16A34A; -fx-font-size: 12px;"/>
                         </VBox>
                         
-                        <VBox styleClass="card" HBox.hgrow="ALWAYS" spacing="10">
+                        <VBox onMouseClicked="#handleLowStockKpi" styleClass="card" HBox.hgrow="ALWAYS" spacing="10" style="-fx-cursor: hand;">
                             <Label text="Low Stock Items" styleClass="secondary-text"/>
                             <Label fx:id="lowStockLabel" text="0" style="-fx-font-size: 28px; -fx-font-weight: bold; -fx-text-fill: #DC2626;"/>
-                            <Label text="Requires attention" style="-fx-text-fill: #F59E0B; -fx-font-size: 12px;"/>
+                            <Label text="Requires attention →" style="-fx-text-fill: #F59E0B; -fx-font-size: 12px;"/>
                         </VBox>
                         
-                        <VBox styleClass="card" HBox.hgrow="ALWAYS" spacing="10">
+                        <VBox onMouseClicked="#handleExpiringKpi" styleClass="card" HBox.hgrow="ALWAYS" spacing="10" style="-fx-cursor: hand;">
                             <Label text="Expiring Soon" styleClass="secondary-text"/>
                             <Label fx:id="expiringLabel" text="0" style="-fx-font-size: 28px; -fx-font-weight: bold; -fx-text-fill: #DC2626;"/>
-                            <Label text="Within 90 days" style="-fx-text-fill: #F59E0B; -fx-font-size: 12px;"/>
+                            <Label text="Within 90 days →" style="-fx-text-fill: #F59E0B; -fx-font-size: 12px;"/>
                         </VBox>
                     </HBox>
                     
@@ -89,7 +93,7 @@
                             <VBox fx:id="recentBillsContainer" spacing="10" VBox.vgrow="ALWAYS">
                                 <!-- Dynamic recent bills will be loaded here -->
                             </VBox>
-                            <Button text="View All" styleClass="button-outline" maxWidth="Infinity"/>
+                            <Button text="View All" onAction="#handlePreviousBills" styleClass="button-outline" maxWidth="Infinity"/>
                         </VBox>
                     </HBox>
                 </VBox>

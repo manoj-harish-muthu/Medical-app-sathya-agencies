@@ -35,16 +35,20 @@ public class CartItem {
     }
 
     public void calculateTotals() {
+        if (sellingRate == null) sellingRate = BigDecimal.ZERO;
+        if (discountPercentage == null) discountPercentage = BigDecimal.ZERO;
+        if (gstRate == null) gstRate = BigDecimal.ZERO;
+
         BigDecimal grossAmount = sellingRate.multiply(new BigDecimal(quantity));
-        this.discountAmount = grossAmount.multiply(discountPercentage).divide(new BigDecimal(100));
+        this.discountAmount = grossAmount.multiply(discountPercentage).divide(new BigDecimal(100), 2, java.math.RoundingMode.HALF_UP);
         BigDecimal taxableAmount = grossAmount.subtract(discountAmount);
         
         // Split GST into CGST and SGST
-        BigDecimal halfRate = gstRate.divide(new BigDecimal(2));
-        this.cgstAmount = taxableAmount.multiply(halfRate).divide(new BigDecimal(100));
-        this.sgstAmount = taxableAmount.multiply(halfRate).divide(new BigDecimal(100));
+        BigDecimal halfRate = gstRate.divide(new BigDecimal(2), 4, java.math.RoundingMode.HALF_UP);
+        this.cgstAmount = taxableAmount.multiply(halfRate).divide(new BigDecimal(100), 2, java.math.RoundingMode.HALF_UP);
+        this.sgstAmount = taxableAmount.multiply(halfRate).divide(new BigDecimal(100), 2, java.math.RoundingMode.HALF_UP);
         
-        this.netAmount = taxableAmount.add(cgstAmount).add(sgstAmount);
+        this.netAmount = taxableAmount.add(cgstAmount).add(sgstAmount).setScale(2, java.math.RoundingMode.HALF_UP);
     }
 
     // Getters and Setters
@@ -64,7 +68,10 @@ public class CartItem {
     public void setHsnCode(String hsnCode) { this.hsnCode = hsnCode; }
 
     public BigDecimal getGstRate() { return gstRate; }
-    public void setGstRate(BigDecimal gstRate) { this.gstRate = gstRate; }
+    public void setGstRate(BigDecimal gstRate) { 
+        this.gstRate = gstRate; 
+        calculateTotals();
+    }
 
     public String getScheduleType() { return scheduleType; }
     public void setScheduleType(String scheduleType) { this.scheduleType = scheduleType; }

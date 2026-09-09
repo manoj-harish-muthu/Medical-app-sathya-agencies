@@ -5,13 +5,10 @@ import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
-import javafx.scene.Scene;
 import javafx.scene.control.Label;
 import javafx.stage.Stage;
 import javafx.scene.Node;
 import com.pharmacyerp.dao.DashboardDAO;
-
-import java.io.IOException;
 
 public class DashboardController {
 
@@ -20,6 +17,7 @@ public class DashboardController {
     @FXML private Label billsLabel;
     @FXML private Label lowStockLabel;
     @FXML private Label expiringLabel;
+    @FXML private javafx.scene.control.TextField globalSearchField;
     @FXML private javafx.scene.layout.VBox recentBillsContainer;
     @FXML private javafx.scene.chart.LineChart<String, Number> salesTrendChart;
     @FXML private javafx.scene.control.Button alertsButton;
@@ -108,8 +106,12 @@ public class DashboardController {
             amtLabel.setStyle("-fx-font-weight: bold;");
             
             hbox.getChildren().addAll(circle, infoBox, spacer, amtLabel);
-            recentBillsContainer.getChildren().add(hbox);
+            hbox.setStyle("-fx-cursor: hand; -fx-padding: 6 8; -fx-background-radius: 6;");
+            hbox.setOnMouseEntered(e -> hbox.setStyle("-fx-cursor: hand; -fx-padding: 6 8; -fx-background-radius: 6; -fx-background-color: #F3F4F6;"));
+            hbox.setOnMouseExited(e -> hbox.setStyle("-fx-cursor: hand; -fx-padding: 6 8; -fx-background-radius: 6; -fx-background-color: transparent;"));
+            hbox.setOnMouseClicked(e -> navigateToNode(hbox, "/fxml/PreviousBills.fxml"));
             
+            recentBillsContainer.getChildren().add(hbox);
             count++;
         }
         
@@ -148,6 +150,49 @@ public class DashboardController {
     }
 
     @FXML
+    private void handleGlobalSearch(ActionEvent event) {
+        if (globalSearchField == null) return;
+        String query = globalSearchField.getText().trim();
+        if (query.isEmpty()) return;
+        navigateTo(event, "/fxml/Medicines.fxml");
+    }
+
+    @FXML
+    private void handlePreviousBills(ActionEvent event) {
+        navigateTo(event, "/fxml/PreviousBills.fxml");
+    }
+
+    @FXML
+    private void handleAgentOrders(ActionEvent event) {
+        navigateTo(event, "/fxml/AgentOrders.fxml");
+    }
+
+    @FXML
+    private void handleDayEnd(ActionEvent event) {
+        navigateTo(event, "/fxml/DayEndClosing.fxml");
+    }
+
+    @FXML
+    private void handleSalesKpi(javafx.scene.input.MouseEvent event) {
+        navigateToNode((Node) event.getSource(), "/fxml/PreviousBills.fxml");
+    }
+
+    @FXML
+    private void handleBillsKpi(javafx.scene.input.MouseEvent event) {
+        navigateToNode((Node) event.getSource(), "/fxml/PreviousBills.fxml");
+    }
+
+    @FXML
+    private void handleLowStockKpi(javafx.scene.input.MouseEvent event) {
+        navigateToNode((Node) event.getSource(), "/fxml/AlertLowStock.fxml");
+    }
+
+    @FXML
+    private void handleExpiringKpi(javafx.scene.input.MouseEvent event) {
+        navigateToNode((Node) event.getSource(), "/fxml/AlertNearExpiry.fxml");
+    }
+
+    @FXML
     private void handleLogout(ActionEvent event) {
         AuthService.logout();
         navigateTo(event, "/fxml/Login.fxml");
@@ -179,8 +224,29 @@ public class DashboardController {
             Parent root = loader.load();
             Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
             stage.getScene().setRoot(root);
-        } catch (IOException e) {
+        } catch (Throwable e) {
             e.printStackTrace();
+            javafx.scene.control.Alert alert = new javafx.scene.control.Alert(javafx.scene.control.Alert.AlertType.ERROR);
+            alert.setTitle("Navigation Error");
+            alert.setHeaderText("Unable to open screen: " + fxmlPath);
+            alert.setContentText(e.getMessage() != null ? e.getMessage() : e.toString());
+            alert.showAndWait();
+        }
+    }
+
+    private void navigateToNode(Node sourceNode, String fxmlPath) {
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource(fxmlPath));
+            Parent root = loader.load();
+            Stage stage = (Stage) sourceNode.getScene().getWindow();
+            stage.getScene().setRoot(root);
+        } catch (Throwable e) {
+            e.printStackTrace();
+            javafx.scene.control.Alert alert = new javafx.scene.control.Alert(javafx.scene.control.Alert.AlertType.ERROR);
+            alert.setTitle("Navigation Error");
+            alert.setHeaderText("Unable to open screen: " + fxmlPath);
+            alert.setContentText(e.getMessage() != null ? e.getMessage() : e.toString());
+            alert.showAndWait();
         }
     }
 }

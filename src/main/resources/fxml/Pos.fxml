@@ -8,13 +8,27 @@
     
     <!-- Top Navbar -->
     <top>
-        <HBox alignment="CENTER_LEFT" spacing="20" style="-fx-background-color: #FFFFFF; -fx-border-color: #E2E8F0; -fx-border-width: 0 0 1 0; -fx-padding: 15 24;">
+        <HBox alignment="CENTER_LEFT" spacing="20" styleClass="top-navbar">
             <Button text="← Back to Dashboard" onAction="#handleDashboard" styleClass="button-outline"/>
+            <VBox spacing="1">
+                <Label text="Point of Sale / Billing Terminal" styleClass="section-title"/>
+                <Label text="Fast counter sales, inventory tracking &amp; GST compliance" styleClass="secondary-text" style="-fx-font-size: 11px;"/>
+            </VBox>
             <Region HBox.hgrow="ALWAYS"/>
-            <Label text="New Bill / POS" styleClass="section-title"/>
-            <Region HBox.hgrow="ALWAYS"/>
-            <Label text="Date: " styleClass="secondary-text"/>
-            <Label fx:id="dateLabel" text="01/09/2026" style="-fx-font-weight: bold;"/>
+            
+            <!-- Quick Keyboard Shortcuts Bar -->
+            <HBox spacing="8" alignment="CENTER">
+                <Label text="[F1] Search" styleClass="badge-shortcut"/>
+                <Label text="[F2] Customer" styleClass="badge-shortcut"/>
+                <Label text="[F3] Clear" styleClass="badge-shortcut"/>
+                <Label text="[F12] Complete Sale" styleClass="badge-shortcut" style="-fx-text-fill: #0F766E; -fx-font-weight: bold;"/>
+            </HBox>
+            
+            <Separator orientation="VERTICAL"/>
+            <VBox alignment="CENTER_RIGHT" spacing="1">
+                <Label text="Cashier: Admin" style="-fx-font-weight: bold; -fx-text-fill: #111827;"/>
+                <Label fx:id="dateLabel" text="01/09/2026" styleClass="secondary-text" style="-fx-font-size: 11px;"/>
+            </VBox>
         </HBox>
     </top>
 
@@ -25,44 +39,49 @@
 
     <!-- Main Content -->
     <center>
-        <HBox spacing="20">
+        <HBox spacing="16">
             <padding>
-                <Insets top="20" right="20" bottom="20" left="20"/>
+                <Insets top="16" right="16" bottom="16" left="16"/>
             </padding>
             
             <!-- Left Side: Medicine Search and Cart -->
-            <VBox spacing="15" HBox.hgrow="ALWAYS">
+            <VBox spacing="14" HBox.hgrow="ALWAYS">
                 <!-- Search Box -->
                 <VBox styleClass="card" spacing="10">
                     <HBox spacing="10" alignment="CENTER_LEFT">
-                        <Label text="Find Medicine (F1) / Barcode" style="-fx-font-weight: bold;"/>
+                        <Label text="🔍 Scan Barcode or Search Medicine [F1]" style="-fx-font-weight: 800; -fx-font-size: 14px; -fx-text-fill: #111827;"/>
                         <Region HBox.hgrow="ALWAYS"/>
-                        <Label text="Type to search..." styleClass="secondary-text"/>
+                        <Label text="Type brand, salt name, or scan barcode..." styleClass="secondary-text"/>
                     </HBox>
                     <HBox spacing="10">
-                        <TextField fx:id="medicineSearchField" promptText="Enter medicine name, salt, or scan barcode..." styleClass="text-field" HBox.hgrow="ALWAYS"/>
-                        <Button text="Search" styleClass="button-primary"/>
+                        <TextField fx:id="medicineSearchField" promptText="Type medicine name (e.g. Paracetamol, Dolo) or scan barcode..." styleClass="text-field-search" HBox.hgrow="ALWAYS"/>
+                        <Button text="Search" onAction="#handleMedicineSearch" styleClass="button-primary"/>
                     </HBox>
                 </VBox>
                 
                 <!-- Cart -->
                 <VBox styleClass="card" VBox.vgrow="ALWAYS" spacing="10">
-                    <Label text="Cart Items" style="-fx-font-weight: bold;"/>
+                    <HBox alignment="CENTER_LEFT">
+                        <Label text="Cart Items" style="-fx-font-weight: 800; -fx-font-size: 15px; -fx-text-fill: #111827;"/>
+                        <Region HBox.hgrow="ALWAYS"/>
+                        <Label fx:id="itemsCountLabel" text="0 items in cart" styleClass="badge-info"/>
+                    </HBox>
+                    
                     <TableView fx:id="cartTable" VBox.vgrow="ALWAYS">
                         <columns>
-                            <TableColumn fx:id="colMfr" text="MFR" prefWidth="80"/>
-                            <TableColumn fx:id="colHsn" text="HSN Code" prefWidth="80"/>
-                            <TableColumn fx:id="colMrp" text="M.R.P" prefWidth="70"/>
-                            <TableColumn fx:id="colBatch" text="BATCH" prefWidth="90"/>
-                            <TableColumn fx:id="colExp" text="EXP" prefWidth="60"/>
-                            <TableColumn fx:id="colItem" text="ITEM DESCRIPTION" prefWidth="200"/>
-                            <TableColumn fx:id="colPack" text="PACK" prefWidth="60"/>
-                            <TableColumn fx:id="colQty" text="QTY" prefWidth="50"/>
-                            <TableColumn fx:id="colRate" text="RATE" prefWidth="70"/>
-                            <TableColumn fx:id="colDisc" text="Dis %" prefWidth="60"/>
-                            <TableColumn fx:id="colGst" text="GST%" prefWidth="60"/>
-                            <TableColumn fx:id="colAmount" text="Amount" prefWidth="80"/>
-                            <TableColumn fx:id="colAction" text="Action" prefWidth="80"/>
+                            <TableColumn fx:id="colItem" text="ITEM / MEDICINE" prefWidth="260" minWidth="200"/>
+                            <TableColumn fx:id="colPack" text="PACK" prefWidth="80" minWidth="65"/>
+                            <TableColumn fx:id="colBatch" text="BATCH" prefWidth="105" minWidth="90"/>
+                            <TableColumn fx:id="colExp" text="EXPIRY" prefWidth="90" minWidth="80"/>
+                            <TableColumn fx:id="colMrp" text="M.R.P" prefWidth="85" minWidth="75"/>
+                            <TableColumn fx:id="colRate" text="RATE" prefWidth="85" minWidth="75"/>
+                            <TableColumn fx:id="colQty" text="QTY" prefWidth="75" minWidth="65"/>
+                            <TableColumn fx:id="colDisc" text="DISC %" prefWidth="70" minWidth="60"/>
+                            <TableColumn fx:id="colGst" text="GST %" prefWidth="70" minWidth="60"/>
+                            <TableColumn fx:id="colAmount" text="AMOUNT" prefWidth="115" minWidth="100"/>
+                            <TableColumn fx:id="colAction" text="ACTION" prefWidth="85" minWidth="75"/>
+                            <TableColumn fx:id="colMfr" text="MFR" prefWidth="85" visible="false"/>
+                            <TableColumn fx:id="colHsn" text="HSN" prefWidth="75" visible="false"/>
                         </columns>
                         <columnResizePolicy>
                             <TableView fx:constant="UNCONSTRAINED_RESIZE_POLICY" />
@@ -71,70 +90,90 @@
                 </VBox>
             </VBox>
 
-            <!-- Right Side: Customer & Payment -->
-            <VBox spacing="15" prefWidth="350">
+            <!-- Right Side: Customer & Checkout Summary -->
+            <VBox spacing="14" prefWidth="410" minWidth="390">
                 
-                <!-- Customer Details -->
+                <!-- Customer Details Card -->
                 <VBox styleClass="card" spacing="10">
                     <HBox alignment="CENTER_LEFT">
-                        <Label text="Customer (F2)" style="-fx-font-weight: bold;"/>
-                        <Region HBox.hgrow="ALWAYS"/>
-                        <Button text="Search" style="-fx-font-size: 11px;" styleClass="button-outline"/>
+                        <Label text="👤 Customer &amp; Doctor Details [F2]" minWidth="-Infinity" style="-fx-font-weight: 800; -fx-font-size: 14px; -fx-text-fill: #000000;"/>
                     </HBox>
-                    <TextField fx:id="customerPhoneField" promptText="Phone Number" styleClass="text-field"/>
-                    <TextField fx:id="customerNameField" promptText="Patient / Customer Name" styleClass="text-field"/>
+                    <TextField fx:id="customerPhoneField" promptText="Customer Phone (e.g. 9876543210)" styleClass="text-field"/>
+                    <TextField fx:id="customerNameField" promptText="Customer / Patient Name" styleClass="text-field"/>
                     <TextField fx:id="doctorNameField" promptText="Doctor Name (Optional)" styleClass="text-field"/>
                 </VBox>
                 
-                <!-- Bill Summary -->
+                <!-- Bill Summary Card -->
                 <VBox styleClass="card" spacing="12">
-                    <Label text="Bill Summary" style="-fx-font-weight: bold;"/>
+                    <Label text="🧾 Bill Summary" minWidth="-Infinity" style="-fx-font-weight: 800; -fx-font-size: 15px; -fx-text-fill: #000000;"/>
                     
-                    <HBox>
-                        <Label text="Subtotal"/>
+                    <HBox alignment="CENTER_LEFT">
+                        <Label text="Subtotal" minWidth="-Infinity" style="-fx-font-weight: 700; -fx-font-size: 13.5px; -fx-text-fill: #111827;"/>
                         <Region HBox.hgrow="ALWAYS"/>
-                        <Label fx:id="subtotalLabel" text="₹ 0.00"/>
+                        <Label fx:id="subtotalLabel" text="₹ 0.00" minWidth="-Infinity" style="-fx-font-weight: 800; -fx-font-size: 15px; -fx-text-fill: #000000;"/>
                     </HBox>
                     
-                    <HBox>
-                        <Label text="Discount"/>
+                    <HBox alignment="CENTER_LEFT">
+                        <Label text="Total Discount" minWidth="-Infinity" style="-fx-font-weight: 700; -fx-font-size: 13.5px; -fx-text-fill: #111827;"/>
                         <Region HBox.hgrow="ALWAYS"/>
-                        <Label fx:id="discountLabel" text="₹ 0.00" style="-fx-text-fill: #16A34A;"/>
+                        <Label fx:id="discountLabel" text="₹ 0.00" minWidth="-Infinity" style="-fx-font-weight: 800; -fx-font-size: 15px; -fx-text-fill: #15803D;"/>
                     </HBox>
                     
-                    <HBox>
-                        <Label text="CGST + SGST"/>
+                    <HBox alignment="CENTER_LEFT">
+                        <Label text="Total Tax (CGST + SGST)" minWidth="-Infinity" style="-fx-font-weight: 700; -fx-font-size: 13.5px; -fx-text-fill: #111827;"/>
                         <Region HBox.hgrow="ALWAYS"/>
-                        <Label fx:id="taxLabel" text="₹ 0.00"/>
+                        <Label fx:id="taxLabel" text="₹ 0.00" minWidth="-Infinity" style="-fx-font-weight: 800; -fx-font-size: 15px; -fx-text-fill: #111827;"/>
                     </HBox>
                     
                     <Separator/>
                     
-                    <HBox>
-                        <Label text="Grand Total" style="-fx-font-weight: bold; -fx-font-size: 16px;"/>
+                    <!-- Grand Total Banner -->
+                    <HBox alignment="CENTER_LEFT" style="-fx-background-color: #ECFDF5; -fx-padding: 12 16; -fx-background-radius: 6px; -fx-border-color: #A7F3D0; -fx-border-width: 1.5px; -fx-border-radius: 6px;">
+                        <VBox spacing="2">
+                            <Label text="GRAND TOTAL" minWidth="-Infinity" style="-fx-font-size: 11.5px; -fx-font-weight: 900; -fx-text-fill: #065F46;"/>
+                            <Label text="Net Payable" minWidth="-Infinity" style="-fx-font-size: 11px; -fx-font-weight: 700; -fx-text-fill: #047857;"/>
+                        </VBox>
                         <Region HBox.hgrow="ALWAYS"/>
-                        <Label fx:id="totalLabel" text="₹ 0.00" style="-fx-font-weight: bold; -fx-font-size: 24px; -fx-text-fill: #111827;"/>
+                        <Label fx:id="totalLabel" text="₹ 0.00" minWidth="-Infinity" style="-fx-font-weight: 900; -fx-font-size: 26px; -fx-text-fill: #047857;"/>
                     </HBox>
                     
-                    <HBox alignment="CENTER_LEFT" spacing="10">
-                        <Label text="Paid Amount" style="-fx-font-weight: bold;"/>
-                        <Region HBox.hgrow="ALWAYS"/>
-                        <TextField fx:id="paidAmountField" promptText="0.00" styleClass="text-field" prefWidth="120" alignment="CENTER_RIGHT" style="-fx-font-weight: bold;"/>
-                    </HBox>
+                    <!-- Paid Amount & Quick Tender -->
+                    <VBox spacing="6">
+                        <HBox alignment="CENTER_LEFT">
+                            <Label text="Paid Amount" minWidth="-Infinity" style="-fx-font-weight: 800; -fx-font-size: 13.5px; -fx-text-fill: #000000;"/>
+                            <Region HBox.hgrow="ALWAYS"/>
+                            <TextField fx:id="paidAmountField" promptText="0.00" styleClass="text-field" prefWidth="140" alignment="CENTER_RIGHT" style="-fx-font-weight: 800; -fx-font-size: 15px; -fx-text-fill: #000000;"/>
+                        </HBox>
+                        
+                        <!-- Quick Tender Buttons -->
+                        <HBox spacing="5" alignment="CENTER_RIGHT">
+                            <Button text="Exact" onAction="#handleExactTender" styleClass="button-tender"/>
+                            <Button text="+100" onAction="#handleTender100" styleClass="button-tender"/>
+                            <Button text="+200" onAction="#handleTender200" styleClass="button-tender"/>
+                            <Button text="+500" onAction="#handleTender500" styleClass="button-tender"/>
+                            <Button text="+2000" onAction="#handleTender2000" styleClass="button-tender"/>
+                        </HBox>
+                    </VBox>
                     
-                    <HBox alignment="CENTER_LEFT">
-                        <Label text="Balance"/>
+                    <HBox alignment="CENTER_LEFT" style="-fx-padding: 4 0;">
+                        <Label text="Balance / Change" minWidth="-Infinity" style="-fx-font-weight: 800; -fx-font-size: 13.5px; -fx-text-fill: #000000;"/>
                         <Region HBox.hgrow="ALWAYS"/>
-                        <Label fx:id="balanceLabel" text="₹ 0.00" style="-fx-font-weight: bold; -fx-text-fill: #DC2626; -fx-font-size: 16px;"/>
+                        <Label fx:id="balanceLabel" text="₹ 0.00" minWidth="-Infinity" style="-fx-font-weight: 800; -fx-text-fill: #DC2626; -fx-font-size: 16px;"/>
                     </HBox>
                 </VBox>
                 
-                <!-- Payment Actions -->
+                <!-- Payment Actions Card -->
                 <VBox styleClass="card" spacing="10" VBox.vgrow="ALWAYS" alignment="BOTTOM_CENTER">
-                    <ComboBox fx:id="paymentModeCombo" promptText="Payment Mode" maxWidth="Infinity" styleClass="text-field"/>
-                    <Button text="Complete Sale (F12)" onAction="#handleCompleteSale" styleClass="button-primary" maxWidth="Infinity" style="-fx-font-size: 16px; -fx-padding: 15px;"/>
-                    <Button text="Suspend Bill (Ctrl+S)" styleClass="button-outline" maxWidth="Infinity"/>
-                    <Button text="Clear Bill (F3)" style="-fx-text-fill: #DC2626; -fx-background-color: transparent; -fx-border-color: #DC2626; -fx-border-radius: 6px;" maxWidth="Infinity"/>
+                    <VBox spacing="4">
+                        <Label text="Payment Method" minWidth="-Infinity" style="-fx-font-weight: 800; -fx-font-size: 13px; -fx-text-fill: #000000;"/>
+                        <ComboBox fx:id="paymentModeCombo" promptText="Payment Mode" maxWidth="Infinity" styleClass="text-field"/>
+                    </VBox>
+                    
+                    <Button text="✓ Complete Sale (F12)" onAction="#handleCompleteSale" styleClass="button-success" maxWidth="Infinity"/>
+                    <HBox spacing="8">
+                        <Button text="Suspend (Ctrl+S)" onAction="#handleSuspendBill" styleClass="button-outline" HBox.hgrow="ALWAYS" maxWidth="Infinity"/>
+                        <Button text="Clear (F3)" onAction="#handleClearBill" styleClass="button-danger" HBox.hgrow="ALWAYS" maxWidth="Infinity"/>
+                    </HBox>
                 </VBox>
             </VBox>
         </HBox>

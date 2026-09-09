@@ -96,7 +96,6 @@ public class InventoryDAO {
                 "ORDER BY m.medicine_name ASC LIMIT 50";
         
         List<InventoryItem> list = new ArrayList<>();
-        LocalDate today = LocalDate.now();
 
         try (Connection conn = DatabaseManager.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {

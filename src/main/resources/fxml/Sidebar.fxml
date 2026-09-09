@@ -3,17 +3,17 @@
 <?import javafx.scene.control.*?>
 <?import javafx.geometry.Insets?>
 
-<VBox xmlns:fx="http://javafx.com/fxml" fx:controller="com.pharmacyerp.controller.SidebarController" style="-fx-background-color: #FFFFFF; -fx-border-color: #E2E8F0; -fx-border-width: 0 1 0 0;" prefWidth="250">
+<VBox xmlns:fx="http://javafx.com/fxml" fx:controller="com.pharmacyerp.controller.SidebarController" styleClass="sidebar" prefWidth="250">
     <padding>
         <Insets top="20" right="0" bottom="20" left="0"/>
     </padding>
     
     <VBox alignment="CENTER_LEFT" spacing="5">
         <padding>
-            <Insets left="20" right="20" bottom="30"/>
+            <Insets left="20" right="20" bottom="24"/>
         </padding>
-        <Label text="PharmaERP" style="-fx-font-size: 20px; -fx-font-weight: bold; -fx-text-fill: #16A6A1;"/>
-        <Label text="Premium Pharmacy System" style="-fx-font-size: 11px; -fx-text-fill: #64748B;"/>
+        <Label text="Sathya Agencies" styleClass="sidebar-brand-title"/>
+        <Label text="Premium Pharmacy System" styleClass="sidebar-brand-subtitle"/>
     </VBox>
     
     <ScrollPane fitToWidth="true" style="-fx-background-color: transparent; -fx-border-color: transparent;" VBox.vgrow="ALWAYS">

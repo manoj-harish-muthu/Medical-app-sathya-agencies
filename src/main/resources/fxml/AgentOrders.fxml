@@ -12,20 +12,29 @@
             <padding>
                 <Insets top="24" right="24" bottom="24" left="24"/>
             </padding>
-            <HBox alignment="CENTER_LEFT">
-                <Label text="Agent Orders" styleClass="page-title"/>
+            <HBox alignment="CENTER_LEFT" spacing="12">
+                <Button text="← Back to Dashboard" onAction="#handleDashboard" styleClass="button-outline"/>
+                <VBox spacing="2">
+                    <Label text="WhatsApp AI Agent Orders" styleClass="page-title"/>
+                    <Label fx:id="countLabel" text="Loading incoming orders from WhatsApp..." styleClass="secondary-text"/>
+                </VBox>
                 <Region HBox.hgrow="ALWAYS"/>
+                <Button text="🔄 Refresh Orders" onAction="#handleRefresh" styleClass="button-primary"/>
             </HBox>
             <VBox styleClass="card" VBox.vgrow="ALWAYS" spacing="15">
-                <Label text="Orders List" styleClass="section-title"/>
-                <TableView VBox.vgrow="ALWAYS">
+                <Label text="Incoming Patient &amp; Customer Orders" styleClass="section-title"/>
+                <TableView fx:id="ordersTable" VBox.vgrow="ALWAYS">
                     <columns>
-                        <TableColumn text="Order ID" prefWidth="100"/>
-                        <TableColumn text="Agent Name" prefWidth="200"/>
-                        <TableColumn text="Customer" prefWidth="200"/>
-                        <TableColumn text="Amount" prefWidth="150"/>
-                        <TableColumn text="Status" prefWidth="100"/>
+                        <TableColumn fx:id="colPhone" text="Customer Phone" prefWidth="130"/>
+                        <TableColumn fx:id="colCustomer" text="Customer Name" prefWidth="160"/>
+                        <TableColumn fx:id="colAddress" text="Delivery Address" prefWidth="250"/>
+                        <TableColumn fx:id="colItems" text="Medicines Ordered" prefWidth="280"/>
+                        <TableColumn fx:id="colStatus" text="Order Status" prefWidth="150"/>
+                        <TableColumn fx:id="colAction" text="Action" prefWidth="180" style="-fx-alignment: CENTER;"/>
                     </columns>
+                    <columnResizePolicy>
+                        <TableView fx:constant="UNCONSTRAINED_RESIZE_POLICY" />
+                    </columnResizePolicy>
                 </TableView>
             </VBox>
         </VBox>

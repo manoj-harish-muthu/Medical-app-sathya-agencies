@@ -8,7 +8,7 @@
     <VBox alignment="CENTER" spacing="20" maxWidth="400" maxHeight="450" styleClass="card">
         
         <VBox alignment="CENTER" spacing="10">
-            <Label text="PharmaERP" styleClass="page-title"/>
+            <Label text="Sathya Agencies" styleClass="page-title"/>
             <Label text="Sign in to your account" styleClass="secondary-text"/>
         </VBox>
 

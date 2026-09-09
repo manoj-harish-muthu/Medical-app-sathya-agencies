@@ -7,7 +7,6 @@ import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Node;
 import javafx.scene.Parent;
-import javafx.scene.Scene;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.TableView;
@@ -18,8 +17,9 @@ import javafx.stage.Stage;
 
 import com.pharmacyerp.model.CartItem;
 import com.pharmacyerp.dao.PosDAO;
+import javafx.geometry.Insets;
+import javafx.scene.layout.Region;
 
-import java.io.IOException;
 import java.math.BigDecimal;
 
 import javafx.scene.control.ContextMenu;
@@ -31,6 +31,7 @@ import javafx.util.converter.IntegerStringConverter;
 
 public class PosController {
 
+    @FXML private Label itemsCountLabel;
     @FXML private TextField medicineSearchField;
     @FXML private TableView<CartItem> cartTable;
     @FXML private TableColumn<CartItem, String> colMfr;
@@ -75,20 +76,41 @@ public class PosController {
                 updateBalance();
             });
         }
+
+        if (customerPhoneField != null) {
+            customerPhoneField.focusedProperty().addListener((obs, oldVal, newVal) -> {
+                if (!newVal) {
+                    lookupCustomer();
+                }
+            });
+            customerPhoneField.setOnAction(e -> {
+                lookupCustomer();
+                if (customerNameField != null && customerNameField.getText().trim().isEmpty()) {
+                    customerNameField.requestFocus();
+                } else if (medicineSearchField != null) {
+                    medicineSearchField.requestFocus();
+                }
+            });
+        }
         
-        paymentModeCombo.setItems(FXCollections.observableArrayList(
-                "Cash", "UPI", "Card", "Credit"
-        ));
-        paymentModeCombo.getSelectionModel().selectFirst();
+        if (paymentModeCombo != null) {
+            paymentModeCombo.setItems(FXCollections.observableArrayList(
+                    "Cash", "UPI", "Card", "Credit"
+            ));
+            paymentModeCombo.getSelectionModel().selectFirst();
+        }
         
         // Initial values
-        dateLabel.setText(java.time.LocalDate.now().format(java.time.format.DateTimeFormatter.ofPattern("dd/MM/yyyy")));
+        if (dateLabel != null) {
+            dateLabel.setText(java.time.LocalDate.now().format(java.time.format.DateTimeFormatter.ofPattern("dd/MM/yyyy")));
+        }
         
         setupTable();
+        updateTotals();
         
-        // Autocomplete logic
+        // Autocomplete logic with rich high-contrast popup cards
         medicineSearchField.textProperty().addListener((observable, oldValue, newValue) -> {
-            if (newValue.trim().isEmpty()) {
+            if (newValue == null || newValue.trim().isEmpty()) {
                 suggestionsPopup.hide();
             } else {
                 java.util.List<CartItem> suggestions = posDAO.searchMedicines(newValue.trim());
@@ -97,9 +119,37 @@ public class PosController {
                 } else {
                     suggestionsPopup.getItems().clear();
                     for (CartItem item : suggestions) {
-                        Label label = new Label(item.getMedicineName() + " (Batch: " + item.getBatchNumber() + " | MRP: ₹" + item.getMrp() + ")");
-                        label.setStyle("-fx-font-size: 14px; -fx-padding: 5px;");
-                        CustomMenuItem menuItem = new CustomMenuItem(label, true);
+                        javafx.scene.layout.HBox row = new javafx.scene.layout.HBox(12);
+                        row.setAlignment(javafx.geometry.Pos.CENTER_LEFT);
+                        row.setPadding(new Insets(6, 12, 6, 12));
+                        
+                        Label nameLbl = new Label(item.getMedicineName());
+                        nameLbl.setStyle("-fx-font-size: 13.5px; -fx-font-weight: 800; -fx-text-fill: #111827;");
+                        
+                        Label packLbl = new Label(item.getPacking() != null ? item.getPacking() : "");
+                        packLbl.setStyle("-fx-font-size: 12px; -fx-font-weight: 600; -fx-text-fill: #4B5563;");
+                        
+                        Label batchLbl = new Label("Batch: " + (item.getBatchNumber() != null ? item.getBatchNumber() : "-"));
+                        batchLbl.setStyle("-fx-font-size: 11.5px; -fx-font-weight: 600; -fx-text-fill: #6B7280;");
+                        
+                        Label expLbl = new Label("Exp: " + (item.getExpiryDateStr() != null ? item.getExpiryDateStr() : "-"));
+                        expLbl.setStyle("-fx-font-size: 11.5px; -fx-font-weight: 600; -fx-text-fill: #6B7280;");
+                        
+                        Region spacer = new Region();
+                        javafx.scene.layout.HBox.setHgrow(spacer, javafx.scene.layout.Priority.ALWAYS);
+                        
+                        Label priceLbl = new Label("₹ " + String.format("%.2f", item.getSellingRate()));
+                        priceLbl.setStyle("-fx-font-size: 13.5px; -fx-font-weight: 800; -fx-text-fill: #059669;");
+                        
+                        row.getChildren().addAll(nameLbl, packLbl, batchLbl, expLbl, spacer, priceLbl);
+                        row.setStyle("-fx-cursor: hand;");
+                        row.setOnMouseClicked(e -> {
+                            medicineSearchField.setText("");
+                            suggestionsPopup.hide();
+                            addItemToCart(item);
+                        });
+
+                        CustomMenuItem menuItem = new CustomMenuItem(row, true);
                         menuItem.setOnAction(e -> {
                             medicineSearchField.setText("");
                             suggestionsPopup.hide();
@@ -108,15 +158,41 @@ public class PosController {
                         suggestionsPopup.getItems().add(menuItem);
                     }
                     if (!suggestionsPopup.isShowing()) {
-                        // Position popup below the search field
                         suggestionsPopup.show(medicineSearchField, javafx.geometry.Side.BOTTOM, 0, 0);
                     }
                 }
             }
         });
         
-        // Barcode scanner acts as keyboard and hits ENTER
+        // Barcode scanner hits Enter
         medicineSearchField.setOnAction(e -> handleMedicineSearch());
+        
+        // Global Keyboard Shortcuts (F1, F2, F3, F12)
+        javafx.application.Platform.runLater(() -> {
+            if (medicineSearchField.getScene() != null) {
+                medicineSearchField.getScene().addEventFilter(javafx.scene.input.KeyEvent.KEY_PRESSED, event -> {
+                    if (event.getCode() == javafx.scene.input.KeyCode.F1) {
+                        medicineSearchField.requestFocus();
+                        medicineSearchField.selectAll();
+                        event.consume();
+                    } else if (event.getCode() == javafx.scene.input.KeyCode.F2) {
+                        if (customerPhoneField != null) {
+                            customerPhoneField.requestFocus();
+                            customerPhoneField.selectAll();
+                        }
+                        event.consume();
+                    } else if (event.getCode() == javafx.scene.input.KeyCode.F3) {
+                        handleClearBill(null);
+                        event.consume();
+                    } else if (event.getCode() == javafx.scene.input.KeyCode.F12) {
+                        handleCompleteSale(null);
+                        event.consume();
+                    } else if (event.getCode() == javafx.scene.input.KeyCode.ESCAPE) {
+                        suggestionsPopup.hide();
+                    }
+                });
+            }
+        });
     }
 
     private void setupTable() {
@@ -168,14 +244,34 @@ public class PosController {
         cartTable.setItems(cartItems);
     }
 
+    @FXML
     private void handleMedicineSearch() {
-        String query = medicineSearchField.getText().trim();
+        String query = medicineSearchField.getText() != null ? medicineSearchField.getText().trim() : "";
         if (query.isEmpty()) return;
         
         CartItem item = posDAO.getItemByBarcodeOrName(query);
         if (item != null) {
             addItemToCart(item);
             medicineSearchField.clear();
+            suggestionsPopup.hide();
+            return;
+        }
+
+        // Fallback to search suggestions
+        java.util.List<CartItem> suggestions = posDAO.searchMedicines(query);
+        if (!suggestions.isEmpty()) {
+            addItemToCart(suggestions.get(0));
+            medicineSearchField.clear();
+            suggestionsPopup.hide();
+        } else {
+            javafx.scene.control.Alert alert = new javafx.scene.control.Alert(
+                    javafx.scene.control.Alert.AlertType.WARNING,
+                    "No medicine found matching \"" + query + "\"",
+                    javafx.scene.control.ButtonType.OK
+            );
+            alert.setHeaderText("Medicine Not Found");
+            alert.setTitle("Search Result");
+            alert.showAndWait();
         }
     }
     
@@ -220,6 +316,11 @@ public class PosController {
         taxLabel.setText(String.format("₹ %.2f", tax));
         totalLabel.setText(String.format("₹ %.2f", total));
         
+        if (itemsCountLabel != null) {
+            int count = cartItems.size();
+            itemsCountLabel.setText(count + (count == 1 ? " item in cart" : " items in cart"));
+        }
+        
         updateBalance();
     }
     
@@ -228,39 +329,178 @@ public class PosController {
             String paidStr = paidAmountField.getText().trim();
             BigDecimal paid = paidStr.isEmpty() ? currentGrandTotal : new BigDecimal(paidStr);
             BigDecimal balance = currentGrandTotal.subtract(paid);
-            // Optionally, allow negative balance as "change to return", but for ledger we store max(0) or just store what is owed.
-            // Let's store actual balance (if < 0, they overpaid, usually return change, so balance owed is 0).
             if (balance.compareTo(BigDecimal.ZERO) < 0) {
                 balanceLabel.setText(String.format("Change: ₹ %.2f", balance.abs()));
+                balanceLabel.setStyle("-fx-font-weight: 800; -fx-text-fill: #16A34A; -fx-font-size: 16px;");
+            } else if (balance.compareTo(BigDecimal.ZERO) == 0) {
+                balanceLabel.setText("₹ 0.00");
+                balanceLabel.setStyle("-fx-font-weight: 800; -fx-text-fill: #16A34A; -fx-font-size: 16px;");
             } else {
                 balanceLabel.setText(String.format("₹ %.2f", balance));
+                balanceLabel.setStyle("-fx-font-weight: 800; -fx-text-fill: #DC2626; -fx-font-size: 16px;");
             }
         } catch (NumberFormatException e) {
             balanceLabel.setText("₹ 0.00");
+            balanceLabel.setStyle("-fx-font-weight: 800; -fx-text-fill: #111827; -fx-font-size: 16px;");
         }
+    }
+
+    // Quick Tender Button Handlers
+    @FXML
+    private void handleExactTender(ActionEvent event) {
+        if (paidAmountField != null) {
+            paidAmountField.setText(currentGrandTotal.setScale(2, java.math.RoundingMode.HALF_UP).toPlainString());
+            updateBalance();
+        }
+    }
+
+    @FXML
+    private void handleTender100(ActionEvent event) {
+        addTenderAmount(new BigDecimal("100"));
+    }
+
+    @FXML
+    private void handleTender200(ActionEvent event) {
+        addTenderAmount(new BigDecimal("200"));
+    }
+
+    @FXML
+    private void handleTender500(ActionEvent event) {
+        addTenderAmount(new BigDecimal("500"));
+    }
+
+    @FXML
+    private void handleTender2000(ActionEvent event) {
+        addTenderAmount(new BigDecimal("2000"));
+    }
+
+    private void addTenderAmount(BigDecimal addAmount) {
+        if (paidAmountField == null) return;
+        try {
+            String cur = paidAmountField.getText().trim();
+            BigDecimal val = cur.isEmpty() ? BigDecimal.ZERO : new BigDecimal(cur);
+            val = val.add(addAmount);
+            paidAmountField.setText(val.setScale(2, java.math.RoundingMode.HALF_UP).toPlainString());
+        } catch (Exception e) {
+            paidAmountField.setText(addAmount.setScale(2, java.math.RoundingMode.HALF_UP).toPlainString());
+        }
+        updateBalance();
+    }
+
+    // Clear Bill with Confirmation
+    @FXML
+    private void handleClearBill(ActionEvent event) {
+        if (cartItems.isEmpty() && (customerNameField == null || customerNameField.getText().trim().isEmpty())) {
+            return;
+        }
+        javafx.scene.control.Alert alert = new javafx.scene.control.Alert(
+                javafx.scene.control.Alert.AlertType.CONFIRMATION,
+                "Are you sure you want to clear the current bill?",
+                javafx.scene.control.ButtonType.YES,
+                javafx.scene.control.ButtonType.NO
+        );
+        alert.setHeaderText("Clear Current Bill");
+        alert.setTitle("Confirm Clear");
+        alert.showAndWait().ifPresent(type -> {
+            if (type == javafx.scene.control.ButtonType.YES) {
+                resetBillingForm();
+            }
+        });
+    }
+
+    // Suspend Bill
+    @FXML
+    private void handleSuspendBill(ActionEvent event) {
+        if (cartItems.isEmpty()) {
+            return;
+        }
+        javafx.scene.control.Alert alert = new javafx.scene.control.Alert(
+                javafx.scene.control.Alert.AlertType.INFORMATION,
+                "Bill with " + cartItems.size() + " items suspended (Total: ₹ " + currentGrandTotal + ")",
+                javafx.scene.control.ButtonType.OK
+        );
+        alert.setHeaderText("Bill Held / Suspended");
+        alert.setTitle("Suspended Bill");
+        alert.showAndWait();
+        resetBillingForm();
+    }
+
+    private void lookupCustomer() {
+        if (customerPhoneField == null || customerNameField == null) return;
+        String phone = customerPhoneField.getText().trim();
+        if (phone.length() >= 7) {
+            String name = posDAO.getCustomerNameByPhone(phone);
+            if (name != null && !name.trim().isEmpty()) {
+                customerNameField.setText(name);
+            }
+        }
+    }
+
+    private void resetBillingForm() {
+        cartItems.clear();
+        cartTable.refresh();
+        if (customerNameField != null) customerNameField.clear();
+        if (customerPhoneField != null) customerPhoneField.clear();
+        if (doctorNameField != null) {
+            doctorNameField.clear();
+            doctorNameField.setStyle("");
+            doctorNameField.setPromptText("Doctor Name (Optional)");
+        }
+        requiresPrescription = false;
+        if (medicineSearchField != null) medicineSearchField.clear();
+        if (paidAmountField != null) paidAmountField.clear();
+        if (balanceLabel != null) balanceLabel.setText("₹ 0.00");
+        updateTotals();
     }
 
     @FXML
     private void handleCompleteSale(ActionEvent event) {
         if (cartItems.isEmpty()) {
+            javafx.scene.control.Alert alert = new javafx.scene.control.Alert(
+                    javafx.scene.control.Alert.AlertType.WARNING,
+                    "Cart is empty! Please search and add medicines before completing the sale.",
+                    javafx.scene.control.ButtonType.OK
+            );
+            alert.setHeaderText("Empty Cart");
+            alert.setTitle("Cannot Complete Sale");
+            alert.showAndWait();
+            medicineSearchField.requestFocus();
             return;
         }
         
-        if (requiresPrescription && doctorNameField.getText().trim().isEmpty()) {
-            // Can't proceed without a doctor's name for Schedule H
-            doctorNameField.setStyle("-fx-border-color: red; -fx-border-width: 2px;");
+        if (requiresPrescription && (doctorNameField == null || doctorNameField.getText().trim().isEmpty())) {
+            if (doctorNameField != null) {
+                doctorNameField.setStyle("-fx-border-color: #DC2626; -fx-border-width: 2px;");
+                doctorNameField.requestFocus();
+            }
+            javafx.scene.control.Alert alert = new javafx.scene.control.Alert(
+                    javafx.scene.control.Alert.AlertType.WARNING,
+                    "Doctor name is required because this bill contains Schedule H / H1 / X medicines.",
+                    javafx.scene.control.ButtonType.OK
+            );
+            alert.setHeaderText("Prescription Required");
+            alert.setTitle("Doctor Name Required");
+            alert.showAndWait();
             return;
         }
 
         String invoiceNo = "INV-" + System.currentTimeMillis();
-        String customer = customerNameField.getText().trim();
-        String customerPhone = customerPhoneField.getText().trim();
-        String doctor = doctorNameField.getText().trim();
-        String paymentMode = paymentModeCombo.getValue();
+        String customer = (customerNameField != null && !customerNameField.getText().trim().isEmpty()) 
+                ? customerNameField.getText().trim() : "Walk-in Customer";
+        String customerPhone = (customerPhoneField != null) ? customerPhoneField.getText().trim() : "";
+        String doctor = (doctorNameField != null) ? doctorNameField.getText().trim() : "";
+        String paymentMode = (paymentModeCombo != null && paymentModeCombo.getValue() != null) 
+                ? paymentModeCombo.getValue() : "Cash";
         String pdfPath = "invoice_" + invoiceNo + ".pdf";
 
-        String paidStr = paidAmountField.getText().trim();
-        BigDecimal paidAmount = paidStr.isEmpty() ? currentGrandTotal : new BigDecimal(paidStr);
+        BigDecimal paidAmount = currentGrandTotal;
+        if (paidAmountField != null && !paidAmountField.getText().trim().isEmpty()) {
+            try {
+                paidAmount = new BigDecimal(paidAmountField.getText().trim());
+            } catch (Exception ignored) {
+                paidAmount = currentGrandTotal;
+            }
+        }
         BigDecimal balanceAmount = currentGrandTotal.subtract(paidAmount);
         if (balanceAmount.compareTo(BigDecimal.ZERO) < 0) balanceAmount = BigDecimal.ZERO;
 
@@ -268,36 +508,40 @@ public class PosController {
         boolean saved = posDAO.saveSale(invoiceNo, customer, customerPhone, doctor, paymentMode, cartItems, paidAmount, balanceAmount);
         
         if (!saved) {
-            System.err.println("Failed to save sale to database!");
-            return; // Maybe show an alert in real app
+            javafx.scene.control.Alert alert = new javafx.scene.control.Alert(
+                    javafx.scene.control.Alert.AlertType.ERROR,
+                    "Failed to save sale to the database! Please check database connection.",
+                    javafx.scene.control.ButtonType.OK
+            );
+            alert.setHeaderText("Database Error");
+            alert.setTitle("Save Failed");
+            alert.showAndWait();
+            return;
         }
 
-        com.pharmacyerp.util.InvoicePrinter.printInvoice(invoiceNo, customer, doctor, cartItems, pdfPath);
-        
-        System.out.println("Sale completed, saved to DB, and invoice saved to " + pdfPath);
-        
-        // Open the PDF automatically
         try {
+            com.pharmacyerp.util.InvoicePrinter.printInvoice(invoiceNo, customer, doctor, cartItems, pdfPath);
+            System.out.println("Sale completed, saved to DB, and invoice saved to " + pdfPath);
+            
             java.io.File pdfFile = new java.io.File(pdfPath);
             if (pdfFile.exists() && java.awt.Desktop.isDesktopSupported()) {
                 java.awt.Desktop.getDesktop().open(pdfFile);
             }
         } catch (Exception e) {
-            System.err.println("Failed to open PDF: " + e.getMessage());
+            System.err.println("Notice: Could not automatically open PDF: " + e.getMessage());
         }
+
+        javafx.scene.control.Alert successAlert = new javafx.scene.control.Alert(
+                javafx.scene.control.Alert.AlertType.INFORMATION,
+                String.format("Sale completed successfully!\n\nInvoice No: %s\nCustomer: %s\nGrand Total: ₹ %.2f\nPayment Mode: %s",
+                        invoiceNo, customer, currentGrandTotal, paymentMode),
+                javafx.scene.control.ButtonType.OK
+        );
+        successAlert.setHeaderText("Sale Completed Successfully");
+        successAlert.setTitle("Sale Completed");
+        successAlert.showAndWait();
         
-        // Reset POS
-        cartItems.clear();
-        cartTable.refresh();
-        customerNameField.clear();
-        customerPhoneField.clear();
-        doctorNameField.clear();
-        requiresPrescription = false;
-        doctorNameField.setStyle("");
-        doctorNameField.setPromptText("Doctor Name (Optional)");
-        if (paidAmountField != null) paidAmountField.clear();
-        if (balanceLabel != null) balanceLabel.setText("₹ 0.00");
-        updateTotals();
+        resetBillingForm();
     }
 
     @FXML
@@ -311,8 +555,13 @@ public class PosController {
             Parent root = loader.load();
             Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
             stage.getScene().setRoot(root);
-        } catch (IOException e) {
+        } catch (Throwable e) {
             e.printStackTrace();
+            javafx.scene.control.Alert alert = new javafx.scene.control.Alert(javafx.scene.control.Alert.AlertType.ERROR);
+            alert.setTitle("Navigation Error");
+            alert.setHeaderText("Unable to open screen: " + fxmlPath);
+            alert.setContentText(e.getMessage() != null ? e.getMessage() : e.toString());
+            alert.showAndWait();
         }
     }
 }

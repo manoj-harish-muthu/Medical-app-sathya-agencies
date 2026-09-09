@@ -15,9 +15,16 @@ public class PasswordUtil {
      * Checks a plaintext password against a stored hash.
      */
     public static boolean checkPassword(String plainPassword, String storedHash) {
-        if (storedHash == null || !storedHash.startsWith("$2a$")) {
-            throw new IllegalArgumentException("Invalid hash provided for comparison.");
+        if (storedHash == null || storedHash.length() < 10) {
+            return false;
         }
-        return BCrypt.checkpw(plainPassword, storedHash);
+        String normalizedHash = storedHash;
+        if (storedHash.startsWith("$2b$") || storedHash.startsWith("$2y$")) {
+            normalizedHash = "$2a$" + storedHash.substring(4);
+        }
+        if (!normalizedHash.startsWith("$2a$")) {
+            return false;
+        }
+        return BCrypt.checkpw(plainPassword, normalizedHash);
     }
 }
