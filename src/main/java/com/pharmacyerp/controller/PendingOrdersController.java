@@ -1,9 +1,8 @@
 package com.pharmacyerp.controller;
 
-import javafx.fxml.FXML;
-
-public class PendingOrdersController {
-    @FXML
-    public void initialize() {
+public class PendingOrdersController extends BaseAgentOrdersController {
+    @Override
+    public String getPageMode() {
+        return "PENDING_ONLY";
     }
 }

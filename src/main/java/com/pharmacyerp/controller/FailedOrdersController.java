@@ -1,9 +1,8 @@
 package com.pharmacyerp.controller;
 
-import javafx.fxml.FXML;
-
-public class FailedOrdersController {
-    @FXML
-    public void initialize() {
+public class FailedOrdersController extends BaseAgentOrdersController {
+    @Override
+    public String getPageMode() {
+        return "FAILED_ONLY";
     }
 }

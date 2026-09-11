@@ -1,0 +1,16 @@
+{
+  "customer_id" : "917418062898",
+  "customer_name" : "Muthukutti",
+  "phone" : "10147649",
+  "address" : "No. 1, Dubai Kurukku Theru, Karayapatti - 626001",
+  "items" : [ {
+    "medicine" : "bandage",
+    "quantity" : 3,
+    "unit" : "piece",
+    "volume_ml" : null,
+    "pieces_per_unit" : null
+  } ],
+  "confirmed" : true,
+  "is_checked_by_admin" : true,
+  "admin_status" : "approved"
+}

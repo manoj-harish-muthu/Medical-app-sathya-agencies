@@ -1,9 +1,8 @@
 package com.pharmacyerp.controller;
 
-import javafx.fxml.FXML;
-
-public class CompletedOrdersController {
-    @FXML
-    public void initialize() {
+public class CompletedOrdersController extends BaseAgentOrdersController {
+    @Override
+    public String getPageMode() {
+        return "COMPLETED_ONLY";
     }
 }

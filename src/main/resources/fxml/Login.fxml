@@ -35,6 +35,14 @@
                 <Insets top="15"/>
             </VBox.margin>
         </Label>
+
+        <HBox alignment="CENTER" spacing="5">
+            <VBox.margin>
+                <Insets top="10"/>
+            </VBox.margin>
+            <Label text="Engineered by" style="-fx-font-size: 13px; -fx-text-fill: #111827; -fx-font-weight: 800;"/>
+            <Hyperlink text="GuttBrains" onAction="#handleOpenGuttBrains" style="-fx-font-size: 13px; -fx-text-fill: #0D9488; -fx-font-weight: 900; -fx-padding: 0; -fx-border-width: 0; -fx-underline: false; -fx-cursor: hand;"/>
+        </HBox>
         
     </VBox>
 </StackPane>

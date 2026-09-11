@@ -8,26 +8,136 @@
         <fx:include source="Sidebar.fxml"/>
     </left>
     <center>
-        <VBox spacing="20">
+        <VBox spacing="16">
             <padding>
-                <Insets top="24" right="24" bottom="24" left="24"/>
+                <Insets top="20" right="20" bottom="20" left="20"/>
             </padding>
-            <HBox alignment="CENTER_LEFT">
-                <Label text="Failed Orders" styleClass="page-title"/>
+            
+            <!-- Top Header Bar -->
+            <HBox alignment="CENTER_LEFT" spacing="14">
+                <Button text="← Back to Dashboard" onAction="#handleDashboard" styleClass="button-outline"/>
+                <VBox spacing="2">
+                    <Label text="Failed &amp; Cancelled Orders" styleClass="page-title"/>
+                    <Label fx:id="countLabel" text="Loading cancelled/failed orders from WhatsApp agent..." styleClass="secondary-text"/>
+                </VBox>
                 <Region HBox.hgrow="ALWAYS"/>
+                <Button text="🔄 Refresh List" onAction="#handleRefresh" styleClass="button-primary"/>
             </HBox>
-            <VBox styleClass="card" VBox.vgrow="ALWAYS" spacing="15">
-                <Label text="Failed / Cancelled Orders" styleClass="section-title"/>
-                <TableView VBox.vgrow="ALWAYS">
-                    <columns>
-                        <TableColumn text="Order ID" prefWidth="100"/>
-                        <TableColumn text="Date" prefWidth="120"/>
-                        <TableColumn text="Customer" prefWidth="200"/>
-                        <TableColumn text="Amount" prefWidth="150"/>
-                        <TableColumn text="Reason" prefWidth="250"/>
-                    </columns>
-                </TableView>
-            </VBox>
+
+            <!-- Search Bar -->
+            <HBox spacing="12" alignment="CENTER_LEFT" styleClass="card" style="-fx-padding: 10 16;">
+                <TextField fx:id="searchField" promptText="🔍 Search failed/cancelled orders by customer, phone, or medicine..." 
+                           styleClass="text-field" HBox.hgrow="ALWAYS"/>
+            </HBox>
+
+            <!-- Master-Detail SplitPane -->
+            <SplitPane dividerPositions="0.58" VBox.vgrow="ALWAYS" styleClass="split-pane">
+                
+                <!-- Left: Master Failed Orders Table -->
+                <VBox spacing="10" styleClass="card" style="-fx-padding: 14;">
+                    <HBox alignment="CENTER_LEFT" spacing="10">
+                        <Label text="Cancelled / Incomplete Orders Queue" styleClass="section-title"/>
+                        <Region HBox.hgrow="ALWAYS"/>
+                        <Label fx:id="tableStatsLabel" text="" styleClass="secondary-text" style="-fx-font-size: 11.5px;"/>
+                    </HBox>
+                    
+                    <TableView fx:id="ordersTable" VBox.vgrow="ALWAYS">
+                        <columns>
+                            <TableColumn fx:id="colPhone" text="Customer Phone" prefWidth="120"/>
+                            <TableColumn fx:id="colCustomer" text="Customer Name" prefWidth="135"/>
+                            <TableColumn fx:id="colAddress" text="Delivery Address" prefWidth="180"/>
+                            <TableColumn fx:id="colItemsCount" text="Items" prefWidth="60" style="-fx-alignment: CENTER;"/>
+                            <TableColumn fx:id="colItems" text="Medicines Ordered" prefWidth="190"/>
+                            <TableColumn fx:id="colStatus" text="Status" prefWidth="130" style="-fx-alignment: CENTER;"/>
+                            <TableColumn fx:id="colAction" text="Action" prefWidth="90" style="-fx-alignment: CENTER;"/>
+                        </columns>
+                        <columnResizePolicy>
+                            <TableView fx:constant="UNCONSTRAINED_RESIZE_POLICY" />
+                        </columnResizePolicy>
+                    </TableView>
+                </VBox>
+
+                <!-- Right: Selected Order Details Card -->
+                <VBox fx:id="detailContainer" styleClass="card" style="-fx-padding: 16;" spacing="14">
+                    
+                    <!-- Empty State Placeholder -->
+                    <VBox fx:id="emptyPlaceholder" alignment="CENTER" spacing="10" VBox.vgrow="ALWAYS">
+                        <Label text="⚠️" style="-fx-font-size: 38px;"/>
+                        <Label text="No Failed Order Selected" styleClass="section-title" style="-fx-text-fill: #4B5563;"/>
+                        <Label text="Select an order from the left list to review customer contact, requested items, and failure or cancellation reason." 
+                               textAlignment="CENTER" wrapText="true" maxWidth="320" styleClass="secondary-text"/>
+                    </VBox>
+
+                    <!-- Populated Details View -->
+                    <VBox fx:id="detailsContent" spacing="12" VBox.vgrow="ALWAYS" visible="false" managed="false">
+                        
+                        <!-- Order Header -->
+                        <HBox alignment="CENTER_LEFT" spacing="10">
+                            <VBox spacing="2" HBox.hgrow="ALWAYS">
+                                <HBox alignment="CENTER_LEFT" spacing="8">
+                                    <Label fx:id="detailCustomerName" text="Customer Name" style="-fx-font-size: 18px; -fx-font-weight: 900; -fx-text-fill: #000000;"/>
+                                    <Label fx:id="detailConfirmedBadge" text="Cancelled / Draft" styleClass="badge-danger"/>
+                                </HBox>
+                                <HBox alignment="CENTER_LEFT" spacing="8">
+                                    <Label fx:id="detailPhone" text="Phone: 9876543210" styleClass="secondary-text"/>
+                                    <Label text="•" styleClass="secondary-text"/>
+                                    <Label fx:id="detailCustomerId" text="WhatsApp ID: 919876543210" styleClass="secondary-text" style="-fx-font-size: 11px;"/>
+                                </HBox>
+                            </VBox>
+                            <Label fx:id="detailStatusBadge" text="Failed / Cancelled" styleClass="badge-danger" style="-fx-font-size: 12.5px;"/>
+                        </HBox>
+
+                        <Separator/>
+
+                        <!-- Delivery Address Card -->
+                        <VBox spacing="6" style="-fx-background-color: #FEF2F2; -fx-border-color: #FECACA; -fx-border-radius: 6px; -fx-background-radius: 6px; -fx-padding: 10 12;">
+                            <HBox alignment="CENTER_LEFT">
+                                <Label text="📍 Recorded Address / Contact" style="-fx-font-weight: 800; -fx-text-fill: #991B1B; -fx-font-size: 12.5px;"/>
+                                <Region HBox.hgrow="ALWAYS"/>
+                                <Button fx:id="btnCopyAddress" text="📋 Copy Address" onAction="#handleCopyAddress" styleClass="button-tender" style="-fx-font-size: 11px;"/>
+                            </HBox>
+                            <Label fx:id="detailAddress" text="No: 123, Gandhi Road, Virudhunagar - 626001" wrapText="true" 
+                                   style="-fx-font-size: 13.5px; -fx-font-weight: 700; -fx-text-fill: #111827; -fx-line-spacing: 3px;"/>
+                        </VBox>
+
+                        <!-- Medicines Breakdown -->
+                        <VBox spacing="6" VBox.vgrow="ALWAYS">
+                            <HBox alignment="CENTER_LEFT">
+                                <Label text="Medicines in this Order" styleClass="section-title" style="-fx-font-size: 14.5px;"/>
+                                <Region HBox.hgrow="ALWAYS"/>
+                                <Label fx:id="detailItemsCount" text="0 items" styleClass="secondary-text"/>
+                            </HBox>
+                            
+                            <TableView fx:id="detailItemsTable" prefHeight="160" VBox.vgrow="ALWAYS">
+                                <columns>
+                                    <TableColumn fx:id="colDetailMed" text="Medicine Name" prefWidth="170"/>
+                                    <TableColumn fx:id="colDetailQty" text="Qty" prefWidth="65" style="-fx-alignment: CENTER;"/>
+                                    <TableColumn fx:id="colDetailUnit" text="Unit" prefWidth="75" style="-fx-alignment: CENTER;"/>
+                                    <TableColumn fx:id="colDetailVol" text="Vol (ml)" prefWidth="75" style="-fx-alignment: CENTER;"/>
+                                    <TableColumn fx:id="colDetailPieces" text="Pcs/Pack" prefWidth="75" style="-fx-alignment: CENTER;"/>
+                                </columns>
+                                <columnResizePolicy>
+                                    <TableView fx:constant="UNCONSTRAINED_RESIZE_POLICY" />
+                                </columnResizePolicy>
+                            </TableView>
+                        </VBox>
+
+                        <!-- Status Re-activation Actions -->
+                        <VBox spacing="6" style="-fx-background-color: #F3F4F6; -fx-border-color: #E5E7EB; -fx-border-radius: 6px; -fx-background-radius: 6px; -fx-padding: 10;">
+                            <Label text="Order Recovery Actions" style="-fx-font-weight: 800; -fx-font-size: 11.5px; -fx-text-fill: #374151;"/>
+                            <FlowPane hgap="6" vgap="6">
+                                <Button fx:id="btnStatusApprove" text="🔄 Re-open &amp; Approve" onAction="#handleStatusApprove" styleClass="button-outline" style="-fx-font-size: 11.5px; -fx-padding: 4 10;"/>
+                                <Button fx:id="btnStatusPacking" text="📦 Move to Packing" onAction="#handleStatusPacking" styleClass="button-outline" style="-fx-font-size: 11.5px; -fx-padding: 4 10;"/>
+                            </FlowPane>
+                        </VBox>
+
+                        <!-- Bill in POS Button -->
+                        <Button fx:id="btnDetailBillInPos" text="🛒 Re-bill in POS" 
+                                onAction="#handleDetailBillInPos" maxWidth="Infinity" styleClass="button-primary" 
+                                style="-fx-font-size: 14.5px; -fx-padding: 10 16;"/>
+                    </VBox>
+                </VBox>
+            </SplitPane>
         </VBox>
     </center>
 </BorderPane>

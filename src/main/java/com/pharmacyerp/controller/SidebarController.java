@@ -6,8 +6,14 @@ import javafx.fxml.FXMLLoader;
 import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.control.Alert;
+import javafx.scene.control.DialogPane;
+import javafx.scene.control.Hyperlink;
+import javafx.scene.control.Label;
+import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
+import java.awt.Desktop;
+import java.net.URI;
 
 public class SidebarController {
 
@@ -505,6 +511,67 @@ public class SidebarController {
     @FXML
     private void handleAlertPendingOrders(ActionEvent event) {
         navigateTo(event, "/fxml/AlertPendingOrders.fxml");
+    }
+
+    @FXML
+    public void handleOpenGuttBrains(ActionEvent event) {
+        openUrl("https://www.guttbrains.com");
+    }
+
+    @FXML
+    public void handleSettings(ActionEvent event) {
+        Alert alert = new Alert(Alert.AlertType.NONE);
+        alert.setTitle("About Software & System Settings");
+        alert.setHeaderText(null);
+        alert.setGraphic(null);
+
+        VBox content = new VBox(12);
+        content.setStyle("-fx-padding: 16 22 10 22; -fx-background-color: #FFFFFF;");
+        content.setPrefWidth(420);
+        
+        Label titleLabel = new Label("Sathya Agencies");
+        titleLabel.setStyle("-fx-font-size: 22px; -fx-font-weight: 900; -fx-text-fill: #0D9488;");
+
+        Label subtitleLabel = new Label("Premium Pharmacy ERP • v1.0.0");
+        subtitleLabel.setStyle("-fx-font-size: 13px; -fx-font-weight: 700; -fx-text-fill: #4B5563;");
+
+        javafx.scene.control.Separator sep1 = new javafx.scene.control.Separator();
+
+        Label descLabel = new Label("High-performance pharmaceutical billing, Marg ERP data sync & WhatsApp AI-integrated order fulfillment.");
+        descLabel.setWrapText(true);
+        descLabel.setStyle("-fx-font-size: 13px; -fx-text-fill: #374151; -fx-font-weight: 600; -fx-line-spacing: 3px;");
+
+        javafx.scene.control.Separator sep2 = new javafx.scene.control.Separator();
+
+        HBox creditBox = new HBox(6);
+        creditBox.setAlignment(javafx.geometry.Pos.CENTER_LEFT);
+        Label engLabel = new Label("Engineered by");
+        engLabel.setStyle("-fx-font-size: 14px; -fx-font-weight: 800; -fx-text-fill: #111827;");
+        Hyperlink guttLink = new Hyperlink("GuttBrains");
+        guttLink.setStyle("-fx-font-size: 14px; -fx-font-weight: 900; -fx-text-fill: #0D9488; -fx-padding: 0; -fx-border-width: 0; -fx-underline: false; -fx-cursor: hand;");
+        guttLink.setOnAction(e -> openUrl("https://www.guttbrains.com"));
+        creditBox.getChildren().addAll(engLabel, guttLink);
+
+        content.getChildren().addAll(titleLabel, subtitleLabel, sep1, descLabel, sep2, creditBox);
+
+        DialogPane pane = alert.getDialogPane();
+        pane.setContent(content);
+        pane.getButtonTypes().add(javafx.scene.control.ButtonType.CLOSE);
+        pane.setStyle("-fx-background-color: #FFFFFF;");
+        pane.getStylesheets().add(getClass().getResource("/css/style.css").toExternalForm());
+        alert.showAndWait();
+    }
+
+    public static void openUrl(String url) {
+        try {
+            if (Desktop.isDesktopSupported() && Desktop.getDesktop().isSupported(Desktop.Action.BROWSE)) {
+                Desktop.getDesktop().browse(new URI(url));
+            } else {
+                new ProcessBuilder("rundll32", "url.dll,FileProtocolHandler", url).start();
+            }
+        } catch (Exception e) {
+            System.err.println("Could not open URL: " + e.getMessage());
+        }
     }
 
     @FXML

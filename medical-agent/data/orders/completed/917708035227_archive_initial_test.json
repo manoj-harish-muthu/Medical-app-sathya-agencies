@@ -1,0 +1,53 @@
+{
+    "customer_id": "917708035227",
+    "customer_name": "Harish",
+    "phone": "7708035227",
+    "address": "68A Kandapuram Street, Madurai Road, Virudhunagar - 626001",
+    "items": [
+        {
+            "medicine": "Dolo 50",
+            "quantity": 2,
+            "unit": "strip",
+            "pieces_per_unit": null
+        },
+        {
+            "medicine": "Metexil 50",
+            "quantity": 2,
+            "unit": "strip",
+            "pieces_per_unit": null
+        },
+        {
+            "medicine": "Kachal tonic",
+            "quantity": 1,
+            "unit": "strip",
+            "pieces_per_unit": null
+        },
+        {
+            "medicine": "Irumal tonic",
+            "quantity": 1,
+            "unit": "strip",
+            "pieces_per_unit": null
+        },
+        {
+            "medicine": "Metexil 500",
+            "quantity": 2,
+            "unit": "strip",
+            "pieces_per_unit": null
+        },
+        {
+            "medicine": "காய்ச்சல் டானிக் (Fever tonic)",
+            "quantity": 1,
+            "unit": "strip",
+            "pieces_per_unit": null
+        },
+        {
+            "medicine": "இருமல் டானிக் (Cough tonic)",
+            "quantity": 1,
+            "unit": "strip",
+            "pieces_per_unit": null
+        }
+    ],
+    "confirmed": true,
+    "is_checked_by_admin": false,
+    "admin_status": "pending"
+}

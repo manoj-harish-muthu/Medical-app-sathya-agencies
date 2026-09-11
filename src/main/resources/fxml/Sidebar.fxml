@@ -202,7 +202,15 @@
             <!-- Backup -->
             <Button text="💾 Backup" onAction="#handleComingSoon" styleClass="sidebar-button" maxWidth="Infinity" alignment="BASELINE_LEFT"/>
 
-            <Button text="⚙️ Settings" onAction="#handleComingSoon" styleClass="sidebar-button" maxWidth="Infinity" alignment="BASELINE_LEFT"/>
+            <Button text="⚙️ Settings" onAction="#handleSettings" styleClass="sidebar-button" maxWidth="Infinity" alignment="BASELINE_LEFT"/>
         </VBox>
     </ScrollPane>
+
+    <!-- Pinned Footer: Engineered by GuttBrains -->
+    <VBox alignment="CENTER" spacing="0" style="-fx-border-color: #D1D5DB; -fx-border-width: 1 0 0 0; -fx-padding: 14 12 14 12; -fx-background-color: #FFFFFF;">
+        <HBox alignment="CENTER" spacing="5">
+            <Label text="Engineered by" style="-fx-font-size: 12px; -fx-text-fill: #111827; -fx-font-weight: 800;"/>
+            <Hyperlink text="GuttBrains" onAction="#handleOpenGuttBrains" style="-fx-font-size: 12px; -fx-text-fill: #0D9488; -fx-font-weight: 900; -fx-padding: 0; -fx-border-width: 0; -fx-underline: false; -fx-cursor: hand;"/>
+        </HBox>
+    </VBox>
 </VBox>

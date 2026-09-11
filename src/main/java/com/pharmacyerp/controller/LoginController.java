@@ -51,4 +51,9 @@ public class LoginController {
         errorLabel.setText(message);
         errorLabel.setVisible(true);
     }
+
+    @FXML
+    private void handleOpenGuttBrains(ActionEvent event) {
+        SidebarController.openUrl("https://www.guttbrains.com");
+    }
 }

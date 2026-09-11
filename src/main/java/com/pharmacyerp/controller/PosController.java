@@ -68,6 +68,7 @@ public class PosController {
     private ObservableList<CartItem> cartItems = FXCollections.observableArrayList();
     private ContextMenu suggestionsPopup = new ContextMenu();
     private boolean requiresPrescription = false;
+    private com.pharmacyerp.model.AgentOrder activeAgentOrder;
 
     @FXML
     public void initialize() {
@@ -437,6 +438,7 @@ public class PosController {
     }
 
     private void resetBillingForm() {
+        activeAgentOrder = null;
         cartItems.clear();
         cartTable.refresh();
         if (customerNameField != null) customerNameField.clear();
@@ -519,6 +521,35 @@ public class PosController {
             return;
         }
 
+        // If this sale was initiated from an Agent Order, mark it as completed & billed
+        if (activeAgentOrder != null) {
+            try {
+                activeAgentOrder.setCheckedByAdmin(true);
+                activeAgentOrder.setAdminStatus("completed");
+
+                com.pharmacyerp.dao.AgentOrderDAO agentOrderDAO = new com.pharmacyerp.dao.AgentOrderDAO();
+                agentOrderDAO.updateOrderStatus(activeAgentOrder.getFilePath(), activeAgentOrder.getCustomerId(), "completed", true);
+
+                if (activeAgentOrder.getFilePath() != null) {
+                    java.io.File f = new java.io.File(activeAgentOrder.getFilePath());
+                    if (f.exists()) {
+                        com.fasterxml.jackson.databind.ObjectMapper om = new com.fasterxml.jackson.databind.ObjectMapper();
+                        com.fasterxml.jackson.databind.JsonNode root = om.readTree(f);
+                        if (root.isObject()) {
+                            ((com.fasterxml.jackson.databind.node.ObjectNode) root).put("is_checked_by_admin", true);
+                            ((com.fasterxml.jackson.databind.node.ObjectNode) root).put("admin_status", "completed");
+                            ((com.fasterxml.jackson.databind.node.ObjectNode) root).put("completed_at", java.time.LocalDateTime.now().toString());
+                            ((com.fasterxml.jackson.databind.node.ObjectNode) root).put("invoice_no", invoiceNo);
+                            om.writerWithDefaultPrettyPrinter().writeValue(f, root);
+                        }
+                    }
+                }
+            } catch (Exception e) {
+                System.err.println("Notice: Could not update agent order status upon sale completion: " + e.getMessage());
+            }
+        }
+
+
         try {
             com.pharmacyerp.util.InvoicePrinter.printInvoice(invoiceNo, customer, doctor, cartItems, pdfPath);
             System.out.println("Sale completed, saved to DB, and invoice saved to " + pdfPath);
@@ -543,6 +574,41 @@ public class PosController {
         
         resetBillingForm();
     }
+
+    public void loadAgentOrder(com.pharmacyerp.model.AgentOrder order) {
+        if (order == null) return;
+        this.activeAgentOrder = order;
+        if (customerPhoneField != null && order.getPhone() != null && !order.getPhone().isBlank()) {
+            customerPhoneField.setText(order.getPhone());
+        }
+        if (customerNameField != null && order.getCustomerName() != null && !order.getCustomerName().isBlank()) {
+            customerNameField.setText(order.getCustomerName());
+        }
+        if (order.getItems() != null && !order.getItems().isEmpty()) {
+            for (com.pharmacyerp.model.AgentOrder.OrderItem it : order.getItems()) {
+                String medName = it.getMedicine();
+                if (medName != null && !medName.isBlank()) {
+                    CartItem found = posDAO.getItemByBarcodeOrName(medName);
+                    if (found != null) {
+                        try {
+                            int q = 1;
+                            String qStr = it.getQuantity().replaceAll("[^0-9]", "");
+                            if (!qStr.isEmpty()) {
+                                q = Math.max(1, Integer.parseInt(qStr));
+                            }
+                            found.setQuantity(q);
+                            found.calculateTotals();
+                            cartItems.add(found);
+                        } catch (Exception ignored) {
+                            cartItems.add(found);
+                        }
+                    }
+                }
+            }
+            updateTotals();
+        }
+    }
+
 
     @FXML
     private void handleDashboard(ActionEvent event) {

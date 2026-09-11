@@ -98,4 +98,20 @@ public class PosFxmlLoadTest {
     public void testLoadDayEndClosingFxml() throws Exception {
         assertFxmlLoads("/fxml/DayEndClosing.fxml");
     }
+
+    @Test
+    public void testLoadPendingOrdersFxml() throws Exception {
+        assertFxmlLoads("/fxml/PendingOrders.fxml");
+    }
+
+    @Test
+    public void testLoadCompletedOrdersFxml() throws Exception {
+        assertFxmlLoads("/fxml/CompletedOrders.fxml");
+    }
+
+    @Test
+    public void testLoadFailedOrdersFxml() throws Exception {
+        assertFxmlLoads("/fxml/FailedOrders.fxml");
+    }
 }
+

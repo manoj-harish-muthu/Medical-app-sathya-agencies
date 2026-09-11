@@ -1,0 +1,16 @@
+{
+  "customer_id" : "917708035227",
+  "customer_name" : "Harish",
+  "phone" : "7708035227",
+  "address" : "68A Kandapuram Street, Madurai Road, Virudhunagar - 626001",
+  "items" : [ {
+    "medicine" : "Paracetamol 500mg",
+    "quantity" : 2,
+    "unit" : "strip",
+    "volume_ml" : null,
+    "pieces_per_unit" : null
+  } ],
+  "confirmed" : false,
+  "is_checked_by_admin" : true,
+  "admin_status" : "approved"
+}
