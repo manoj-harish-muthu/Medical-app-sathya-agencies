@@ -1,0 +1,26 @@
+{
+    "customer_id": "917708035227",
+    "customer_name": "Harish",
+    "phone": "7708035227",
+    "address": "No. 68/A, Kandhapuram St, Madurai Road, VNR - 626001",
+    "items": [
+        {
+            "medicine": "Paracetamol",
+            "quantity": 1,
+            "unit": "strip",
+            "volume_ml": null,
+            "pieces_per_unit": null
+        },
+        {
+            "medicine": "Dolo 650mg",
+            "quantity": 1,
+            "unit": "strip",
+            "volume_ml": null,
+            "pieces_per_unit": null
+        }
+    ],
+    "confirmed": true,
+    "is_checked_by_admin": false,
+    "admin_status": "pending",
+    "completed_at": "2026-09-21 17:03:51"
+}

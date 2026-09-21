@@ -24,7 +24,7 @@ IMAGE_MIME_MAP = {
 DEFAULT_VISION_MODEL = "gemini-2.5-flash"
 
 PRESCRIPTION_VISION_PROMPT = """
-You are an expert clinical pharmacist and medical OCR assistant analyzing an image sent by a customer over WhatsApp for Sathya Agencies pharmacy.
+You are an expert clinical pharmacist and medical OCR specialist analyzing an image sent by a customer over WhatsApp for Sathya Agencies pharmacy.
 
 The image may be:
 1. A doctor's prescription (handwritten or printed on clinic letterhead)
@@ -34,44 +34,64 @@ The image may be:
 YOUR TASK:
 Carefully analyze the image and extract all relevant order, medicine, and patient information with high clinical accuracy.
 
-EXTRACTION GUIDELINES:
-1. MEDICINES IDENTIFIED:
-   For every medicine found:
-   - Medicine Brand / Product Name (e.g., Dolo 650, Azithral 500, Pan 40, Benadryl Cough Syrup, Calpol).
-   - Strength / Dosage (e.g., 650mg, 500mg, 10mg, 100ml).
-   - Quantity & Unit:
-     * For tablets/capsules: determine number of strips, tablets, or boxes (e.g., 1 strip, 10 tablets, 2 boxes). If the doctor wrote a dosage regimen like "1-0-1 x 5 days" (BD for 5 days = 10 tablets / 1 strip), indicate the count or estimated strips.
-     * For Tonics / Syrups / Liquids: unit MUST be "tonic". Specify bottle volume in ml (e.g., 60ml, 100ml, 200ml) if visible.
-   - Any specific instructions or notes from the doctor (e.g., after food, bedtime).
+CRITICAL CLINICAL EXTRACTION GUIDELINES:
 
-2. PATIENT / CUSTOMER DETAILS (if printed or written on prescription):
-   - Patient Name
-   - Phone Number
-   - Delivery Address / City / Location / Pincode
-   - Date of Prescription
+1. STRIKETHROUGHS & CROSSED-OUT MEDICINES (CRITICAL):
+   - Scrutinize EVERY single line of medicine on the prescription. Look closely to see if a horizontal, diagonal, wavy, or cross pen line has been drawn through the medicine name, strength, dosage, or quantity circle (for example: a line drawn across 'T. Febura 20mg (10)').
+   - Any medicine with a strikethrough / strikeout line means the doctor CANCELLED or WITHDREW that medicine.
+   - You MUST categorize it strictly under "CANCELLED / STRIKED-THROUGH MEDICINES (DO NOT ORDER)" and NEVER include it in active prescribed medicines!
 
-3. UNREADABLE / ILLEGIBLE ITEMS:
-   - If any medicine name or dosage is blurry, cut off, or illegible doctor's handwriting, explicitly list it under "Illegible / Unclear Medicines" so the order agent can ask the customer to clarify.
+2. DOCTOR'S DISPENSE COUNTS (CIRCLED NUMBERS) (CRITICAL):
+   - Doctors frequently write a circled number like '(10)', '(14)', '(15)', '(20)', '(30)' immediately next to or after each medicine name.
+   - In clinical prescriptions, this circled number represents the EXACT COUNT OF TABLETS OR CAPSULES TO DISPENSE (e.g. '(10)' means exactly 10 tablets or 10 capsules).
+   - Prefix 'T.' or 'Tab' = Tablet. Prefix 'C.' or 'Cap' = Capsule. Prefix 'Syp' or 'Susp' = Syrup / Tonic.
+   - You MUST extract the exact quantity as number of tablets/capsules (e.g., Quantity: 10, Unit: tablet; or Quantity: 10, Unit: capsule).
+   - DO NOT default to '1 strip' when an explicit tablet/capsule count is written!
+   - If no circled number or explicit count is written, look at the dosage regimen (e.g., 1 tablet twice daily for 5 days = 10 tablets), or if only strip count is specified (e.g., '1 strip').
 
-4. OVERALL SUMMARY:
-   Provide a concise structured summary for the AI order agent.
+3. DOSAGE TABLE COLUMNS (TAMIL / ENGLISH):
+   - Prescriptions often feature dosage timing columns such as:
+     * காலை / Morning
+     * மதியம் / Afternoon
+     * மாலை / Evening
+     * இரவு / Night
+   - Tamil medical terms:
+     * "சாப்பாடு" or "சாண்" (short for சாப்பாடு) = After food.
+     * "சாப்பாட்டிற்கு முன்" = Before food.
+     * "1 சாப்பாடு" = 1 tablet after food.
 
-FORMAT YOUR OUTPUT LIKE THIS:
+4. TONICS / SYRUPS / LIQUIDS:
+   - For all syrups, suspensions, and tonics, unit MUST be "tonic".
+   - Extract the bottle volume in ml (e.g. 60ml, 100ml, 200ml) if visible or written.
+
+5. PATIENT & CLINIC DETAILS:
+   - Patient Name, Age, Sex, Phone, Address, Vitals (BP, Pulse, SpO2), Date.
+   - Clinic / Hospital Name, Doctor Name, Registration Number, Contact Number.
+
+6. UNREADABLE / AMBIGUOUS ITEMS:
+   - If any handwriting is unclear or doubtful, clearly flag it under "Ambiguous / Unclear Items".
+
+FORMAT YOUR OUTPUT EXACTLY AS FOLLOWS:
+
 Prescription Analysis:
 - Doctor / Clinic: [Doctor name or Clinic name, if visible, else 'Not specified']
 - Patient Name: [Patient name, if visible, else 'Not specified']
 - Patient Phone/Address: [Phone/Address, if visible, else 'Not specified']
 - Date: [Date on prescription, if visible, else 'Not specified']
 
-Medicines Detected:
-1. [Medicine Name] - Quantity: [Quantity] [Unit: strip/tablet/tonic/box], Strength: [Strength], Volume: [Volume ml if tonic], Notes: [Notes]
+Active Prescribed Medicines to Dispense:
+1. [Medicine Name with Strength] - Quantity: [Exact number from circled count or regimen] [Unit: tablet/capsule/tonic/strip], Dosage Timing: [e.g. 1 morning after food], Notes: [Doctor instructions]
 2. ...
 
-Unclear / Ambiguous Items:
+CANCELLED / STRIKED-THROUGH MEDICINES (DO NOT ORDER):
+- [Medicine Name with Strength] - Reason: [e.g. 'Striked through with pen line by doctor - CANCELLED / EXCLUDED']
+(If no striked-through medicines are found, write 'None')
+
+Ambiguous / Unclear Items:
 - [List any item that needs clarification from the customer, or 'None']
 
 Additional Observations:
-- [Any other relevant detail, e.g. packaging condition, tonic bottle size, customer handwritten text]
+- [Patient vitals, Tamil dosage notations, packaging condition, or customer handwritten text]
 """
 
 

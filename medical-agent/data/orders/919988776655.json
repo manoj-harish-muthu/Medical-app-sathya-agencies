@@ -5,20 +5,6 @@
     "address": "Flat 4B, Emerald Flats, 2nd Avenue, Anna Nagar, Chennai - 600040",
     "items": [
         {
-            "medicine": "Dolo 650mg",
-            "quantity": 1,
-            "unit": "strip",
-            "volume_ml": null,
-            "pieces_per_unit": null
-        },
-        {
-            "medicine": "Azithral 500mg",
-            "quantity": 1,
-            "unit": "strip",
-            "volume_ml": null,
-            "pieces_per_unit": null
-        },
-        {
             "medicine": "Benadryl Cough Syrup",
             "quantity": "100ml",
             "unit": "tonic",
@@ -26,7 +12,21 @@
             "pieces_per_unit": null
         },
         {
-            "medicine": "Cetirizine 10mg",
+            "medicine": "Dolo 650 mg",
+            "quantity": 1,
+            "unit": "strip",
+            "volume_ml": null,
+            "pieces_per_unit": null
+        },
+        {
+            "medicine": "Azithral 500 mg",
+            "quantity": 1,
+            "unit": "strip",
+            "volume_ml": null,
+            "pieces_per_unit": null
+        },
+        {
+            "medicine": "Cetirizine 10 mg",
             "quantity": 1,
             "unit": "strip",
             "volume_ml": null,
