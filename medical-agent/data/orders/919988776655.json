@@ -1,0 +1,39 @@
+{
+    "customer_id": "919988776655",
+    "customer_name": "Rajesh Kumar",
+    "phone": "917708035227",
+    "address": "Flat 4B, Emerald Flats, 2nd Avenue, Anna Nagar, Chennai - 600040",
+    "items": [
+        {
+            "medicine": "Dolo 650mg",
+            "quantity": 1,
+            "unit": "strip",
+            "volume_ml": null,
+            "pieces_per_unit": null
+        },
+        {
+            "medicine": "Azithral 500mg",
+            "quantity": 1,
+            "unit": "strip",
+            "volume_ml": null,
+            "pieces_per_unit": null
+        },
+        {
+            "medicine": "Benadryl Cough Syrup",
+            "quantity": "100ml",
+            "unit": "tonic",
+            "volume_ml": "100ml",
+            "pieces_per_unit": null
+        },
+        {
+            "medicine": "Cetirizine 10mg",
+            "quantity": 1,
+            "unit": "strip",
+            "volume_ml": null,
+            "pieces_per_unit": null
+        }
+    ],
+    "confirmed": false,
+    "is_checked_by_admin": false,
+    "admin_status": "pending"
+}

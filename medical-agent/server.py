@@ -18,6 +18,7 @@ load_dotenv()
 from agents.gemini import ask_gemini
 from agents.order import Order
 from services.stt import transcribe_audio_bytes
+from services.vision import analyze_image_bytes
 from services.whatsapp import (
     send_whatsapp_message,
     send_whatsapp_template,
@@ -191,8 +192,77 @@ def webhook():
                                 phone_number_id=phone_number_id,
                             )
 
+                    # Handle Image / Photo Message (Prescriptions, medicine strips/boxes, syrup bottles)
+                    elif msg_type == "image" or (msg_type == "document" and msg.get("document", {}).get("mime_type", "").startswith("image/")):
+                        media_data = msg.get("image") if msg_type == "image" else msg.get("document", {})
+                        media_id = media_data.get("id")
+                        mime_type = media_data.get("mime_type", "image/jpeg").split(";")[0].strip()
+                        caption = media_data.get("caption", "").strip()
+
+                        print(f"📷 Downloading image (media_id: {media_id}, mime: {mime_type}, caption: '{caption}')...")
+                        image_bytes = download_media_bytes(media_id)
+
+                        if not image_bytes:
+                            send_whatsapp_message(
+                                to_number=sender,
+                                text="Sorry, I could not download the image. Please try sending the photo again.",
+                                phone_number_id=phone_number_id,
+                            )
+                            continue
+
+                        # Save local copy of prescription/medicine photo
+                        try:
+                            import datetime
+                            os.makedirs("data/prescriptions", exist_ok=True)
+                            ext = ".jpg" if ("jpeg" in mime_type or "jpg" in mime_type) else (".png" if "png" in mime_type else ".jpg")
+                            ts = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
+                            local_img_path = f"data/prescriptions/{sender}_{ts}{ext}"
+                            with open(local_img_path, "wb") as f_img:
+                                f_img.write(image_bytes)
+                            print(f"💾 Saved prescription image to {local_img_path}")
+                        except Exception as save_err:
+                            print(f"⚠️ Warning: Could not save local prescription copy: {save_err}")
+
+                        print(f"⏳ Analyzing photo with Gemini Vision...")
+                        vision_analysis = analyze_image_bytes(image_bytes=image_bytes, mime_type=mime_type, caption=caption)
+                        print(f"📋 Vision Analysis Result:\n{vision_analysis}")
+
+                        if not vision_analysis:
+                            send_whatsapp_message(
+                                to_number=sender,
+                                text="I received your photo, but could not detect readable medicines or prescription text. Please take a clearer photo or type your medicine names.",
+                                phone_number_id=phone_number_id,
+                            )
+                            continue
+
+                        # Pass vision analysis to Doxy
+                        agent_prompt = (
+                            f"[Customer sent a photo (prescription / medicine package)]:\n"
+                            f"{vision_analysis}\n"
+                        )
+                        if caption:
+                            agent_prompt += f"\nCustomer caption: \"{caption}\""
+
+                        print("🤖 Processing with Doxy...")
+                        ai_reply = ask_gemini(agent_prompt, customer_id=sender)
+                        print(f"💡 AI Reply: {ai_reply}")
+
+                        # Send reply back to WhatsApp
+                        send_whatsapp_message(to_number=sender, text=ai_reply, phone_number_id=phone_number_id)
+
+                        # If the order was newly confirmed in this turn, send the official order confirmation template card
+                        curr_order = Order.load(sender)
+                        if not was_confirmed_before and curr_order.confirmed:
+                            print(f"🎉 [Order Confirmed] Sending official confirmation template to {sender}...")
+                            send_order_confirmation_template(
+                                to_number=sender,
+                                customer_name=curr_order.customer_name or "Customer",
+                                order_id=sender[-6:],
+                                phone_number_id=phone_number_id,
+                            )
+
                     else:
-                        print(f"ℹ️ [Notice] Received media type '{msg_type}'. Currently text and voice notes are supported.")
+                        print(f"ℹ️ [Notice] Received media type '{msg_type}'. Currently text, audio voice notes, and images are supported.")
 
     except Exception as e:
         print(f"❌ [Webhook Error] Exception processing webhook: {e}")
@@ -245,6 +315,79 @@ def simulate_message():
         "ai_reply": ai_reply,
         "saved_order_file": f"data/orders/{sender}.json",
         "current_order": order.get_order(),
+    }), 200
+
+
+@app.route("/simulate_image", methods=["POST"])
+def simulate_image():
+    """
+    Test endpoint allowing you to simulate incoming WhatsApp image/prescription messages directly
+    without waiting for Meta webhooks.
+    POST /simulate_image
+    Body JSON options:
+      1) {"from": "917708035227", "image_path": "path/to/prescription.jpg", "caption": "optional caption"}
+      2) {"from": "917708035227", "base64_image": "...", "mime_type": "image/jpeg", "caption": "..."}
+    """
+    import base64
+    from services.vision import get_image_mime_type
+
+    data = request.get_json() or {}
+    sender = str(data.get("from", "917708035227")).strip()
+    image_path = data.get("image_path", "").strip()
+    caption = data.get("caption", "").strip()
+    b64_data = data.get("base64_image", "").strip()
+
+    image_bytes = None
+    mime_type = "image/jpeg"
+
+    if b64_data:
+        image_bytes = base64.b64decode(b64_data)
+        mime_type = data.get("mime_type", "image/jpeg")
+    elif image_path:
+        if not os.path.exists(image_path):
+            return jsonify({"error": f"image_path '{image_path}' does not exist"}), 400
+        mime_type = get_image_mime_type(image_path)
+        with open(image_path, "rb") as f:
+            image_bytes = f.read()
+    else:
+        return jsonify({"error": "Either 'image_path' or 'base64_image' must be provided"}), 400
+
+    order = Order.load(sender)
+    order.save()
+    was_confirmed_before = order.confirmed
+
+    # Save local copy in data/prescriptions/
+    try:
+        import datetime
+        os.makedirs("data/prescriptions", exist_ok=True)
+        ext = ".jpg" if ("jpeg" in mime_type or "jpg" in mime_type) else (".png" if "png" in mime_type else ".jpg")
+        ts = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
+        local_img_path = f"data/prescriptions/{sender}_{ts}{ext}"
+        with open(local_img_path, "wb") as f_img:
+            f_img.write(image_bytes)
+    except Exception as e:
+        print(f"⚠️ Warning saving copy: {e}")
+
+    print(f"⏳ Analyzing photo with Gemini Vision for customer {sender}...")
+    vision_analysis = analyze_image_bytes(image_bytes=image_bytes, mime_type=mime_type, caption=caption)
+    print(f"📋 Vision Analysis Result:\n{vision_analysis}")
+
+    agent_prompt = f"[Customer sent a photo (prescription / medicine package)]:\n{vision_analysis}\n"
+    if caption:
+        agent_prompt += f"\nCustomer caption: \"{caption}\""
+
+    print("🤖 Processing with Doxy...")
+    ai_reply = ask_gemini(agent_prompt, customer_id=sender)
+    curr_order = Order.load(sender)
+
+    return jsonify({
+        "sender": sender,
+        "vision_analysis": vision_analysis,
+        "caption": caption,
+        "ai_reply": ai_reply,
+        "saved_order_file": f"data/orders/{sender}.json",
+        "current_order": curr_order.get_order(),
+        "confirmed": curr_order.confirmed,
     }), 200
 
 

@@ -25,3 +25,4 @@ typing_extensions==4.16.0
 urllib3==2.7.0
 websockets==16.1.1
 flask>=3.0.0
+pillow>=10.0.0
