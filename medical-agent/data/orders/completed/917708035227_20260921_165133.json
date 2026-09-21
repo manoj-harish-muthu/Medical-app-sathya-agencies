@@ -12,14 +12,15 @@
             "pieces_per_unit": null
         },
         {
-            "medicine": "Dolo 650mg",
+            "medicine": "Dolo 650",
             "quantity": 1,
-            "unit": "strip",
+            "unit": "tablet",
             "volume_ml": null,
             "pieces_per_unit": null
         }
     ],
-    "confirmed": false,
+    "confirmed": true,
     "is_checked_by_admin": false,
-    "admin_status": "pending"
+    "admin_status": "pending",
+    "completed_at": "2026-09-21 16:51:33"
 }
