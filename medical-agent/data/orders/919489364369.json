@@ -1,0 +1,10 @@
+{
+    "customer_id": "919489364369",
+    "customer_name": null,
+    "phone": "9489364369",
+    "address": null,
+    "items": [],
+    "confirmed": false,
+    "is_checked_by_admin": false,
+    "admin_status": "pending"
+}

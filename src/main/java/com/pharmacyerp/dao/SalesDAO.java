@@ -118,7 +118,7 @@ public class SalesDAO {
         java.util.List<com.pharmacyerp.model.CartItem> items = new java.util.ArrayList<>();
         String sql = "SELECT si.*, m.medicine_name, m.hsn_code, m.schedule_type, m.packing, (m.cgst + m.sgst) as gst_rate, " +
                      "comp.company_name, " +
-                     "mb.batch_number, DATE_FORMAT(mb.expiry_date, '%m/%y') as exp_date " +
+                     "mb.batch_number, mb.expiry_date " +
                      "FROM sale_items si " +
                      "JOIN medicines m ON si.medicine_id = m.medicine_id " +
                      "JOIN medicine_batches mb ON si.batch_id = mb.batch_id " +
@@ -140,7 +140,8 @@ public class SalesDAO {
                     
                     item.setBatchId(rs.getInt("batch_id"));
                     item.setBatchNumber(rs.getString("batch_number") != null ? rs.getString("batch_number") : "");
-                    item.setExpiryDateStr(rs.getString("exp_date") != null ? rs.getString("exp_date") : "");
+                    java.sql.Date expDate = rs.getDate("expiry_date");
+                    item.setExpiryDateStr(expDate != null ? new java.text.SimpleDateFormat("MM/yy").format(expDate) : "");
                     
                     item.setGstRate(rs.getBigDecimal("gst_rate") != null ? rs.getBigDecimal("gst_rate") : java.math.BigDecimal.ZERO);
                     item.setMrp(rs.getBigDecimal("mrp"));
