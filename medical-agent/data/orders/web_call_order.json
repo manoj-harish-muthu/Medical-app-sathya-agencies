@@ -1,0 +1,10 @@
+{
+    "customer_id": "web_call_order",
+    "customer_name": null,
+    "phone": null,
+    "address": null,
+    "items": [],
+    "confirmed": false,
+    "is_checked_by_admin": false,
+    "admin_status": "pending"
+}

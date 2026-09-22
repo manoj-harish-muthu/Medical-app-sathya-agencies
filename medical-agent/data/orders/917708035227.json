@@ -1,53 +1,32 @@
 {
     "customer_id": "917708035227",
-    "customer_name": "Mrs. Bhuvaneshwari",
+    "customer_name": "ஹரிஷ்",
     "phone": "7708035227",
-    "address": "No. 68/A, Kandhapuram St, Madurai Road, VNR - 626001",
+    "address": "68A, கந்தபுரம் Street, மதுரை Road, விருதுநகர், 626001",
     "items": [
         {
-            "medicine": "Bissheart 2.5mg/40mg",
+            "medicine": "Dolo 650",
             "quantity": 1,
             "unit": "strip",
             "volume_ml": null,
             "pieces_per_unit": null
         },
         {
-            "medicine": "Febura 20mg",
+            "medicine": "Paracetamol 500mg",
             "quantity": 1,
             "unit": "strip",
             "volume_ml": null,
             "pieces_per_unit": null
         },
         {
-            "medicine": "Libraa",
-            "quantity": 1,
-            "unit": "strip",
-            "volume_ml": null,
-            "pieces_per_unit": null
-        },
-        {
-            "medicine": "Pan-DSR",
-            "quantity": 1,
-            "unit": "strip",
-            "volume_ml": null,
-            "pieces_per_unit": null
-        },
-        {
-            "medicine": "Amitriptyline 10mg",
-            "quantity": 1,
-            "unit": "strip",
-            "volume_ml": null,
-            "pieces_per_unit": null
-        },
-        {
-            "medicine": "Calcifrol K2-7",
+            "medicine": "Met XL 25",
             "quantity": 1,
             "unit": "strip",
             "volume_ml": null,
             "pieces_per_unit": null
         }
     ],
-    "confirmed": false,
+    "confirmed": true,
     "is_checked_by_admin": false,
     "admin_status": "pending"
 }

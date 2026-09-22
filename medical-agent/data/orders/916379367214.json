@@ -1,28 +1,18 @@
 {
-  "customer_id" : "916379367214",
-  "customer_name" : "Manoj Kumar",
-  "phone" : "6379367214",
-  "address" : "No: (not provided), Lakshmi Nagar, Siddhar Kovil Street, Virudhunagar - 626001",
-  "items" : [ {
-    "medicine" : "Irumal tonic",
-    "quantity" : "50ml",
-    "unit" : "tonic",
-    "volume_ml" : "50ml",
-    "pieces_per_unit" : null
-  }, {
-    "medicine" : "Paracetamol",
-    "quantity" : 5,
-    "unit" : "tablet",
-    "volume_ml" : null,
-    "pieces_per_unit" : null
-  }, {
-    "medicine" : "Metexel 500",
-    "quantity" : 1,
-    "unit" : "strip",
-    "volume_ml" : null,
-    "pieces_per_unit" : null
-  } ],
-  "confirmed" : true,
-  "is_checked_by_admin" : true,
-  "admin_status" : "completed"
+    "customer_id": "916379367214",
+    "customer_name": "Manoj Kumar",
+    "phone": "6379367214",
+    "address": "No: (not provided), Lakshmi Nagar, Siddhar Kovil Street, Virudhunagar - 626001",
+    "items": [
+        {
+            "medicine": "Paracetamol",
+            "quantity": 20,
+            "unit": "tablet",
+            "volume_ml": null,
+            "pieces_per_unit": null
+        }
+    ],
+    "confirmed": false,
+    "is_checked_by_admin": false,
+    "admin_status": "pending"
 }

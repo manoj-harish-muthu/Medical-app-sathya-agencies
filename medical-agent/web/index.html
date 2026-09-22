@@ -941,6 +941,15 @@
         unlockAudioContexts();
         setCallUIState('connecting', 'Connecting to Gemini Live...');
 
+        // Reset Order State for fresh session
+        orderItems.length = 0;
+        renderOrderItems();
+        document.getElementById('custName').textContent = '—';
+        document.getElementById('custPhone').textContent = '—';
+        document.getElementById('custAddress').textContent = '—';
+        const existingConfirmBadge = document.getElementById('orderConfirmedBadge');
+        if (existingConfirmBadge) existingConfirmBadge.remove();
+
         // 2. Connect WebSocket
         await connectWebSocket();
 
@@ -1247,32 +1256,56 @@
       transcriptBox.scrollTop = transcriptBox.scrollHeight;
     }
 
-    // Simple Medicine Extractor from Speech (Instant UI preview)
+    function escapeHtml(str) {
+      if (!str) return '';
+      return String(str)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#039;');
+    }
+
+    // Fast Medicine & Detail Extractor from Speech (Instant UI preview)
     function detectMedicineMentions(text) {
+      if (!text) return;
       const lower = text.toLowerCase();
       
       // Check customer name
-      const nameMatch = lower.match(/(?:my name is|i am|name is)\s+([a-z]+)/i);
+      const nameMatch = lower.match(/(?:my name is|i am|name is|this is)\s+([a-zA-Z]+)/i);
       if (nameMatch) {
         document.getElementById('custName').textContent = nameMatch[1].charAt(0).toUpperCase() + nameMatch[1].slice(1);
       }
 
+      // Check phone number
+      const phoneMatch = text.match(/\b([6-9]\d{9})\b/);
+      if (phoneMatch) {
+        document.getElementById('custPhone').textContent = phoneMatch[1];
+      }
+
       // Check common medicines
       const meds = [
-        { regex: /dolo\s*650/i, name: 'Dolo 650mg', unit: 'strip' },
+        { regex: /dolo\s*(?:650)?/i, name: 'Dolo 650mg', unit: 'strip' },
+        { regex: /paracetamol(?:\s*650)?/i, name: 'Paracetamol 650mg', unit: 'strip' },
         { regex: /benadryl/i, name: 'Benadryl Cough Syrup', unit: 'tonic (100ml)' },
-        { regex: /azithral/i, name: 'Azithral 500mg', unit: 'strip' },
-        { regex: /cetirizine|cetrizine/i, name: 'Cetirizine 10mg', unit: 'strip' },
-        { regex: /pan-dsr|pan dsr/i, name: 'Pan-DSR', unit: 'strip' },
-        { regex: /febura/i, name: 'Febura 20mg', unit: 'tablet' }
+        { regex: /ascoril/i, name: 'Ascoril LS Syrup', unit: 'tonic (100ml)' },
+        { regex: /azithral(?:\s*500)?/i, name: 'Azithral 500mg', unit: 'strip' },
+        { regex: /cetirizine|cetzine|cetrizine/i, name: 'Cetirizine 10mg', unit: 'strip' },
+        { regex: /pan-dsr|pan dsr|pantocid/i, name: 'Pan-DSR', unit: 'strip' },
+        { regex: /febura(?:\s*20|\s*40)?/i, name: 'Febura 20mg', unit: 'tablet' },
+        { regex: /met\s*xl(?:\s*25|\s*50)?/i, name: 'Met XL 25mg', unit: 'strip' },
+        { regex: /telma\s*(?:40|20)?/i, name: 'Telma 40mg', unit: 'strip' },
+        { regex: /shelcal/i, name: 'Shelcal 500mg', unit: 'strip' },
+        { regex: /montair[\s-]lc|montek[\s-]lc/i, name: 'Montair-LC', unit: 'strip' },
+        { regex: /augmentin|amoxicillin/i, name: 'Augmentin 625mg', unit: 'strip' }
       ];
 
       for (const m of meds) {
-        if (m.regex.test(text) && !orderItems.some(item => item.name === m.name)) {
+        if (m.regex.test(text) && !orderItems.some(item => item.name.toLowerCase().includes(m.name.toLowerCase().split(' ')[0]))) {
           let qty = '1';
-          const qtyMatch = text.match(new RegExp(`(\\d+|one|two|three|four|five)\\s*(?:strips?|bottles?|tablets?|box)?\\s*(?:of)?\\s*${m.name.split(' ')[0]}`, 'i'));
+          const qtyMatch = text.match(new RegExp(`(\\d+|one|two|three|four|five|six|seven|eight|nine|ten)\\s*(?:strips?|bottles?|tablets?|box)?\\s*(?:of)?\\s*${m.name.split(' ')[0]}`, 'i'));
           if (qtyMatch) {
-            const wordMap = { one: '1', two: '2', three: '3', four: '4', five: '5' };
+            const wordMap = { one: '1', two: '2', three: '3', four: '4', five: '5', six: '6', seven: '7', eight: '8', nine: '9', ten: '10' };
             qty = wordMap[qtyMatch[1].toLowerCase()] || qtyMatch[1];
           }
           orderItems.push({ name: m.name, qty: qty, unit: m.unit });
@@ -1300,12 +1333,92 @@
       list.innerHTML = orderItems.map(item => `
         <div class="item-card">
           <div>
-            <div class="item-name">${item.name}</div>
-            <div class="item-details">Unit: ${item.unit}</div>
+            <div class="item-name">${escapeHtml(item.name)}</div>
+            <div class="item-details">Unit: ${escapeHtml(item.unit)}</div>
           </div>
-          <div class="item-qty-badge">${item.qty} ${item.unit.split(' ')[0]}</div>
+          <div class="item-qty-badge">${escapeHtml(String(item.qty))} ${escapeHtml(String(item.unit).split(' ')[0])}</div>
         </div>
       `).join('');
+    }
+
+    // Backend Synchronized Order State Handler
+    function updateOrderUI(order) {
+      if (!order) return;
+
+      // Update customer info fields
+      if (order.customer_name) {
+        const el = document.getElementById('custName');
+        el.textContent = order.customer_name;
+        el.style.color = '#F1F5F9';
+        el.style.fontWeight = '700';
+      }
+      if (order.phone) {
+        const el = document.getElementById('custPhone');
+        el.textContent = order.phone;
+        el.style.color = '#F1F5F9';
+        el.style.fontWeight = '700';
+      }
+      if (order.address) {
+        const el = document.getElementById('custAddress');
+        el.textContent = order.address;
+        el.title = order.address;
+        el.style.color = '#F1F5F9';
+        el.style.fontWeight = '600';
+        el.style.maxWidth = '180px';
+      }
+
+      // Reconcile items list with authoritative order state from Python backend
+      if (Array.isArray(order.items) && order.items.length > 0) {
+        orderItems.length = 0;
+        for (const it of order.items) {
+          const vol = it.volume_ml ? ` (${it.volume_ml})` : '';
+          orderItems.push({
+            name: it.medicine,
+            qty: it.quantity,
+            unit: (it.unit || 'strip') + vol
+          });
+        }
+        renderOrderItems();
+      }
+
+      // Confirmation badge
+      if (order.confirmed) {
+        let confirmBadge = document.getElementById('orderConfirmedBadge');
+        if (!confirmBadge) {
+          confirmBadge = document.createElement('div');
+          confirmBadge.id = 'orderConfirmedBadge';
+          confirmBadge.style.display = 'flex';
+          confirmBadge.style.alignItems = 'center';
+          confirmBadge.style.justifyContent = 'center';
+          confirmBadge.style.gap = '0.4rem';
+          confirmBadge.style.padding = '0.6rem 0.8rem';
+          confirmBadge.style.borderRadius = '10px';
+          confirmBadge.style.background = 'rgba(16, 185, 129, 0.18)';
+          confirmBadge.style.border = '1px solid rgba(16, 185, 129, 0.45)';
+          confirmBadge.style.color = '#34D399';
+          confirmBadge.style.fontSize = '0.8rem';
+          confirmBadge.style.fontWeight = '700';
+          confirmBadge.style.marginTop = '0.75rem';
+          confirmBadge.innerHTML = '<span>✅</span><span>Order Confirmed & Saved</span>';
+          const box = document.querySelector('.customer-info-box');
+          if (box && box.parentNode) {
+            box.parentNode.appendChild(confirmBadge);
+          }
+        }
+      }
+
+      // Mobile feedback: pulse drawer count
+      if (window.innerWidth <= 1024 && orderSidebar.classList.contains('collapsed')) {
+        const toggleBtn = document.querySelector('.order-toggle-btn');
+        if (toggleBtn) {
+          toggleBtn.style.background = 'rgba(16, 185, 129, 0.35)';
+          toggleBtn.style.color = '#34D399';
+          setTimeout(() => {
+            toggleBtn.style.background = '';
+            toggleBtn.style.color = '';
+          }, 1200);
+        }
+      }
     }
 
     // UI State Helpers
