@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.cell.PropertyValueFactory?>
+
+<BorderPane xmlns:fx="http://javafx.com/fxml" fx:controller="com.pharmacyerp.controller.ManufacturerController" styleClass="root" stylesheets="@../css/style.css">
+    <left>
+        <fx:include source="Sidebar.fxml"/>
+    </left>
+    <center>
+        <VBox spacing="15">
+            <padding>
+                <Insets top="20" right="20" bottom="20" left="20"/>
+            </padding>
+            <HBox alignment="CENTER_LEFT" spacing="10">
+                <Label text="Manufacturer Master" styleClass="page-title"/>
+                <Region HBox.hgrow="ALWAYS"/>
+                <Button text="Reload DB" onAction="#loadData" styleClass="button-outline"/>
+            </HBox>
+            
+            <TableView fx:id="tblData" VBox.vgrow="ALWAYS" minHeight="200" editable="true">
+                <columns>
+                    <TableColumn fx:id="colId" text="ID" prefWidth="80">
+                        <cellValueFactory><PropertyValueFactory property="id"/></cellValueFactory>
+                    </TableColumn>
+                    <TableColumn fx:id="colName" text="Company Name" prefWidth="300">
+                        <cellValueFactory><PropertyValueFactory property="name"/></cellValueFactory>
+                    </TableColumn>
+                    <TableColumn fx:id="colDetails" text="Details / Status" prefWidth="250">
+                        <cellValueFactory><PropertyValueFactory property="details"/></cellValueFactory>
+                    </TableColumn>
+                </columns>
+            </TableView>
+            
+            <HBox spacing="20" alignment="CENTER_RIGHT" styleClass="card">
+                <padding>
+                    <Insets top="15" right="15" bottom="15" left="15"/>
+                </padding>
+                <Label text="Total Records:" styleClass="form-label"/>
+                <Label fx:id="lblTotalItems" text="0" style="-fx-font-weight: bold; -fx-font-size: 16px;"/>
+                <Region prefWidth="30"/>
+                <Button text="Save Changes" styleClass="button-primary" onAction="#handleSave" prefHeight="40" prefWidth="150" style="-fx-font-size: 16px;"/>
+            </HBox>
+        </VBox>
+    </center>
+</BorderPane>

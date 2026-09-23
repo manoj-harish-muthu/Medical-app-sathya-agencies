@@ -4,61 +4,176 @@
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.control.cell.PropertyValueFactory?>
 
-<BorderPane xmlns:fx="http://javafx.com/fxml" fx:controller="com.pharmacyerp.controller.MedicineController" styleClass="root" stylesheets="@../css/style.css">
-    
-    <!-- Sidebar -->
+<BorderPane xmlns:fx="http://javafx.com/fxml" fx:controller="com.pharmacyerp.controller.MedicinesController" styleClass="root" stylesheets="@../css/style.css">
     <left>
         <fx:include source="Sidebar.fxml"/>
     </left>
-    
-    <!-- Main Content -->
     <center>
-        <VBox spacing="20">
-            <padding>
-                <Insets top="24" right="24" bottom="24" left="24"/>
-            </padding>
+        <StackPane>
             
-            <HBox alignment="CENTER_LEFT">
-                <Label text="Medicine Master" styleClass="page-title"/>
-                <Region HBox.hgrow="ALWAYS"/>
-                <Button text="+ Add Medicine" onAction="#handleAddMedicine" styleClass="button-primary"/>
-            </HBox>
-            
-            <VBox styleClass="card" VBox.vgrow="ALWAYS" spacing="15">
-                <HBox spacing="10">
-                    <TextField fx:id="searchField" promptText="Search medicine, salt, or company..." styleClass="text-field" prefWidth="400"/>
-                    <Button text="Search" onAction="#handleSearch" styleClass="button-outline"/>
+            <!-- LIST VIEW -->
+            <VBox fx:id="listView" spacing="15" visible="true">
+                <padding>
+                    <Insets top="20" right="20" bottom="20" left="20"/>
+                </padding>
+                <HBox alignment="CENTER_LEFT" spacing="10">
+                    <Label text="Medicine Master" styleClass="page-title"/>
+                    <Region HBox.hgrow="ALWAYS"/>
+                    <Button text="Reload List" onAction="#loadData" styleClass="button-outline"/>
+                    <Button text="+ Add New Product" onAction="#showFormView" styleClass="button-primary"/>
                 </HBox>
                 
-                <TableView fx:id="medicineTable" VBox.vgrow="ALWAYS">
+                <TableView fx:id="tblData" VBox.vgrow="ALWAYS" minHeight="200">
                     <columns>
-                        <TableColumn text="Medicine Name" prefWidth="250">
-                            <cellValueFactory><PropertyValueFactory property="medicineName" /></cellValueFactory>
+                        <TableColumn fx:id="colId" text="ID" prefWidth="60">
+                            <cellValueFactory><PropertyValueFactory property="id"/></cellValueFactory>
                         </TableColumn>
-                        <TableColumn text="Salt/Generic" prefWidth="150">
-                            <cellValueFactory><PropertyValueFactory property="saltName" /></cellValueFactory>
+                        <TableColumn fx:id="colName" text="Medicine Name" prefWidth="250">
+                            <cellValueFactory><PropertyValueFactory property="name"/></cellValueFactory>
                         </TableColumn>
-                        <TableColumn text="Packing" prefWidth="100">
-                            <cellValueFactory><PropertyValueFactory property="packing" /></cellValueFactory>
+                        <TableColumn fx:id="colDetails" text="Salt / Generic" prefWidth="200">
+                            <cellValueFactory><PropertyValueFactory property="details"/></cellValueFactory>
                         </TableColumn>
-                        <TableColumn text="Batch" prefWidth="100">
-                            <cellValueFactory><PropertyValueFactory property="batchNumber" /></cellValueFactory>
+                        <TableColumn fx:id="colExtra1" text="Company" prefWidth="150">
+                            <cellValueFactory><PropertyValueFactory property="extra1"/></cellValueFactory>
                         </TableColumn>
-                        <TableColumn text="Stock" prefWidth="80">
-                            <cellValueFactory><PropertyValueFactory property="totalStock" /></cellValueFactory>
+                        <TableColumn fx:id="colExtra2" text="HSN Code" prefWidth="150">
+                            <cellValueFactory><PropertyValueFactory property="extra2"/></cellValueFactory>
                         </TableColumn>
-                        <TableColumn text="MRP" prefWidth="80">
-                            <cellValueFactory><PropertyValueFactory property="currentMrp" /></cellValueFactory>
-                        </TableColumn>
-                        <TableColumn fx:id="actionColumn" text="Action" prefWidth="140" style="-fx-alignment: CENTER;">
-                            <!-- Cell factory added in controller -->
-                        </TableColumn>
+                        <TableColumn fx:id="colAction" text="Actions" prefWidth="100" />
                     </columns>
-                    <columnResizePolicy>
-                        <TableView fx:constant="UNCONSTRAINED_RESIZE_POLICY" />
-                    </columnResizePolicy>
                 </TableView>
+                
+                <HBox spacing="20" alignment="CENTER_RIGHT" styleClass="card">
+                    <padding>
+                        <Insets top="15" right="15" bottom="15" left="15"/>
+                    </padding>
+                    <Label text="Total Medicines:" styleClass="form-label"/>
+                    <Label fx:id="lblTotalItems" text="0" style="-fx-font-weight: bold; -fx-font-size: 16px;"/>
+                </HBox>
             </VBox>
-        </VBox>
+            
+            <!-- FORM VIEW -->
+            <VBox fx:id="formView" spacing="10" visible="false">
+                <padding>
+                    <Insets top="15" right="20" bottom="15" left="20"/>
+                </padding>
+                <HBox alignment="CENTER_LEFT" spacing="10">
+                    <Label text="NEW PRODUCT" styleClass="page-title"/>
+                    <Region HBox.hgrow="ALWAYS"/>
+                    <Button text="Back to List" onAction="#showListView" styleClass="button-outline"/>
+                    <Button text="Clear" onAction="#clearForm" styleClass="button-outline"/>
+                </HBox>
+
+                <ScrollPane fitToWidth="true" VBox.vgrow="ALWAYS" style="-fx-background-color: transparent;">
+                    <VBox spacing="15">
+                        
+                        <!-- Top Status Section -->
+                        <GridPane hgap="20" vgap="10" styleClass="card">
+                            <padding><Insets top="15" right="15" bottom="15" left="15"/></padding>
+                            <Label text="STATUS :" GridPane.columnIndex="0" GridPane.rowIndex="0" style="-fx-font-weight: bold;"/>
+                            <ComboBox fx:id="cmbStatus" GridPane.columnIndex="1" GridPane.rowIndex="0" prefWidth="120"/>
+                            
+                            <Label text="TYPE :" GridPane.columnIndex="2" GridPane.rowIndex="0" style="-fx-font-weight: bold;"/>
+                            <ComboBox fx:id="cmbType" GridPane.columnIndex="3" GridPane.rowIndex="0" prefWidth="120"/>
+                            
+                            <Label text="HIDE :" GridPane.columnIndex="4" GridPane.rowIndex="0" style="-fx-font-weight: bold;"/>
+                            <ComboBox fx:id="cmbHide" GridPane.columnIndex="5" GridPane.rowIndex="0" prefWidth="100"/>
+                            
+                            <Label text="PRODUCT :" GridPane.columnIndex="0" GridPane.rowIndex="1" style="-fx-font-weight: bold;"/>
+                            <TextField fx:id="txtProduct" GridPane.columnIndex="1" GridPane.rowIndex="1" GridPane.columnSpan="3" prefWidth="400" style="-fx-background-color: #e6f2e6; -fx-font-weight: bold;"/>
+                            
+                            <Label text="PACKING :" GridPane.columnIndex="4" GridPane.rowIndex="1" style="-fx-font-weight: bold;"/>
+                            <TextField fx:id="txtPacking" GridPane.columnIndex="5" GridPane.rowIndex="1"/>
+                            
+                            <Label text="UNIT 1st :" GridPane.columnIndex="0" GridPane.rowIndex="2" style="-fx-font-weight: bold;"/>
+                            <TextField fx:id="txtUnit1" GridPane.columnIndex="1" GridPane.rowIndex="2" promptText="TAB."/>
+                            
+                            <Label text="UNIT 2nd :" GridPane.columnIndex="2" GridPane.rowIndex="2" style="-fx-font-weight: bold;"/>
+                            <TextField fx:id="txtUnit2" GridPane.columnIndex="3" GridPane.rowIndex="2" promptText="STRI"/>
+                            
+                            <Label text="DECIMAL :" GridPane.columnIndex="4" GridPane.rowIndex="2" style="-fx-font-weight: bold;"/>
+                            <ComboBox fx:id="cmbDecimal" GridPane.columnIndex="5" GridPane.rowIndex="2" prefWidth="100"/>
+                            
+                            <Label text="COLOR TYPE :" GridPane.columnIndex="0" GridPane.rowIndex="3" style="-fx-font-weight: bold;"/>
+                            <ComboBox fx:id="cmbColorType" GridPane.columnIndex="1" GridPane.rowIndex="3" prefWidth="120"/>
+                            
+                            <Label text="ITEM TYPE :" GridPane.columnIndex="4" GridPane.rowIndex="3" style="-fx-font-weight: bold;"/>
+                            <ComboBox fx:id="cmbItemType" GridPane.columnIndex="5" GridPane.rowIndex="3" prefWidth="120"/>
+                            
+                            <Label text="COMPANY :" GridPane.columnIndex="0" GridPane.rowIndex="4" style="-fx-font-weight: bold;"/>
+                            <ComboBox fx:id="cmbCompany" GridPane.columnIndex="1" GridPane.rowIndex="4" GridPane.columnSpan="3" prefWidth="400" editable="true"/>
+                            
+                            <Label text="SALT :" GridPane.columnIndex="0" GridPane.rowIndex="5" style="-fx-font-weight: bold;"/>
+                            <ComboBox fx:id="cmbSalt" GridPane.columnIndex="1" GridPane.rowIndex="5" GridPane.columnSpan="3" prefWidth="400" editable="true"/>
+                            
+                            <Label text="HSN/SAC :" GridPane.columnIndex="0" GridPane.rowIndex="6" style="-fx-font-weight: bold;"/>
+                            <TextField fx:id="txtHsn" GridPane.columnIndex="1" GridPane.rowIndex="6"/>
+                        </GridPane>
+
+                        <!-- Bottom Tax and Pricing Section -->
+                        <GridPane hgap="20" vgap="10" styleClass="card" style="-fx-background-color: #f0f7f4;">
+                            <padding><Insets top="15" right="15" bottom="15" left="15"/></padding>
+                            
+                            <!-- Col 1 -->
+                            <Label text="LOCAL :" GridPane.columnIndex="0" GridPane.rowIndex="0" style="-fx-font-weight: bold;"/>
+                            <ComboBox fx:id="cmbLocal" GridPane.columnIndex="1" GridPane.rowIndex="0" prefWidth="100"/>
+                            
+                            <Label text="CENTRAL :" GridPane.columnIndex="0" GridPane.rowIndex="1" style="-fx-font-weight: bold;"/>
+                            <ComboBox fx:id="cmbCentral" GridPane.columnIndex="1" GridPane.rowIndex="1" prefWidth="100"/>
+                            
+                            <Label text="M.R.P. :" GridPane.columnIndex="0" GridPane.rowIndex="2" style="-fx-font-weight: bold;"/>
+                            <TextField fx:id="txtMrp" GridPane.columnIndex="1" GridPane.rowIndex="2" text="0.00"/>
+                            
+                            <Label text="Rate-A :" GridPane.columnIndex="0" GridPane.rowIndex="3" style="-fx-font-weight: bold;"/>
+                            <TextField fx:id="txtRateA" GridPane.columnIndex="1" GridPane.rowIndex="3" text="0.00"/>
+                            
+                            <Label text="CONV.STRI :" GridPane.columnIndex="0" GridPane.rowIndex="4" style="-fx-font-weight: bold;"/>
+                            <TextField fx:id="txtConvStri" GridPane.columnIndex="1" GridPane.rowIndex="4" text="0"/>
+                            
+                            <!-- Col 2 -->
+                            <Label text="SGST % :" GridPane.columnIndex="2" GridPane.rowIndex="0" style="-fx-font-weight: bold;"/>
+                            <TextField fx:id="txtSgst" GridPane.columnIndex="3" GridPane.rowIndex="0" text="0.00"/>
+                            
+                            <Label text="IGST % :" GridPane.columnIndex="2" GridPane.rowIndex="1" style="-fx-font-weight: bold;"/>
+                            <TextField fx:id="txtIgst" GridPane.columnIndex="3" GridPane.rowIndex="1" text="0.00"/>
+                            
+                            <Label text="P.RATE :" GridPane.columnIndex="2" GridPane.rowIndex="2" style="-fx-font-weight: bold;"/>
+                            <TextField fx:id="txtPRate" GridPane.columnIndex="3" GridPane.rowIndex="2" text="0.00"/>
+                            
+                            <Label text="Rate-B :" GridPane.columnIndex="2" GridPane.rowIndex="3" style="-fx-font-weight: bold;"/>
+                            <TextField fx:id="txtRateB" GridPane.columnIndex="3" GridPane.rowIndex="3" text="0.00"/>
+                            
+                            <Label text="CONV.CAS :" GridPane.columnIndex="2" GridPane.rowIndex="4" style="-fx-font-weight: bold;"/>
+                            <TextField fx:id="txtConvCas" GridPane.columnIndex="3" GridPane.rowIndex="4" text="0"/>
+                            
+                            <!-- Col 3 -->
+                            <Label text="CGST % :" GridPane.columnIndex="4" GridPane.rowIndex="0" style="-fx-font-weight: bold;"/>
+                            <TextField fx:id="txtCgst" GridPane.columnIndex="5" GridPane.rowIndex="0" text="0.00"/>
+                            
+                            <Label text="COST/ :" GridPane.columnIndex="4" GridPane.rowIndex="2" style="-fx-font-weight: bold;"/>
+                            <TextField fx:id="txtCost" GridPane.columnIndex="5" GridPane.rowIndex="2" text="0.00000"/>
+                            
+                            <Label text="Rate-C :" GridPane.columnIndex="4" GridPane.rowIndex="3" style="-fx-font-weight: bold;"/>
+                            <TextField fx:id="txtRateC" GridPane.columnIndex="5" GridPane.rowIndex="3" text="0.00"/>
+                            
+                            <Label text="NEGATIVE :" GridPane.columnIndex="4" GridPane.rowIndex="4" style="-fx-font-weight: bold;"/>
+                            <ComboBox fx:id="cmbNegative" GridPane.columnIndex="5" GridPane.rowIndex="4" prefWidth="80"/>
+                        </GridPane>
+                        
+                    </VBox>
+                </ScrollPane>
+                
+                <HBox spacing="20" alignment="CENTER_RIGHT" styleClass="card">
+                    <padding>
+                        <Insets top="15" right="15" bottom="15" left="15"/>
+                    </padding>
+                    <Label fx:id="lblStatus" text="" style="-fx-text-fill: #15803d; -fx-font-weight: bold;"/>
+                    <Region HBox.hgrow="ALWAYS"/>
+                    <Button text="Save Product" styleClass="button-primary" onAction="#handleSave" prefHeight="40" prefWidth="180" style="-fx-font-size: 16px;"/>
+                </HBox>
+            </VBox>
+            
+        </StackPane>
     </center>
 </BorderPane>

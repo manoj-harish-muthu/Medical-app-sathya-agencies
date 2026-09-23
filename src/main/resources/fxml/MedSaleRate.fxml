@@ -2,33 +2,52 @@
 <?import javafx.scene.layout.*?>
 <?import javafx.scene.control.*?>
 <?import javafx.geometry.Insets?>
+<?import javafx.scene.control.cell.PropertyValueFactory?>
 
 <BorderPane xmlns:fx="http://javafx.com/fxml" fx:controller="com.pharmacyerp.controller.MedSaleRateController" styleClass="root" stylesheets="@../css/style.css">
     <left>
         <fx:include source="Sidebar.fxml"/>
     </left>
     <center>
-        <VBox spacing="20">
+        <VBox spacing="15">
             <padding>
-                <Insets top="24" right="24" bottom="24" left="24"/>
+                <Insets top="20" right="20" bottom="20" left="20"/>
             </padding>
-            <HBox alignment="CENTER_LEFT">
-                <Label text="Sale Rate Configuration" styleClass="page-title"/>
+            <HBox alignment="CENTER_LEFT" spacing="10">
+                <Label text="Sale Rates" styleClass="page-title"/>
                 <Region HBox.hgrow="ALWAYS"/>
-                <Button text="Update Sale Rate" styleClass="button-primary"/>
+                <Button text="Reload DB" onAction="#loadData" styleClass="button-outline"/>
             </HBox>
-            <VBox styleClass="card" VBox.vgrow="ALWAYS" spacing="15">
-                <Label text="Current Selling Prices" styleClass="section-title"/>
-                <TableView VBox.vgrow="ALWAYS">
-                    <columns>
-                        <TableColumn text="Item Name" prefWidth="250"/>
-                        <TableColumn text="MRP" prefWidth="100"/>
-                        <TableColumn text="Sale Rate (Counter)" prefWidth="150"/>
-                        <TableColumn text="Wholesale Rate" prefWidth="150"/>
-                        <TableColumn text="Margin %" prefWidth="100"/>
-                    </columns>
-                </TableView>
-            </VBox>
+            
+            <TableView fx:id="tblData" VBox.vgrow="ALWAYS" minHeight="200" editable="true">
+                <columns>
+                    <TableColumn fx:id="colId" text="ID" prefWidth="60">
+                        <cellValueFactory><PropertyValueFactory property="id"/></cellValueFactory>
+                    </TableColumn>
+                    <TableColumn fx:id="colName" text="Rate Details" prefWidth="250">
+                        <cellValueFactory><PropertyValueFactory property="name"/></cellValueFactory>
+                    </TableColumn>
+                    <TableColumn fx:id="colDetails" text="Contact Info" prefWidth="200">
+                        <cellValueFactory><PropertyValueFactory property="details"/></cellValueFactory>
+                    </TableColumn>
+                    <TableColumn fx:id="colExtra1" text="Extra Details 1" prefWidth="150">
+                        <cellValueFactory><PropertyValueFactory property="extra1"/></cellValueFactory>
+                    </TableColumn>
+                    <TableColumn fx:id="colExtra2" text="Extra Details 2" prefWidth="250">
+                        <cellValueFactory><PropertyValueFactory property="extra2"/></cellValueFactory>
+                    </TableColumn>
+                </columns>
+            </TableView>
+            
+            <HBox spacing="20" alignment="CENTER_RIGHT" styleClass="card">
+                <padding>
+                    <Insets top="15" right="15" bottom="15" left="15"/>
+                </padding>
+                <Label text="Total Records:" styleClass="form-label"/>
+                <Label fx:id="lblTotalItems" text="0" style="-fx-font-weight: bold; -fx-font-size: 16px;"/>
+                <Region prefWidth="30"/>
+                <Button text="Save Changes" styleClass="button-primary" onAction="#handleSave" prefHeight="40" prefWidth="150" style="-fx-font-size: 16px;"/>
+            </HBox>
         </VBox>
     </center>
 </BorderPane>

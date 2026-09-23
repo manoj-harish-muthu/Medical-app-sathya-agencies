@@ -2,33 +2,86 @@
 <?import javafx.scene.layout.*?>
 <?import javafx.scene.control.*?>
 <?import javafx.geometry.Insets?>
+<?import javafx.scene.control.cell.PropertyValueFactory?>
 
 <BorderPane xmlns:fx="http://javafx.com/fxml" fx:controller="com.pharmacyerp.controller.BillingSalesReturnController" styleClass="root" stylesheets="@../css/style.css">
+    
     <left>
         <fx:include source="Sidebar.fxml"/>
     </left>
+    
     <center>
-        <VBox spacing="20">
+        <VBox spacing="15">
             <padding>
-                <Insets top="24" right="24" bottom="24" left="24"/>
+                <Insets top="20" right="20" bottom="20" left="20"/>
             </padding>
-            <HBox alignment="CENTER_LEFT">
+            
+            <HBox alignment="CENTER_LEFT" spacing="10">
                 <Label text="Sales Return" styleClass="page-title"/>
                 <Region HBox.hgrow="ALWAYS"/>
-                <Button text="New Return" styleClass="button-primary"/>
+                <Label text="Draft" style="-fx-font-weight: bold; -fx-text-fill: #b91c1c; -fx-font-size: 14px;"/>
             </HBox>
-            <VBox styleClass="card" VBox.vgrow="ALWAYS" spacing="15">
-                <Label text="Sales Returns List" styleClass="section-title"/>
-                <TableView VBox.vgrow="ALWAYS">
-                    <columns>
-                        <TableColumn text="Return No" prefWidth="120"/>
-                        <TableColumn text="Date" prefWidth="120"/>
-                        <TableColumn text="Original Invoice" prefWidth="150"/>
-                        <TableColumn text="Customer Name" prefWidth="250"/>
-                        <TableColumn text="Refund Amount" prefWidth="150"/>
-                    </columns>
-                </TableView>
-            </VBox>
+            
+            <!-- Customer Details -->
+            <HBox spacing="15" alignment="CENTER_LEFT" styleClass="card">
+                <padding>
+                    <Insets top="15" right="15" bottom="15" left="15"/>
+                </padding>
+                <VBox spacing="5" HBox.hgrow="ALWAYS">
+                    <Label text="Select Customer" styleClass="form-label"/>
+                    <ComboBox fx:id="cmbCustomer" maxWidth="Infinity" promptText="-- Select Customer --"/>
+                </VBox>
+                <VBox spacing="5" HBox.hgrow="ALWAYS">
+                    <Label text="Select Doctor" styleClass="form-label"/>
+                    <ComboBox fx:id="cmbDoctor" maxWidth="Infinity" promptText="-- Select Doctor --"/>
+                </VBox>
+                <VBox spacing="5" HBox.hgrow="ALWAYS">
+                    <Label text="Date" styleClass="form-label"/>
+                    <DatePicker fx:id="dpDate" maxWidth="Infinity"/>
+                </VBox>
+            </HBox>
+            
+            <!-- Cart Table -->
+            <TableView fx:id="tblCart" VBox.vgrow="ALWAYS" minHeight="200" editable="true">
+                <columns>
+                    <TableColumn fx:id="colMedicine" text="Medicine" prefWidth="250">
+                        <cellValueFactory><PropertyValueFactory property="medicineName"/></cellValueFactory>
+                    </TableColumn>
+                    <TableColumn fx:id="colBatch" text="Batch" prefWidth="120">
+                        <cellValueFactory><PropertyValueFactory property="batchNumber"/></cellValueFactory>
+                    </TableColumn>
+                    <TableColumn fx:id="colQty" text="Qty" prefWidth="80">
+                        <cellValueFactory><PropertyValueFactory property="quantity"/></cellValueFactory>
+                    </TableColumn>
+                    <TableColumn fx:id="colRate" text="Rate (₹)" prefWidth="100">
+                        <cellValueFactory><PropertyValueFactory property="sellingRate"/></cellValueFactory>
+                    </TableColumn>
+                    <TableColumn fx:id="colTotal" text="Net Amt" prefWidth="120">
+                        <cellValueFactory><PropertyValueFactory property="netAmount"/></cellValueFactory>
+                    </TableColumn>
+                </columns>
+            </TableView>
+            
+            <!-- Totals & Actions -->
+            <HBox spacing="20" alignment="CENTER_RIGHT" styleClass="card">
+                <padding>
+                    <Insets top="15" right="15" bottom="15" left="15"/>
+                </padding>
+                
+                <Label text="Items:" styleClass="form-label"/>
+                <Label fx:id="lblTotalItems" text="0" style="-fx-font-weight: bold; -fx-font-size: 16px;"/>
+                
+                <Region prefWidth="30"/>
+                
+                <Label text="Grand Total (₹):" styleClass="form-label"/>
+                <Label fx:id="lblGrandTotal" text="0.00" style="-fx-font-weight: bold; -fx-font-size: 24px; -fx-text-fill: #15803d;"/>
+                
+                <Region prefWidth="30"/>
+                
+                <Button text="Cancel" styleClass="button-outline" onAction="#handleDashboard"/>
+                <Button text="Save / Print" styleClass="button-primary" onAction="#handleSave" prefHeight="40" prefWidth="150" style="-fx-font-size: 16px;"/>
+            </HBox>
+            
         </VBox>
     </center>
 </BorderPane>

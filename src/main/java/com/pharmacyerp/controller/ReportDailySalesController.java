@@ -1,76 +1,69 @@
 package com.pharmacyerp.controller;
 
-import com.pharmacyerp.dao.SalesDAO;
-import com.pharmacyerp.model.Sale;
+import javafx.beans.property.SimpleDoubleProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
-import javafx.scene.control.TableColumn;
-import javafx.scene.control.TableView;
-import javafx.scene.control.TableCell;
-import javafx.scene.control.Button;
-import javafx.scene.control.cell.PropertyValueFactory;
-import com.pharmacyerp.util.InvoicePrinter;
-import com.pharmacyerp.model.CartItem;
+import javafx.fxml.Initializable;
+import javafx.scene.control.*;
 
-public class ReportDailySalesController {
+import java.net.URL;
+import java.time.LocalDate;
+import java.util.ResourceBundle;
 
-    @FXML private TableView<Sale> salesTable;
-    @FXML private TableColumn<Sale, String> colInvoiceNo;
-    @FXML private TableColumn<Sale, String> colTime;
-    @FXML private TableColumn<Sale, String> colCustomer;
-    @FXML private TableColumn<Sale, String> colTotal;
-    @FXML private TableColumn<Sale, String> colPaymentMode;
-    @FXML private TableColumn<Sale, Void> colAction;
+public class ReportDailySalesController implements Initializable {
 
-    private SalesDAO salesDAO = new SalesDAO();
+    public static class HistoryData {
+        private final SimpleStringProperty date;
+        private final SimpleStringProperty name;
+        private final SimpleStringProperty description;
+        private final SimpleDoubleProperty amount;
 
-    @FXML
-    public void initialize() {
-        colInvoiceNo.setCellValueFactory(new PropertyValueFactory<>("invoiceNo"));
+        public HistoryData(String date, String name, String description, double amount) {
+            this.date = new SimpleStringProperty(date);
+            this.name = new SimpleStringProperty(name);
+            this.description = new SimpleStringProperty(description);
+            this.amount = new SimpleDoubleProperty(amount);
+        }
+
+        public String getDate() { return date.get(); }
+        public String getName() { return name.get(); }
+        public String getDescription() { return description.get(); }
+        public double getAmount() { return amount.get(); }
+    }
+    
+    @FXML private TextField txtSearch;
+    @FXML private DatePicker dpFrom;
+    @FXML private DatePicker dpTo;
+    
+    @FXML private TableView<HistoryData> tblHistory;
+    
+    @FXML private Label lblTotalItems;
+    @FXML private Label lblGrandTotal;
+
+    private ObservableList<HistoryData> records = FXCollections.observableArrayList();
+
+    @Override
+    public void initialize(URL location, ResourceBundle resources) {
+        dpFrom.setValue(LocalDate.now().minusDays(30));
+        dpTo.setValue(LocalDate.now());
         
-        colTime.setCellValueFactory(cellData -> {
-            java.sql.Timestamp ts = cellData.getValue().getSaleDate();
-            if (ts != null) {
-                return new SimpleStringProperty(new java.text.SimpleDateFormat("HH:mm:ss").format(ts));
-            }
-            return new SimpleStringProperty("");
-        });
-        
-        colCustomer.setCellValueFactory(new PropertyValueFactory<>("customerName"));
-        colTotal.setCellValueFactory(new PropertyValueFactory<>("grandTotal"));
-        colPaymentMode.setCellValueFactory(new PropertyValueFactory<>("paymentMode"));
+        loadDummyData();
+        tblHistory.setItems(records);
+        updateTotals();
+    }
 
-        colAction.setCellFactory(param -> new TableCell<Sale, Void>() {
-            private final Button viewBtn = new Button("View Bill");
-            {
-                viewBtn.getStyleClass().add("button-primary");
-                viewBtn.setOnAction(event -> {
-                    Sale sale = getTableView().getItems().get(getIndex());
-                    java.util.List<CartItem> items = salesDAO.getSaleItemsBySaleId(sale.getSaleId());
-                    String pdfPath = "invoice_" + sale.getInvoiceNo() + ".pdf";
-                    InvoicePrinter.printInvoice(sale.getInvoiceNo(), sale.getCustomerName() != null ? sale.getCustomerName() : "", sale.getDoctorName() != null ? sale.getDoctorName() : "", items, pdfPath);
-                    try {
-                        java.io.File pdfFile = new java.io.File(pdfPath);
-                        if (pdfFile.exists() && java.awt.Desktop.isDesktopSupported()) {
-                            java.awt.Desktop.getDesktop().open(pdfFile);
-                        }
-                    } catch (Exception e) {
-                        e.printStackTrace();
-                    }
-                });
-            }
-            @Override
-            protected void updateItem(Void item, boolean empty) {
-                super.updateItem(item, empty);
-                if (empty) {
-                    setGraphic(null);
-                } else {
-                    setGraphic(viewBtn);
-                }
-            }
-        });
+    private void loadDummyData() {
+        // Dummy data removed as per user request
+    }
 
-        salesTable.setItems(FXCollections.observableArrayList(salesDAO.getDailySales(java.time.LocalDate.now())));
+    private void updateTotals() {
+        double grandTotal = 0.0;
+        for (HistoryData item : records) {
+            grandTotal += item.getAmount();
+        }
+        lblTotalItems.setText(String.valueOf(records.size()));
+        lblGrandTotal.setText(String.format("%.2f", grandTotal));
     }
 }

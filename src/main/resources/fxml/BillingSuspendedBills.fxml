@@ -2,32 +2,83 @@
 <?import javafx.scene.layout.*?>
 <?import javafx.scene.control.*?>
 <?import javafx.geometry.Insets?>
+<?import javafx.scene.control.cell.PropertyValueFactory?>
 
 <BorderPane xmlns:fx="http://javafx.com/fxml" fx:controller="com.pharmacyerp.controller.BillingSuspendedBillsController" styleClass="root" stylesheets="@../css/style.css">
+    
     <left>
         <fx:include source="Sidebar.fxml"/>
     </left>
+    
     <center>
-        <VBox spacing="20">
+        <VBox spacing="15">
             <padding>
-                <Insets top="24" right="24" bottom="24" left="24"/>
+                <Insets top="20" right="20" bottom="20" left="20"/>
             </padding>
-            <HBox alignment="CENTER_LEFT">
+            
+            <HBox alignment="CENTER_LEFT" spacing="10">
                 <Label text="Suspended Bills" styleClass="page-title"/>
                 <Region HBox.hgrow="ALWAYS"/>
             </HBox>
-            <VBox styleClass="card" VBox.vgrow="ALWAYS" spacing="15">
-                <Label text="Suspended Bills List" styleClass="section-title"/>
-                <TableView VBox.vgrow="ALWAYS">
-                    <columns>
-                        <TableColumn text="Bill Ref No" prefWidth="120"/>
-                        <TableColumn text="Date &amp; Time" prefWidth="150"/>
-                        <TableColumn text="Reason" prefWidth="250"/>
-                        <TableColumn text="Est. Amount" prefWidth="150"/>
-                        <TableColumn text="Action" prefWidth="150"/>
-                    </columns>
-                </TableView>
-            </VBox>
+            
+            <!-- Filters -->
+            <HBox spacing="15" alignment="CENTER_LEFT" styleClass="card">
+                <padding>
+                    <Insets top="15" right="15" bottom="15" left="15"/>
+                </padding>
+                <VBox spacing="5" HBox.hgrow="ALWAYS">
+                    <Label text="Search Bill No / Customer" styleClass="form-label"/>
+                    <TextField fx:id="txtSearch" promptText="Type to search..."/>
+                </VBox>
+                <VBox spacing="5" HBox.hgrow="ALWAYS">
+                    <Label text="From Date" styleClass="form-label"/>
+                    <DatePicker fx:id="dpFrom" maxWidth="Infinity"/>
+                </VBox>
+                <VBox spacing="5" HBox.hgrow="ALWAYS">
+                    <Label text="To Date" styleClass="form-label"/>
+                    <DatePicker fx:id="dpTo" maxWidth="Infinity"/>
+                </VBox>
+                <VBox alignment="BOTTOM_CENTER">
+                    <Button text="Search" styleClass="button-primary"/>
+                </VBox>
+            </HBox>
+            
+            <!-- History Table -->
+            <TableView fx:id="tblHistory" VBox.vgrow="ALWAYS" minHeight="200">
+                <columns>
+                    <TableColumn text="Date" prefWidth="120">
+                        <cellValueFactory><PropertyValueFactory property="manufacturingDate"/></cellValueFactory>
+                    </TableColumn>
+                    <TableColumn text="Customer" prefWidth="250">
+                        <cellValueFactory><PropertyValueFactory property="medicineName"/></cellValueFactory>
+                    </TableColumn>
+                    <TableColumn text="Items" prefWidth="80">
+                        <cellValueFactory><PropertyValueFactory property="quantity"/></cellValueFactory>
+                    </TableColumn>
+                    <TableColumn text="Amount (₹)" prefWidth="120">
+                        <cellValueFactory><PropertyValueFactory property="netAmount"/></cellValueFactory>
+                    </TableColumn>
+                    <TableColumn text="Status" prefWidth="100">
+                        <cellValueFactory><PropertyValueFactory property="batchNumber"/></cellValueFactory>
+                    </TableColumn>
+                </columns>
+            </TableView>
+            
+            <!-- Totals -->
+            <HBox spacing="20" alignment="CENTER_RIGHT" styleClass="card">
+                <padding>
+                    <Insets top="15" right="15" bottom="15" left="15"/>
+                </padding>
+                
+                <Label text="Total Bills:" styleClass="form-label"/>
+                <Label fx:id="lblTotalItems" text="0" style="-fx-font-weight: bold; -fx-font-size: 16px;"/>
+                
+                <Region prefWidth="30"/>
+                
+                <Label text="Total Amount (₹):" styleClass="form-label"/>
+                <Label fx:id="lblGrandTotal" text="0.00" style="-fx-font-weight: bold; -fx-font-size: 24px; -fx-text-fill: #15803d;"/>
+            </HBox>
+            
         </VBox>
     </center>
 </BorderPane>

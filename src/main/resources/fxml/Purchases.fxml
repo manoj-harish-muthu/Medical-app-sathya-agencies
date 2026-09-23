@@ -6,41 +6,95 @@
 
 <BorderPane xmlns:fx="http://javafx.com/fxml" fx:controller="com.pharmacyerp.controller.PurchaseController" styleClass="root" stylesheets="@../css/style.css">
     
-    <!-- Sidebar -->
     <left>
         <fx:include source="Sidebar.fxml"/>
     </left>
     
-    <!-- Main Content -->
     <center>
-        <VBox spacing="20">
+        <VBox spacing="15">
             <padding>
-                <Insets top="24" right="24" bottom="24" left="24"/>
+                <Insets top="20" right="20" bottom="20" left="20"/>
             </padding>
             
-            <HBox alignment="CENTER_LEFT">
-                <Label text="Purchase Management" styleClass="page-title"/>
+            <HBox alignment="CENTER_LEFT" spacing="10">
+                <Label text="Purchase Entry" styleClass="page-title"/>
                 <Region HBox.hgrow="ALWAYS"/>
-                <Button text="+ New Purchase Order" styleClass="button-primary"/>
-                <Button text="+ New GRN" styleClass="button-outline">
-                    <HBox.margin><Insets left="10"/></HBox.margin>
-                </Button>
+                <Label fx:id="lblLastPurchase" text="Last Purchase from Supplier: ₹0.00" style="-fx-font-weight: bold; -fx-text-fill: #b91c1c; -fx-font-size: 14px;" visible="false"/>
             </HBox>
             
-            <VBox styleClass="card" VBox.vgrow="ALWAYS" spacing="15">
-                <Label text="Recent Purchases" styleClass="section-title"/>
+            <!-- Supplier and Invoice Details -->
+            <HBox spacing="15" alignment="CENTER_LEFT" styleClass="card">
+                <padding>
+                    <Insets top="15" right="15" bottom="15" left="15"/>
+                </padding>
+                <VBox spacing="5" HBox.hgrow="ALWAYS">
+                    <Label text="Select Supplier" styleClass="form-label"/>
+                    <ComboBox fx:id="cmbSupplier" maxWidth="Infinity" promptText="-- Select Supplier --"/>
+                </VBox>
+                <VBox spacing="5" HBox.hgrow="ALWAYS">
+                    <Label text="Invoice Number" styleClass="form-label"/>
+                    <TextField fx:id="txtInvoiceNo" promptText="Supplier Invoice No."/>
+                </VBox>
+                <VBox spacing="5" HBox.hgrow="ALWAYS">
+                    <Label text="Payment Mode" styleClass="form-label"/>
+                    <ComboBox fx:id="cmbPaymentMode" maxWidth="Infinity"/>
+                </VBox>
+                <VBox spacing="5" HBox.hgrow="ALWAYS">
+                    <Label text="Purchase Date" styleClass="form-label"/>
+                    <DatePicker fx:id="dpPurchaseDate" maxWidth="Infinity"/>
+                </VBox>
+            </HBox>
+            
+            <!-- Cart Table -->
+            <TableView fx:id="tblCart" VBox.vgrow="ALWAYS" minHeight="200" editable="true">
+                <columns>
+                    <TableColumn fx:id="colMedicine" text="Medicine" prefWidth="200">
+                        <cellValueFactory><PropertyValueFactory property="medicineName"/></cellValueFactory>
+                    </TableColumn>
+                    <TableColumn fx:id="colBatch" text="Batch" prefWidth="120">
+                        <cellValueFactory><PropertyValueFactory property="batchNumber"/></cellValueFactory>
+                    </TableColumn>
+                    <TableColumn fx:id="colExpiry" text="Expiry" prefWidth="100">
+                        <cellValueFactory><PropertyValueFactory property="expiryDate"/></cellValueFactory>
+                    </TableColumn>
+                    <TableColumn fx:id="colQty" text="Qty" prefWidth="80">
+                        <cellValueFactory><PropertyValueFactory property="quantity"/></cellValueFactory>
+                    </TableColumn>
+                    <TableColumn fx:id="colFree" text="Free" prefWidth="80">
+                        <cellValueFactory><PropertyValueFactory property="freeQuantity"/></cellValueFactory>
+                    </TableColumn>
+                    <TableColumn fx:id="colPRate" text="P.Rate" prefWidth="100">
+                        <cellValueFactory><PropertyValueFactory property="purchaseRate"/></cellValueFactory>
+                    </TableColumn>
+                    <TableColumn fx:id="colMRP" text="MRP" prefWidth="100">
+                        <cellValueFactory><PropertyValueFactory property="mrp"/></cellValueFactory>
+                    </TableColumn>
+                    <TableColumn fx:id="colTotal" text="Net Amt" prefWidth="120">
+                        <cellValueFactory><PropertyValueFactory property="netAmount"/></cellValueFactory>
+                    </TableColumn>
+                </columns>
+            </TableView>
+            
+            <!-- Totals & Actions -->
+            <HBox spacing="20" alignment="CENTER_RIGHT" styleClass="card">
+                <padding>
+                    <Insets top="15" right="15" bottom="15" left="15"/>
+                </padding>
                 
-                <TableView VBox.vgrow="ALWAYS">
-                    <columns>
-                        <TableColumn text="Invoice Number" prefWidth="150"/>
-                        <TableColumn text="Date" prefWidth="120"/>
-                        <TableColumn text="Supplier" prefWidth="250"/>
-                        <TableColumn text="Total Amount" prefWidth="150"/>
-                        <TableColumn text="Status" prefWidth="100"/>
-                        <TableColumn text="Payment" prefWidth="100"/>
-                    </columns>
-                </TableView>
-            </VBox>
+                <Label text="Items:" styleClass="form-label"/>
+                <Label fx:id="lblTotalItems" text="0" style="-fx-font-weight: bold; -fx-font-size: 16px;"/>
+                
+                <Region prefWidth="30"/>
+                
+                <Label text="Grand Total (₹):" styleClass="form-label"/>
+                <Label fx:id="lblGrandTotal" text="0.00" style="-fx-font-weight: bold; -fx-font-size: 24px; -fx-text-fill: #15803d;"/>
+                
+                <Region prefWidth="30"/>
+                
+                <Button text="Cancel" styleClass="button-outline" onAction="#handleDashboard"/>
+                <Button text="Save Purchase" styleClass="button-primary" onAction="#handleSavePurchase" prefHeight="40" prefWidth="150" style="-fx-font-size: 16px;"/>
+            </HBox>
+            
         </VBox>
     </center>
 </BorderPane>

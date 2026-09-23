@@ -144,57 +144,58 @@ public class SidebarController {
 
     @FXML
     private void handleBillingCounterSale(ActionEvent event) {
-        navigateTo(event, "/fxml/BillingCounterSale.fxml");
+        navigateTo(event, "/fxml/Pos.fxml");
     }
 
     @FXML
     private void handleBillingWholesale(ActionEvent event) {
-        navigateTo(event, "/fxml/BillingWholesale.fxml");
+        navigateTo(event, "/fxml/Pos.fxml");
     }
 
     @FXML
     private void handleBillingCreditSale(ActionEvent event) {
-        navigateTo(event, "/fxml/BillingCreditSale.fxml");
+        navigateTo(event, "/fxml/Pos.fxml");
     }
 
     @FXML
     private void handleBillingCashSale(ActionEvent event) {
-        navigateTo(event, "/fxml/BillingCashSale.fxml");
+        navigateTo(event, "/fxml/Pos.fxml");
     }
 
     @FXML
     private void handleBillingQuotation(ActionEvent event) {
-        navigateTo(event, "/fxml/BillingQuotation.fxml");
+        navigateTo(event, "/fxml/Pos.fxml");
     }
 
     @FXML
     private void handleBillingSalesOrder(ActionEvent event) {
-        navigateTo(event, "/fxml/BillingSalesOrder.fxml");
+        navigateTo(event, "/fxml/Pos.fxml");
     }
 
     @FXML
     private void handleBillingDeliveryChallan(ActionEvent event) {
-        navigateTo(event, "/fxml/BillingDeliveryChallan.fxml");
+        navigateTo(event, "/fxml/Pos.fxml");
     }
 
     @FXML
     private void handleBillingSalesReturn(ActionEvent event) {
-        navigateTo(event, "/fxml/BillingSalesReturn.fxml");
+        // Return could eventually be its own screen, but Pos is fine for now
+        navigateTo(event, "/fxml/Pos.fxml");
     }
 
     @FXML
     private void handleBillingExchange(ActionEvent event) {
-        navigateTo(event, "/fxml/BillingExchange.fxml");
+        navigateTo(event, "/fxml/Pos.fxml");
     }
 
     @FXML
     private void handleBillingHoldBills(ActionEvent event) {
-        navigateTo(event, "/fxml/BillingHoldBills.fxml");
+        navigateTo(event, "/fxml/Pos.fxml");
     }
 
     @FXML
     private void handleBillingSuspendedBills(ActionEvent event) {
-        navigateTo(event, "/fxml/BillingSuspendedBills.fxml");
+        navigateTo(event, "/fxml/Pos.fxml");
     }
 
     @FXML

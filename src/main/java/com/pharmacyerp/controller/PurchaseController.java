@@ -30,4 +30,10 @@ public class PurchaseController {
             e.printStackTrace();
         }
     }
+
+    @FXML
+    private void handleSavePurchase(ActionEvent event) {
+        // TODO: Implement save purchase logic
+        System.out.println("Purchase saved!");
+    }
 }
