@@ -30,10 +30,11 @@ public class InventoryDAO {
     }
 
     public List<InventoryItem> getNearExpiryStock() {
+        Date cutoff = Date.valueOf(LocalDate.now().plusDays(90));
         return fetchInventory("SELECT m.medicine_name, m.minimum_stock, mb.batch_number, mb.expiry_date, mb.current_quantity, mb.mrp " +
                 "FROM medicines m JOIN medicine_batches mb ON m.medicine_id = mb.medicine_id " +
-                "WHERE mb.expiry_date >= CURRENT_DATE AND mb.expiry_date <= DATE_ADD(CURRENT_DATE, INTERVAL 90 DAY) " +
-                "ORDER BY mb.expiry_date ASC");
+                "WHERE mb.expiry_date >= CURRENT_DATE AND mb.expiry_date <= ? " +
+                "ORDER BY mb.expiry_date ASC", cutoff);
     }
 
     public List<InventoryItem> getZeroOrLowStock() {
@@ -43,15 +44,21 @@ public class InventoryDAO {
                 "ORDER BY mb.current_quantity ASC");
     }
 
-    private List<InventoryItem> fetchInventory(String sql) {
+    private List<InventoryItem> fetchInventory(String sql, Object... params) {
         List<InventoryItem> list = new ArrayList<>();
         LocalDate today = LocalDate.now();
 
         try (Connection conn = DatabaseManager.getConnection();
-             PreparedStatement stmt = conn.prepareStatement(sql);
-             ResultSet rs = stmt.executeQuery()) {
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
 
-            while (rs.next()) {
+            if (params != null) {
+                for (int i = 0; i < params.length; i++) {
+                    stmt.setObject(i + 1, params[i]);
+                }
+            }
+
+            try (ResultSet rs = stmt.executeQuery()) {
+                while (rs.next()) {
                 InventoryItem item = new InventoryItem();
                 item.setMedicineName(rs.getString("medicine_name"));
                 item.setBatchNumber(rs.getString("batch_number"));
@@ -82,6 +89,7 @@ public class InventoryDAO {
                 }
 
                 list.add(item);
+            }
             }
         } catch (Exception e) {
             logger.error("Error fetching inventory", e);

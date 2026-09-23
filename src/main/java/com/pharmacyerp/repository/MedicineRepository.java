@@ -13,7 +13,7 @@ public class MedicineRepository {
 
     private static final String BASE_SELECT = 
         "SELECT m.*, c.category_name, comp.company_name, " +
-        "(SELECT COALESCE(SUM(current_quantity), 0) FROM medicine_batches WHERE medicine_id = m.medicine_id AND (expiry_date IS NULL OR expiry_date >= CURDATE())) as total_stock, " +
+        "(SELECT COALESCE(SUM(current_quantity), 0) FROM medicine_batches WHERE medicine_id = m.medicine_id AND (expiry_date IS NULL OR expiry_date >= CURRENT_DATE)) as total_stock, " +
         "(SELECT mrp FROM medicine_batches WHERE medicine_id = m.medicine_id ORDER BY (current_quantity > 0) DESC, expiry_date ASC LIMIT 1) as current_mrp, " +
         "(SELECT batch_number FROM medicine_batches WHERE medicine_id = m.medicine_id ORDER BY (current_quantity > 0) DESC, expiry_date ASC LIMIT 1) as batch_number, " +
         "(SELECT expiry_date FROM medicine_batches WHERE medicine_id = m.medicine_id ORDER BY (current_quantity > 0) DESC, expiry_date ASC LIMIT 1) as expiry_date, " +

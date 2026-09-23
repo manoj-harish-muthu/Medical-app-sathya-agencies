@@ -16,15 +16,18 @@ public class DatabaseConnectionTest {
         });
 
         // 1. Check Tables
+        String tableQuery = DatabaseManager.isPostgres()
+            ? "SELECT table_name FROM information_schema.tables WHERE table_schema = 'public' ORDER BY table_name"
+            : "SHOW TABLES";
         try (Connection conn = DatabaseManager.getConnection();
              Statement stmt = conn.createStatement();
-             ResultSet rs = stmt.executeQuery("SHOW TABLES")) {
+             ResultSet rs = stmt.executeQuery(tableQuery)) {
             System.out.println("=== TABLES IN DB ===");
             while (rs.next()) {
                 System.out.println("  Table: " + rs.getString(1));
             }
         } catch (Exception e) {
-            System.err.println("SHOW TABLES failed: " + e.getMessage());
+            System.err.println("Listing tables failed: " + e.getMessage());
         }
 
         // 2. Test SalesDAO

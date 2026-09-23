@@ -18,7 +18,7 @@ public class PosDAO {
 
         String sql = "SELECT m.medicine_id, m.medicine_name, m.hsn_code, COALESCE(NULLIF(m.cgst + m.sgst, 0), m.gst_rate, 0) as gst_rate, m.schedule_type, m.packing, " +
                      "comp.company_name, " +
-                     "mb.batch_id, mb.batch_number, mb.mrp, mb.selling_rate, DATE_FORMAT(mb.expiry_date, '%m/%y') as exp_date " +
+                     "mb.batch_id, mb.batch_number, mb.mrp, mb.selling_rate, mb.expiry_date " +
                      "FROM medicines m " +
                      "JOIN medicine_batches mb ON m.medicine_id = mb.medicine_id " +
                      "LEFT JOIN medicine_companies comp ON m.company_id = comp.company_id " +
@@ -50,7 +50,8 @@ public class PosDAO {
                     
                     item.setBatchId(rs.getInt("batch_id"));
                     item.setBatchNumber(rs.getString("batch_number") != null ? rs.getString("batch_number") : "");
-                    item.setExpiryDateStr(rs.getString("exp_date") != null ? rs.getString("exp_date") : "");
+                    java.sql.Date expDate = rs.getDate("expiry_date");
+                    item.setExpiryDateStr(expDate != null ? new java.text.SimpleDateFormat("MM/yy").format(expDate) : "");
                     item.setMrp(rs.getBigDecimal("mrp") != null ? rs.getBigDecimal("mrp") : java.math.BigDecimal.ZERO);
                     item.setSellingRate(rs.getBigDecimal("selling_rate") != null ? rs.getBigDecimal("selling_rate") : java.math.BigDecimal.ZERO);
                     
@@ -71,7 +72,7 @@ public class PosDAO {
 
         String sql = "SELECT m.medicine_id, m.medicine_name, m.hsn_code, COALESCE(NULLIF(m.cgst + m.sgst, 0), m.gst_rate, 0) as gst_rate, m.schedule_type, m.packing, " +
                      "comp.company_name, " +
-                     "mb.batch_id, mb.batch_number, mb.mrp, mb.selling_rate, DATE_FORMAT(mb.expiry_date, '%m/%y') as exp_date " +
+                     "mb.batch_id, mb.batch_number, mb.mrp, mb.selling_rate, mb.expiry_date " +
                      "FROM medicines m " +
                      "JOIN medicine_batches mb ON m.medicine_id = mb.medicine_id " +
                      "LEFT JOIN medicine_companies comp ON m.company_id = comp.company_id " +
@@ -103,7 +104,8 @@ public class PosDAO {
                     
                     item.setBatchId(rs.getInt("batch_id"));
                     item.setBatchNumber(rs.getString("batch_number") != null ? rs.getString("batch_number") : "");
-                    item.setExpiryDateStr(rs.getString("exp_date") != null ? rs.getString("exp_date") : "");
+                    java.sql.Date expDate = rs.getDate("expiry_date");
+                    item.setExpiryDateStr(expDate != null ? new java.text.SimpleDateFormat("MM/yy").format(expDate) : "");
                     item.setMrp(rs.getBigDecimal("mrp") != null ? rs.getBigDecimal("mrp") : java.math.BigDecimal.ZERO);
                     item.setSellingRate(rs.getBigDecimal("selling_rate") != null ? rs.getBigDecimal("selling_rate") : java.math.BigDecimal.ZERO);
                     
