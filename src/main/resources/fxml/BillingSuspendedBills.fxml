@@ -47,20 +47,21 @@
             <TableView fx:id="tblHistory" VBox.vgrow="ALWAYS" minHeight="200">
                 <columns>
                     <TableColumn text="Date" prefWidth="120">
-                        <cellValueFactory><PropertyValueFactory property="manufacturingDate"/></cellValueFactory>
+                        <cellValueFactory><PropertyValueFactory property="saleDate"/></cellValueFactory>
                     </TableColumn>
                     <TableColumn text="Customer" prefWidth="250">
-                        <cellValueFactory><PropertyValueFactory property="medicineName"/></cellValueFactory>
+                        <cellValueFactory><PropertyValueFactory property="customerName"/></cellValueFactory>
                     </TableColumn>
-                    <TableColumn text="Items" prefWidth="80">
-                        <cellValueFactory><PropertyValueFactory property="quantity"/></cellValueFactory>
+                    <TableColumn text="Invoice No" prefWidth="150">
+                        <cellValueFactory><PropertyValueFactory property="invoiceNo"/></cellValueFactory>
                     </TableColumn>
                     <TableColumn text="Amount (₹)" prefWidth="120">
-                        <cellValueFactory><PropertyValueFactory property="netAmount"/></cellValueFactory>
+                        <cellValueFactory><PropertyValueFactory property="grandTotal"/></cellValueFactory>
                     </TableColumn>
                     <TableColumn text="Status" prefWidth="100">
-                        <cellValueFactory><PropertyValueFactory property="batchNumber"/></cellValueFactory>
+                        <cellValueFactory><PropertyValueFactory property="status"/></cellValueFactory>
                     </TableColumn>
+                    <TableColumn fx:id="colAction" text="Action" prefWidth="100"/>
                 </columns>
             </TableView>
             

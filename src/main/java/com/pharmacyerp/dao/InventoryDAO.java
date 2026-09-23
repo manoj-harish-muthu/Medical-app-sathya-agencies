@@ -143,4 +143,35 @@ public class InventoryDAO {
             return false;
         }
     }
+
+    public List<com.pharmacyerp.model.ExpiryReportRow> getExpiringBatches(int monthsUntilExpiry) {
+        List<com.pharmacyerp.model.ExpiryReportRow> list = new ArrayList<>();
+        
+        String sql = "SELECT m.medicine_name, mb.batch_number, mb.expiry_date, mb.current_quantity, comp.company_name " +
+                     "FROM medicine_batches mb " +
+                     "JOIN medicines m ON mb.medicine_id = m.medicine_id " +
+                     "LEFT JOIN medicine_companies comp ON m.company_id = comp.company_id " +
+                     "WHERE mb.current_quantity > 0 " +
+                     "AND mb.expiry_date <= date('now', '+" + monthsUntilExpiry + " month') " +
+                     "ORDER BY mb.expiry_date ASC";
+
+        try (Connection conn = DatabaseManager.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql);
+             ResultSet rs = stmt.executeQuery()) {
+             
+            while (rs.next()) {
+                java.sql.Date expDate = rs.getDate("expiry_date");
+                list.add(new com.pharmacyerp.model.ExpiryReportRow(
+                        rs.getString("medicine_name"),
+                        rs.getString("batch_number"),
+                        expDate != null ? expDate.toLocalDate() : null,
+                        rs.getInt("current_quantity"),
+                        rs.getString("company_name")
+                ));
+            }
+        } catch (Exception e) {
+            logger.error("Error fetching expiring batches", e);
+        }
+        return list;
+    }
 }

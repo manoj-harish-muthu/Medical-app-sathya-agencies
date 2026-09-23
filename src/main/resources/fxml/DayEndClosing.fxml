@@ -2,7 +2,6 @@
 <?import javafx.scene.layout.*?>
 <?import javafx.scene.control.*?>
 <?import javafx.geometry.Insets?>
-<?import javafx.scene.control.cell.PropertyValueFactory?>
 
 <BorderPane xmlns:fx="http://javafx.com/fxml" fx:controller="com.pharmacyerp.controller.DayEndClosingController" styleClass="root" stylesheets="@../css/style.css">
     
@@ -11,73 +10,57 @@
     </left>
     
     <center>
-        <VBox spacing="15">
+        <VBox spacing="20">
             <padding>
-                <Insets top="20" right="20" bottom="20" left="20"/>
+                <Insets top="20" right="30" bottom="20" left="30"/>
             </padding>
             
             <HBox alignment="CENTER_LEFT" spacing="10">
                 <Label text="Day End / Counter Closing" styleClass="page-title"/>
                 <Region HBox.hgrow="ALWAYS"/>
+                <Button text="Print Z-Report" onAction="#handlePrint" styleClass="button-primary"/>
             </HBox>
             
-            <!-- Filters -->
+            <!-- Filter -->
             <HBox spacing="15" alignment="CENTER_LEFT" styleClass="card">
                 <padding>
                     <Insets top="15" right="15" bottom="15" left="15"/>
                 </padding>
-                <VBox spacing="5" HBox.hgrow="ALWAYS">
-                    <Label text="Search Bill No / Customer" styleClass="form-label"/>
-                    <TextField fx:id="txtSearch" promptText="Type to search..."/>
-                </VBox>
-                <VBox spacing="5" HBox.hgrow="ALWAYS">
-                    <Label text="From Date" styleClass="form-label"/>
-                    <DatePicker fx:id="dpFrom" maxWidth="Infinity"/>
-                </VBox>
-                <VBox spacing="5" HBox.hgrow="ALWAYS">
-                    <Label text="To Date" styleClass="form-label"/>
-                    <DatePicker fx:id="dpTo" maxWidth="Infinity"/>
-                </VBox>
-                <VBox alignment="BOTTOM_CENTER">
-                    <Button text="Search" styleClass="button-primary"/>
-                </VBox>
+                <Label text="Select Date:" styleClass="form-label" style="-fx-font-weight: bold;"/>
+                <DatePicker fx:id="datePicker" onAction="#loadSummary"/>
             </HBox>
             
-            <!-- History Table -->
-            <TableView fx:id="tblHistory" VBox.vgrow="ALWAYS" minHeight="200">
-                <columns>
-                    <TableColumn text="Date" prefWidth="120">
-                        <cellValueFactory><PropertyValueFactory property="manufacturingDate"/></cellValueFactory>
-                    </TableColumn>
-                    <TableColumn text="Customer" prefWidth="250">
-                        <cellValueFactory><PropertyValueFactory property="medicineName"/></cellValueFactory>
-                    </TableColumn>
-                    <TableColumn text="Items" prefWidth="80">
-                        <cellValueFactory><PropertyValueFactory property="quantity"/></cellValueFactory>
-                    </TableColumn>
-                    <TableColumn text="Amount (₹)" prefWidth="120">
-                        <cellValueFactory><PropertyValueFactory property="netAmount"/></cellValueFactory>
-                    </TableColumn>
-                    <TableColumn text="Status" prefWidth="100">
-                        <cellValueFactory><PropertyValueFactory property="batchNumber"/></cellValueFactory>
-                    </TableColumn>
-                </columns>
-            </TableView>
-            
-            <!-- Totals -->
-            <HBox spacing="20" alignment="CENTER_RIGHT" styleClass="card">
+            <!-- Summary Grid -->
+            <GridPane hgap="20" vgap="20" styleClass="card">
                 <padding>
-                    <Insets top="15" right="15" bottom="15" left="15"/>
+                    <Insets top="20" right="20" bottom="20" left="20"/>
                 </padding>
+                <columnConstraints>
+                    <ColumnConstraints minWidth="150" halignment="LEFT"/>
+                    <ColumnConstraints minWidth="150" halignment="RIGHT"/>
+                </columnConstraints>
                 
-                <Label text="Total Bills:" styleClass="form-label"/>
-                <Label fx:id="lblTotalItems" text="0" style="-fx-font-weight: bold; -fx-font-size: 16px;"/>
+                <Label text="Total Invoices:" GridPane.columnIndex="0" GridPane.rowIndex="0" styleClass="form-label"/>
+                <Label fx:id="lblInvoices" text="0" GridPane.columnIndex="1" GridPane.rowIndex="0" style="-fx-font-weight: bold; -fx-font-size: 16px;"/>
                 
-                <Region prefWidth="30"/>
+                <Label text="Cash Sales:" GridPane.columnIndex="0" GridPane.rowIndex="1" styleClass="form-label"/>
+                <Label fx:id="lblCash" text="₹ 0.00" GridPane.columnIndex="1" GridPane.rowIndex="1" style="-fx-font-weight: bold; -fx-font-size: 16px;"/>
                 
-                <Label text="Total Amount (₹):" styleClass="form-label"/>
-                <Label fx:id="lblGrandTotal" text="0.00" style="-fx-font-weight: bold; -fx-font-size: 24px; -fx-text-fill: #15803d;"/>
-            </HBox>
+                <Label text="UPI Sales:" GridPane.columnIndex="0" GridPane.rowIndex="2" styleClass="form-label"/>
+                <Label fx:id="lblUpi" text="₹ 0.00" GridPane.columnIndex="1" GridPane.rowIndex="2" style="-fx-font-weight: bold; -fx-font-size: 16px;"/>
+                
+                <Label text="Card Sales:" GridPane.columnIndex="0" GridPane.rowIndex="3" styleClass="form-label"/>
+                <Label fx:id="lblCard" text="₹ 0.00" GridPane.columnIndex="1" GridPane.rowIndex="3" style="-fx-font-weight: bold; -fx-font-size: 16px;"/>
+                
+                <Label text="Credit Sales:" GridPane.columnIndex="0" GridPane.rowIndex="4" styleClass="form-label"/>
+                <Label fx:id="lblCredit" text="₹ 0.00" GridPane.columnIndex="1" GridPane.rowIndex="4" style="-fx-font-weight: bold; -fx-font-size: 16px;"/>
+                
+                <Separator GridPane.columnIndex="0" GridPane.rowIndex="5" GridPane.columnSpan="2"/>
+                
+                <Label text="Grand Total Sales:" GridPane.columnIndex="0" GridPane.rowIndex="6" styleClass="form-label" style="-fx-font-size: 18px; -fx-font-weight: bold; -fx-text-fill: #15803d;"/>
+                <Label fx:id="lblTotal" text="₹ 0.00" GridPane.columnIndex="1" GridPane.rowIndex="6" style="-fx-font-size: 18px; -fx-font-weight: bold; -fx-text-fill: #15803d;"/>
+                
+            </GridPane>
             
         </VBox>
     </center>

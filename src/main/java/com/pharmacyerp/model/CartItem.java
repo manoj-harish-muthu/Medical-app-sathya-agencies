@@ -15,6 +15,8 @@ public class CartItem {
     private String packing;
     private String expiryDateStr;
     
+    private int availableStock;
+    
     private int quantity;
     private BigDecimal mrp;
     private BigDecimal sellingRate;
@@ -23,6 +25,9 @@ public class CartItem {
     
     private BigDecimal cgstAmount;
     private BigDecimal sgstAmount;
+
+    public int getAvailableStock() { return availableStock; }
+    public void setAvailableStock(int availableStock) { this.availableStock = availableStock; }
     private BigDecimal netAmount;
 
     public CartItem() {

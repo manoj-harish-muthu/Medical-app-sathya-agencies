@@ -8,6 +8,8 @@ public class Medicine {
     private String saltName;
     private int companyId;
     private int categoryId;
+    private int brandId;
+    private int scheduleId;
     private String hsnCode;
     private double gstRate;
     private boolean prescriptionRequired;
@@ -50,12 +52,26 @@ public class Medicine {
     // Additional transient fields for UI/Joins
     private String categoryName;
     private String companyName;
+    private String brandName;
+    private String scheduleName;
     private int totalStock;
     private double currentMrp;
 
     // Getters and Setters
     public int getMedicineId() { return medicineId; }
     public void setMedicineId(int medicineId) { this.medicineId = medicineId; }
+
+    public int getBrandId() { return brandId; }
+    public void setBrandId(int brandId) { this.brandId = brandId; }
+
+    public int getScheduleId() { return scheduleId; }
+    public void setScheduleId(int scheduleId) { this.scheduleId = scheduleId; }
+
+    public String getBrandName() { return brandName; }
+    public void setBrandName(String brandName) { this.brandName = brandName; }
+
+    public String getScheduleName() { return scheduleName; }
+    public void setScheduleName(String scheduleName) { this.scheduleName = scheduleName; }
 
     public String getMedicineName() { return medicineName; }
     public void setMedicineName(String medicineName) { this.medicineName = medicineName; }

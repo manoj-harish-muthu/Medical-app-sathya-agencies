@@ -11,9 +11,11 @@ import javafx.scene.control.*;
 import javafx.stage.Stage;
 
 import com.pharmacyerp.model.Sale;
+import com.pharmacyerp.model.CartItem;
 import com.pharmacyerp.dao.SalesDAO;
 
 import java.io.IOException;
+import javafx.scene.layout.HBox;
 
 public class PreviousBillsController {
 
@@ -61,7 +63,28 @@ public class PreviousBillsController {
                 if (empty) {
                     setGraphic(null);
                 } else {
-                    setGraphic(printBtn);
+                    Button editBtn = new Button("Edit");
+                    editBtn.setStyle("-fx-background-color: #F59E0B; -fx-text-fill: white; -fx-cursor: hand;");
+                    editBtn.setOnAction(event -> {
+                        Sale sale = getTableView().getItems().get(getIndex());
+                        try {
+                            java.util.List<CartItem> items = salesDAO.getSaleItemsBySaleId(sale.getSaleId());
+                            FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/Pos.fxml"));
+                            Parent root = loader.load();
+                            PosController posController = loader.getController();
+                            posController.loadSale(sale, items);
+                            // Flag as editing
+                            posController.setEditingSale(sale.getSaleId(), sale.getInvoiceNo());
+                            Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
+                            stage.getScene().setRoot(root);
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                        }
+                    });
+
+                    HBox box = new HBox(5, printBtn, editBtn);
+                    box.setAlignment(javafx.geometry.Pos.CENTER);
+                    setGraphic(box);
                 }
             }
         });

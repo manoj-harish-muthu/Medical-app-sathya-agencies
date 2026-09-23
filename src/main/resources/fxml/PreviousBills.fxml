@@ -44,23 +44,27 @@
             </HBox>
             
             <!-- History Table -->
-            <TableView fx:id="tblHistory" VBox.vgrow="ALWAYS" minHeight="200">
+            <TableView fx:id="billsTable" VBox.vgrow="ALWAYS" minHeight="200">
                 <columns>
-                    <TableColumn text="Date" prefWidth="120">
-                        <cellValueFactory><PropertyValueFactory property="manufacturingDate"/></cellValueFactory>
+                    <TableColumn fx:id="colDate" text="Date" prefWidth="120">
+                        <cellValueFactory><PropertyValueFactory property="saleDate"/></cellValueFactory>
                     </TableColumn>
-                    <TableColumn text="Customer" prefWidth="250">
-                        <cellValueFactory><PropertyValueFactory property="medicineName"/></cellValueFactory>
+                    <TableColumn fx:id="colInvoice" text="Invoice No" prefWidth="120">
+                        <cellValueFactory><PropertyValueFactory property="invoiceNo"/></cellValueFactory>
                     </TableColumn>
-                    <TableColumn text="Items" prefWidth="80">
-                        <cellValueFactory><PropertyValueFactory property="quantity"/></cellValueFactory>
+                    <TableColumn fx:id="colCustomer" text="Customer" prefWidth="200">
+                        <cellValueFactory><PropertyValueFactory property="customerName"/></cellValueFactory>
                     </TableColumn>
-                    <TableColumn text="Amount (₹)" prefWidth="120">
-                        <cellValueFactory><PropertyValueFactory property="netAmount"/></cellValueFactory>
+                    <TableColumn fx:id="colPhone" text="Phone" prefWidth="120">
+                        <cellValueFactory><PropertyValueFactory property="customerPhone"/></cellValueFactory>
                     </TableColumn>
-                    <TableColumn text="Status" prefWidth="100">
-                        <cellValueFactory><PropertyValueFactory property="batchNumber"/></cellValueFactory>
+                    <TableColumn fx:id="colAmount" text="Amount (₹)" prefWidth="100">
+                        <cellValueFactory><PropertyValueFactory property="grandTotal"/></cellValueFactory>
                     </TableColumn>
+                    <TableColumn fx:id="colStatus" text="Status" prefWidth="100">
+                        <cellValueFactory><PropertyValueFactory property="status"/></cellValueFactory>
+                    </TableColumn>
+                    <TableColumn fx:id="colAction" text="Action" prefWidth="100"/>
                 </columns>
             </TableView>
             

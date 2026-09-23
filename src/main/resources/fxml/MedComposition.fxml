@@ -5,49 +5,71 @@
 <?import javafx.scene.control.cell.PropertyValueFactory?>
 
 <BorderPane xmlns:fx="http://javafx.com/fxml" fx:controller="com.pharmacyerp.controller.MedCompositionController" styleClass="root" stylesheets="@../css/style.css">
+    
     <left>
         <fx:include source="Sidebar.fxml"/>
     </left>
+    
     <center>
-        <VBox spacing="15">
+        <VBox spacing="20">
             <padding>
-                <Insets top="20" right="20" bottom="20" left="20"/>
+                <Insets top="20" right="30" bottom="20" left="30"/>
             </padding>
+            
             <HBox alignment="CENTER_LEFT" spacing="10">
-                <Label text="Medicine Composition" styleClass="page-title"/>
+                <Label text="Medicine Composition Master" styleClass="page-title"/>
                 <Region HBox.hgrow="ALWAYS"/>
-                <Button text="Reload DB" onAction="#loadData" styleClass="button-outline"/>
+                <Label text="Total Links:" style="-fx-text-fill: #6B7280;"/>
+                <Label fx:id="lblTotalItems" text="0" style="-fx-font-weight: bold; -fx-text-fill: #111827;"/>
             </HBox>
             
-            <TableView fx:id="tblData" VBox.vgrow="ALWAYS" minHeight="200" editable="true">
-                <columns>
-                    <TableColumn fx:id="colId" text="ID" prefWidth="60">
-                        <cellValueFactory><PropertyValueFactory property="id"/></cellValueFactory>
-                    </TableColumn>
-                    <TableColumn fx:id="colName" text="Composition Details" prefWidth="250">
-                        <cellValueFactory><PropertyValueFactory property="name"/></cellValueFactory>
-                    </TableColumn>
-                    <TableColumn fx:id="colDetails" text="Contact Info" prefWidth="200">
-                        <cellValueFactory><PropertyValueFactory property="details"/></cellValueFactory>
-                    </TableColumn>
-                    <TableColumn fx:id="colExtra1" text="Extra Details 1" prefWidth="150">
-                        <cellValueFactory><PropertyValueFactory property="extra1"/></cellValueFactory>
-                    </TableColumn>
-                    <TableColumn fx:id="colExtra2" text="Extra Details 2" prefWidth="250">
-                        <cellValueFactory><PropertyValueFactory property="extra2"/></cellValueFactory>
-                    </TableColumn>
-                </columns>
-            </TableView>
-            
-            <HBox spacing="20" alignment="CENTER_RIGHT" styleClass="card">
-                <padding>
-                    <Insets top="15" right="15" bottom="15" left="15"/>
-                </padding>
-                <Label text="Total Records:" styleClass="form-label"/>
-                <Label fx:id="lblTotalItems" text="0" style="-fx-font-weight: bold; -fx-font-size: 16px;"/>
-                <Region prefWidth="30"/>
-                <Button text="Save Changes" styleClass="button-primary" onAction="#handleSave" prefHeight="40" prefWidth="150" style="-fx-font-size: 16px;"/>
+            <HBox spacing="20" VBox.vgrow="ALWAYS">
+                <!-- Data Table -->
+                <VBox spacing="10" HBox.hgrow="ALWAYS" styleClass="card">
+                    <padding>
+                        <Insets top="15" right="15" bottom="15" left="15"/>
+                    </padding>
+                    <TableView fx:id="tblData" VBox.vgrow="ALWAYS">
+                        <columns>
+                            <TableColumn fx:id="colId" text="ID" prefWidth="50"/>
+                            <TableColumn fx:id="colMedicine" text="Medicine Name" prefWidth="200"/>
+                            <TableColumn fx:id="colSalt" text="Generic / Salt Name" prefWidth="200"/>
+                            <TableColumn fx:id="colStrength" text="Strength (mg/ml)" prefWidth="120"/>
+                            <TableColumn fx:id="colAction" text="Action" prefWidth="80"/>
+                        </columns>
+                    </TableView>
+                </VBox>
+                
+                <!-- Add Form -->
+                <VBox spacing="15" styleClass="card" prefWidth="350">
+                    <padding>
+                        <Insets top="20" right="20" bottom="20" left="20"/>
+                    </padding>
+                    
+                    <Label text="Add Composition" style="-fx-font-weight: bold; -fx-font-size: 16px;"/>
+                    
+                    <VBox spacing="5">
+                        <Label text="Select Medicine *" styleClass="form-label"/>
+                        <ComboBox fx:id="medicineCombo" promptText="Select Medicine..." maxWidth="Infinity"/>
+                    </VBox>
+                    
+                    <VBox spacing="5">
+                        <Label text="Select Salt *" styleClass="form-label"/>
+                        <ComboBox fx:id="saltCombo" promptText="Select Salt..." maxWidth="Infinity"/>
+                    </VBox>
+                    
+                    <VBox spacing="5" VBox.vgrow="ALWAYS">
+                        <Label text="Strength (Optional)" styleClass="form-label"/>
+                        <TextField fx:id="strengthField" promptText="e.g. 500mg, 5ml" />
+                    </VBox>
+                    
+                    <HBox spacing="10" alignment="CENTER_RIGHT">
+                        <Button text="Clear" onAction="#handleClear" styleClass="button-outline"/>
+                        <Button text="Save Link" onAction="#handleSave" styleClass="button-primary"/>
+                    </HBox>
+                </VBox>
             </HBox>
+            
         </VBox>
     </center>
 </BorderPane>

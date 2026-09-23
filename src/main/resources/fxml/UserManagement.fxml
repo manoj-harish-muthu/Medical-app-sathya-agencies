@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.cell.PropertyValueFactory?>
+
+<BorderPane xmlns:fx="http://javafx.com/fxml" fx:controller="com.pharmacyerp.controller.UserManagementController" styleClass="root" stylesheets="@../css/style.css">
+    
+    <left>
+        <fx:include source="Sidebar.fxml"/>
+    </left>
+    
+    <center>
+        <VBox spacing="20">
+            <padding>
+                <Insets top="20" right="30" bottom="20" left="30"/>
+            </padding>
+            
+            <HBox alignment="CENTER_LEFT" spacing="10">
+                <Label text="User Management" styleClass="page-title"/>
+                <Region HBox.hgrow="ALWAYS"/>
+            </HBox>
+            
+            <HBox spacing="20" VBox.vgrow="ALWAYS">
+                <!-- User List -->
+                <VBox spacing="10" HBox.hgrow="ALWAYS" styleClass="card">
+                    <padding>
+                        <Insets top="15" right="15" bottom="15" left="15"/>
+                    </padding>
+                    <Label text="Existing Accounts" style="-fx-font-weight: bold; -fx-font-size: 16px;"/>
+                    
+                    <TableView fx:id="tblUsers" VBox.vgrow="ALWAYS">
+                        <columns>
+                            <TableColumn fx:id="colId" text="ID" prefWidth="50"/>
+                            <TableColumn fx:id="colUsername" text="Username" prefWidth="150"/>
+                            <TableColumn fx:id="colFullName" text="Full Name" prefWidth="200"/>
+                            <TableColumn fx:id="colRole" text="Role" prefWidth="120"/>
+                        </columns>
+                    </TableView>
+                    
+                    <HBox alignment="CENTER_RIGHT" spacing="10">
+                        <Button text="Delete Selected User" onAction="#handleDeleteUser" style="-fx-background-color: #ef4444; -fx-text-fill: white;"/>
+                    </HBox>
+                </VBox>
+                
+                <!-- Create User Form -->
+                <VBox spacing="15" styleClass="card" prefWidth="350">
+                    <padding>
+                        <Insets top="15" right="20" bottom="20" left="20"/>
+                    </padding>
+                    
+                    <Label text="Create New Account" style="-fx-font-weight: bold; -fx-font-size: 16px;"/>
+                    
+                    <VBox spacing="5">
+                        <Label text="Full Name" styleClass="form-label"/>
+                        <TextField fx:id="fullNameField" promptText="e.g. Rahul Sharma"/>
+                    </VBox>
+                    
+                    <VBox spacing="5">
+                        <Label text="Username" styleClass="form-label"/>
+                        <TextField fx:id="usernameField" promptText="e.g. rahul.rep"/>
+                    </VBox>
+                    
+                    <VBox spacing="5">
+                        <Label text="Password" styleClass="form-label"/>
+                        <PasswordField fx:id="passwordField" promptText="Enter password"/>
+                    </VBox>
+                    
+                    <VBox spacing="5">
+                        <Label text="Role" styleClass="form-label"/>
+                        <ComboBox fx:id="roleCombo" maxWidth="Infinity"/>
+                    </VBox>
+                    
+                    <Label fx:id="lblError" text="" style="-fx-text-fill: #dc2626; -fx-font-size: 12px;" visible="false"/>
+                    
+                    <Region VBox.vgrow="ALWAYS"/>
+                    <Button text="Create Account" onAction="#handleCreateUser" styleClass="button-primary" maxWidth="Infinity"/>
+                </VBox>
+            </HBox>
+            
+        </VBox>
+    </center>
+</BorderPane>

@@ -117,6 +117,7 @@
                     <ComboBox fx:id="paymentModeCombo" prefWidth="150"/>
                     <Button text="Clear Bill (F3)" styleClass="button-outline" onAction="#handleClearBill" prefWidth="150"/>
                     <Button text="Hold Bill" styleClass="button-outline" onAction="#handleSuspendBill" prefWidth="150"/>
+                    <Button text="Save Quotation" styleClass="button-outline" onAction="#handleSaveQuotation" prefWidth="150"/>
                     <Button text="Complete Sale (F12)" styleClass="button-primary" onAction="#handleCompleteSale" prefHeight="40" prefWidth="150" style="-fx-font-size: 14px;"/>
                 </VBox>
             </HBox>

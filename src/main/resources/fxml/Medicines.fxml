@@ -102,13 +102,22 @@
                             <ComboBox fx:id="cmbItemType" GridPane.columnIndex="5" GridPane.rowIndex="3" prefWidth="120"/>
                             
                             <Label text="COMPANY :" GridPane.columnIndex="0" GridPane.rowIndex="4" style="-fx-font-weight: bold;"/>
-                            <ComboBox fx:id="cmbCompany" GridPane.columnIndex="1" GridPane.rowIndex="4" GridPane.columnSpan="3" prefWidth="400" editable="true"/>
+                            <ComboBox fx:id="cmbCompany" GridPane.columnIndex="1" GridPane.rowIndex="4" prefWidth="250"/>
+                            
+                            <Label text="CATEGORY :" GridPane.columnIndex="2" GridPane.rowIndex="4" style="-fx-font-weight: bold;"/>
+                            <ComboBox fx:id="cmbCategory" GridPane.columnIndex="3" GridPane.rowIndex="4" prefWidth="150"/>
                             
                             <Label text="SALT :" GridPane.columnIndex="0" GridPane.rowIndex="5" style="-fx-font-weight: bold;"/>
-                            <ComboBox fx:id="cmbSalt" GridPane.columnIndex="1" GridPane.rowIndex="5" GridPane.columnSpan="3" prefWidth="400" editable="true"/>
+                            <ComboBox fx:id="cmbSalt" GridPane.columnIndex="1" GridPane.rowIndex="5" prefWidth="250"/>
                             
-                            <Label text="HSN/SAC :" GridPane.columnIndex="0" GridPane.rowIndex="6" style="-fx-font-weight: bold;"/>
-                            <TextField fx:id="txtHsn" GridPane.columnIndex="1" GridPane.rowIndex="6"/>
+                            <Label text="BRAND :" GridPane.columnIndex="2" GridPane.rowIndex="5" style="-fx-font-weight: bold;"/>
+                            <ComboBox fx:id="cmbBrand" GridPane.columnIndex="3" GridPane.rowIndex="5" prefWidth="150"/>
+                            
+                            <Label text="SCHEDULE :" GridPane.columnIndex="0" GridPane.rowIndex="6" style="-fx-font-weight: bold;"/>
+                            <ComboBox fx:id="cmbSchedule" GridPane.columnIndex="1" GridPane.rowIndex="6" prefWidth="250"/>
+                            
+                            <Label text="HSN/SAC :" GridPane.columnIndex="2" GridPane.rowIndex="6" style="-fx-font-weight: bold;"/>
+                            <TextField fx:id="txtHsn" GridPane.columnIndex="3" GridPane.rowIndex="6" prefWidth="150"/>
                         </GridPane>
 
                         <!-- Bottom Tax and Pricing Section -->

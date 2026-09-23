@@ -23,6 +23,7 @@
                 <Button fx:id="alertsButton" text="🔔 Alerts" onAction="#handleShowAlerts" style="-fx-background-color: transparent; -fx-text-fill: #111827; -fx-font-weight: bold; -fx-cursor: hand;"/>
                 <Label text="Main Store" styleClass="secondary-text"/>
                 <Label fx:id="userNameLabel" text="Admin User" style="-fx-font-weight: bold; -fx-text-fill: #111827;"/>
+                <Button text="⚙️ Manage Users" onAction="#handleManageUsers" styleClass="button-outline"/>
                 <Button text="Logout" onAction="#handleLogout" styleClass="button-outline"/>
             </HBox>
             

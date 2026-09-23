@@ -58,6 +58,9 @@ public class PosController {
     @FXML private Label totalLabel;
     
     @FXML private TextField paidAmountField;
+    
+    private int editingSaleId = 0;
+    private String editingInvoiceNo = null;
     @FXML private Label balanceLabel;
     private BigDecimal currentGrandTotal = BigDecimal.ZERO;
     @FXML private Label dateLabel;
@@ -109,60 +112,73 @@ public class PosController {
         setupTable();
         updateTotals();
         
-        // Autocomplete logic with rich high-contrast popup cards
+        // Autocomplete logic with rich high-contrast popup cards and debounce for smooth UI
+        javafx.animation.PauseTransition searchDebounce = new javafx.animation.PauseTransition(javafx.util.Duration.millis(300));
         medicineSearchField.textProperty().addListener((observable, oldValue, newValue) -> {
-            if (newValue == null || newValue.trim().isEmpty()) {
-                suggestionsPopup.hide();
-            } else {
-                java.util.List<CartItem> suggestions = posDAO.searchMedicines(newValue.trim());
-                if (suggestions.isEmpty()) {
+            searchDebounce.setOnFinished(event -> {
+                if (newValue == null || newValue.trim().isEmpty()) {
                     suggestionsPopup.hide();
                 } else {
-                    suggestionsPopup.getItems().clear();
-                    for (CartItem item : suggestions) {
-                        javafx.scene.layout.HBox row = new javafx.scene.layout.HBox(12);
-                        row.setAlignment(javafx.geometry.Pos.CENTER_LEFT);
-                        row.setPadding(new Insets(6, 12, 6, 12));
-                        
-                        Label nameLbl = new Label(item.getMedicineName());
-                        nameLbl.setStyle("-fx-font-size: 13.5px; -fx-font-weight: 800; -fx-text-fill: #111827;");
-                        
-                        Label packLbl = new Label(item.getPacking() != null ? item.getPacking() : "");
-                        packLbl.setStyle("-fx-font-size: 12px; -fx-font-weight: 600; -fx-text-fill: #4B5563;");
-                        
-                        Label batchLbl = new Label("Batch: " + (item.getBatchNumber() != null ? item.getBatchNumber() : "-"));
-                        batchLbl.setStyle("-fx-font-size: 11.5px; -fx-font-weight: 600; -fx-text-fill: #6B7280;");
-                        
-                        Label expLbl = new Label("Exp: " + (item.getExpiryDateStr() != null ? item.getExpiryDateStr() : "-"));
-                        expLbl.setStyle("-fx-font-size: 11.5px; -fx-font-weight: 600; -fx-text-fill: #6B7280;");
-                        
-                        Region spacer = new Region();
-                        javafx.scene.layout.HBox.setHgrow(spacer, javafx.scene.layout.Priority.ALWAYS);
-                        
-                        Label priceLbl = new Label("₹ " + String.format("%.2f", item.getSellingRate()));
-                        priceLbl.setStyle("-fx-font-size: 13.5px; -fx-font-weight: 800; -fx-text-fill: #059669;");
-                        
-                        row.getChildren().addAll(nameLbl, packLbl, batchLbl, expLbl, spacer, priceLbl);
-                        row.setStyle("-fx-cursor: hand;");
-                        row.setOnMouseClicked(e -> {
-                            medicineSearchField.setText("");
-                            suggestionsPopup.hide();
-                            addItemToCart(item);
-                        });
+                    String query = newValue.trim();
+                    java.util.concurrent.CompletableFuture.supplyAsync(() -> {
+                        return posDAO.searchMedicines(query);
+                    }).thenAccept(suggestions -> {
+                        javafx.application.Platform.runLater(() -> {
+                            if (suggestions.isEmpty()) {
+                                suggestionsPopup.hide();
+                            } else {
+                                suggestionsPopup.getItems().clear();
+                                for (CartItem item : suggestions) {
+                                    javafx.scene.layout.HBox row = new javafx.scene.layout.HBox(12);
+                                    row.setAlignment(javafx.geometry.Pos.CENTER_LEFT);
+                                    row.setPadding(new javafx.geometry.Insets(6, 12, 6, 12));
+                                    
+                                    Label nameLbl = new Label(item.getMedicineName());
+                                    nameLbl.setStyle("-fx-font-size: 13.5px; -fx-font-weight: 800; -fx-text-fill: #111827;");
+                                    
+                                    Label packLbl = new Label(item.getPacking() != null ? item.getPacking() : "");
+                                    packLbl.setStyle("-fx-font-size: 12px; -fx-font-weight: 600; -fx-text-fill: #4B5563;");
+                                    
+                                    Label batchLbl = new Label("Batch: " + (item.getBatchNumber() != null ? item.getBatchNumber() : "-"));
+                                    batchLbl.setStyle("-fx-font-size: 11.5px; -fx-font-weight: 600; -fx-text-fill: #6B7280;");
+                                    
+                                    Label expLbl = new Label("Exp: " + (item.getExpiryDateStr() != null ? item.getExpiryDateStr() : "-"));
+                                    expLbl.setStyle("-fx-font-size: 11.5px; -fx-font-weight: 600; -fx-text-fill: #6B7280;");
+                                    
+                                    Label stockLbl = new Label("Stock: " + item.getAvailableStock());
+                                    stockLbl.setStyle("-fx-font-size: 11.5px; -fx-font-weight: 700; -fx-text-fill: " + (item.getAvailableStock() > 0 ? "#15803d;" : "#dc2626;"));
+                                    
+                                    javafx.scene.layout.Region spacer = new javafx.scene.layout.Region();
+                                    javafx.scene.layout.HBox.setHgrow(spacer, javafx.scene.layout.Priority.ALWAYS);
+                                    
+                                    Label priceLbl = new Label("₹ " + String.format("%.2f", item.getSellingRate()));
+                                    priceLbl.setStyle("-fx-font-size: 13.5px; -fx-font-weight: 800; -fx-text-fill: #059669;");
+                                    
+                                    row.getChildren().addAll(nameLbl, packLbl, batchLbl, expLbl, stockLbl, spacer, priceLbl);
+                                    row.setStyle("-fx-cursor: hand;");
+                                    row.setOnMouseClicked(e -> {
+                                        medicineSearchField.setText("");
+                                        suggestionsPopup.hide();
+                                        addItemToCart(item);
+                                    });
 
-                        CustomMenuItem menuItem = new CustomMenuItem(row, true);
-                        menuItem.setOnAction(e -> {
-                            medicineSearchField.setText("");
-                            suggestionsPopup.hide();
-                            addItemToCart(item);
+                                    CustomMenuItem menuItem = new CustomMenuItem(row, true);
+                                    menuItem.setOnAction(e -> {
+                                        medicineSearchField.setText("");
+                                        suggestionsPopup.hide();
+                                        addItemToCart(item);
+                                    });
+                                    suggestionsPopup.getItems().add(menuItem);
+                                }
+                                if (!suggestionsPopup.isShowing() && medicineSearchField.getScene() != null && medicineSearchField.isFocused()) {
+                                    suggestionsPopup.show(medicineSearchField, javafx.geometry.Side.BOTTOM, 0, 0);
+                                }
+                            }
                         });
-                        suggestionsPopup.getItems().add(menuItem);
-                    }
-                    if (!suggestionsPopup.isShowing()) {
-                        suggestionsPopup.show(medicineSearchField, javafx.geometry.Side.BOTTOM, 0, 0);
-                    }
+                    });
                 }
-            }
+            });
+            searchDebounce.playFromStart();
         });
         
         // Barcode scanner hits Enter
@@ -439,6 +455,8 @@ public class PosController {
 
     private void resetBillingForm() {
         activeAgentOrder = null;
+        editingSaleId = 0;
+        editingInvoiceNo = null;
         cartItems.clear();
         cartTable.refresh();
         if (customerNameField != null) customerNameField.clear();
@@ -505,6 +523,23 @@ public class PosController {
         }
         BigDecimal balanceAmount = currentGrandTotal.subtract(paidAmount);
         if (balanceAmount.compareTo(BigDecimal.ZERO) < 0) balanceAmount = BigDecimal.ZERO;
+
+        // If editing, use the old invoice number and wipe the old bill to restore inventory
+        if (editingSaleId > 0 && editingInvoiceNo != null) {
+            invoiceNo = editingInvoiceNo;
+            pdfPath = "invoice_" + invoiceNo + ".pdf";
+            com.pharmacyerp.dao.SalesDAO salesDAO = new com.pharmacyerp.dao.SalesDAO();
+            boolean oldDeleted = salesDAO.deleteSale(editingSaleId, true);
+            if (!oldDeleted) {
+                javafx.scene.control.Alert error = new javafx.scene.control.Alert(
+                        javafx.scene.control.Alert.AlertType.ERROR,
+                        "Failed to remove the old bill for editing. Cannot proceed.",
+                        javafx.scene.control.ButtonType.OK
+                );
+                error.showAndWait();
+                return;
+            }
+        }
 
         // Save to Database
         boolean saved = posDAO.saveSale(invoiceNo, customer, customerPhone, doctor, paymentMode, cartItems, paidAmount, balanceAmount);
@@ -574,6 +609,42 @@ public class PosController {
         
         resetBillingForm();
     }
+    
+    @FXML
+    private void handleSaveQuotation(ActionEvent event) {
+        if (cartItems.isEmpty()) {
+            javafx.scene.control.Alert alert = new javafx.scene.control.Alert(javafx.scene.control.Alert.AlertType.WARNING);
+            alert.setTitle("Cart Empty");
+            alert.setHeaderText("Cannot save quotation");
+            alert.setContentText("Please add items to the cart before saving a quotation.");
+            alert.showAndWait();
+            return;
+        }
+
+        String invoiceNo = "QT-" + System.currentTimeMillis();
+        String customer = customerNameField != null ? customerNameField.getText().trim() : "";
+        String customerPhone = customerPhoneField != null ? customerPhoneField.getText().trim() : "";
+        String doctor = doctorNameField != null ? doctorNameField.getText().trim() : "";
+
+        boolean saved = posDAO.saveSale(invoiceNo, customer, customerPhone, doctor, "Cash", cartItems, BigDecimal.ZERO, currentGrandTotal, "QUOTATION");
+        
+        if (!saved) {
+            javafx.scene.control.Alert alert = new javafx.scene.control.Alert(javafx.scene.control.Alert.AlertType.ERROR);
+            alert.setHeaderText("Database Error");
+            alert.setTitle("Save Failed");
+            alert.setContentText("Failed to save quotation to the database!");
+            alert.showAndWait();
+            return;
+        }
+
+        javafx.scene.control.Alert successAlert = new javafx.scene.control.Alert(javafx.scene.control.Alert.AlertType.INFORMATION);
+        successAlert.setHeaderText("Quotation Saved");
+        successAlert.setTitle("Success");
+        successAlert.setContentText("Quotation saved successfully!\nQuotation No: " + invoiceNo);
+        successAlert.showAndWait();
+        
+        resetBillingForm();
+    }
 
     public void loadAgentOrder(com.pharmacyerp.model.AgentOrder order) {
         if (order == null) return;
@@ -608,7 +679,34 @@ public class PosController {
             updateTotals();
         }
     }
+    
+    public void loadSale(com.pharmacyerp.model.Sale sale, java.util.List<com.pharmacyerp.model.CartItem> items) {
+        if (sale == null) return;
+        
+        if (customerPhoneField != null && sale.getCustomerPhone() != null && !sale.getCustomerPhone().isBlank()) {
+            customerPhoneField.setText(sale.getCustomerPhone());
+        }
+        if (customerNameField != null && sale.getCustomerName() != null && !sale.getCustomerName().isBlank()) {
+            customerNameField.setText(sale.getCustomerName());
+        }
+        if (doctorNameField != null && sale.getDoctorName() != null && !sale.getDoctorName().isBlank()) {
+            doctorNameField.setText(sale.getDoctorName());
+        }
+        
+        cartItems.clear();
+        if (items != null) {
+            for (com.pharmacyerp.model.CartItem it : items) {
+                it.calculateTotals();
+                cartItems.add(it);
+            }
+        }
+        updateTotals();
+    }
 
+    public void setEditingSale(int saleId, String invoiceNo) {
+        this.editingSaleId = saleId;
+        this.editingInvoiceNo = invoiceNo;
+    }
 
     @FXML
     private void handleDashboard(ActionEvent event) {

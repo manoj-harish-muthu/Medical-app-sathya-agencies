@@ -1,69 +1,139 @@
 package com.pharmacyerp.controller;
 
-import javafx.beans.property.SimpleDoubleProperty;
-import javafx.beans.property.SimpleStringProperty;
+import com.pharmacyerp.dao.MedicineDAO;
+import com.pharmacyerp.dao.SubstituteDAO;
+import com.pharmacyerp.model.Medicine;
+import com.pharmacyerp.model.Substitute;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
-import javafx.fxml.Initializable;
 import javafx.scene.control.*;
+import javafx.scene.control.cell.PropertyValueFactory;
+import javafx.util.StringConverter;
+import java.util.List;
 
-import java.net.URL;
-import java.time.LocalDate;
-import java.util.ResourceBundle;
+public class MedSubstituteController {
 
-public class MedSubstituteController implements Initializable {
-
-    public static class HistoryData {
-        private final SimpleStringProperty date;
-        private final SimpleStringProperty name;
-        private final SimpleStringProperty description;
-        private final SimpleDoubleProperty amount;
-
-        public HistoryData(String date, String name, String description, double amount) {
-            this.date = new SimpleStringProperty(date);
-            this.name = new SimpleStringProperty(name);
-            this.description = new SimpleStringProperty(description);
-            this.amount = new SimpleDoubleProperty(amount);
-        }
-
-        public String getDate() { return date.get(); }
-        public String getName() { return name.get(); }
-        public String getDescription() { return description.get(); }
-        public double getAmount() { return amount.get(); }
-    }
-    
-    @FXML private TextField txtSearch;
-    @FXML private DatePicker dpFrom;
-    @FXML private DatePicker dpTo;
-    
-    @FXML private TableView<HistoryData> tblHistory;
-    
+    @FXML private TableView<Substitute> tblData;
+    @FXML private TableColumn<Substitute, Integer> colId;
+    @FXML private TableColumn<Substitute, String> colPrimary;
+    @FXML private TableColumn<Substitute, String> colSubstitute;
+    @FXML private TableColumn<Substitute, Void> colAction;
     @FXML private Label lblTotalItems;
-    @FXML private Label lblGrandTotal;
 
-    private ObservableList<HistoryData> records = FXCollections.observableArrayList();
+    @FXML private ComboBox<Medicine> primaryCombo;
+    @FXML private ComboBox<Medicine> substituteCombo;
+    
+    private SubstituteDAO subDao = new SubstituteDAO();
+    private ObservableList<Substitute> subList = FXCollections.observableArrayList();
+    private ObservableList<Medicine> allMedicines = FXCollections.observableArrayList();
 
-    @Override
-    public void initialize(URL location, ResourceBundle resources) {
-        dpFrom.setValue(LocalDate.now().minusDays(30));
-        dpTo.setValue(LocalDate.now());
+    @FXML
+    public void initialize() {
+        colId.setCellValueFactory(new PropertyValueFactory<>("id"));
+        colPrimary.setCellValueFactory(new PropertyValueFactory<>("medicineName"));
+        colSubstitute.setCellValueFactory(new PropertyValueFactory<>("substituteName"));
+
+        colAction.setCellFactory(param -> new TableCell<Substitute, Void>() {
+            private final Button delBtn = new Button("Delete");
+            {
+                delBtn.setStyle("-fx-background-color: #EF4444; -fx-text-fill: white;");
+                delBtn.setOnAction(event -> {
+                    Substitute sub = getTableView().getItems().get(getIndex());
+                    if (subDao.deleteSubstitute(sub.getId())) {
+                        loadData();
+                    }
+                });
+            }
+            @Override
+            protected void updateItem(Void item, boolean empty) {
+                super.updateItem(item, empty);
+                if (empty) {
+                    setGraphic(null);
+                } else {
+                    setGraphic(delBtn);
+                }
+            }
+        });
+
+        tblData.setItems(subList);
         
-        loadDummyData();
-        tblHistory.setItems(records);
-        updateTotals();
+        setupComboBox(primaryCombo);
+        setupComboBox(substituteCombo);
+
+        loadMedicines();
+        loadData();
     }
 
-    private void loadDummyData() {
-        // Dummy data removed as per user request
+    private void setupComboBox(ComboBox<Medicine> combo) {
+        combo.setConverter(new StringConverter<Medicine>() {
+            @Override
+            public String toString(Medicine m) {
+                return m == null ? "" : m.getMedicineName();
+            }
+            @Override
+            public Medicine fromString(String string) {
+                return null;
+            }
+        });
     }
 
-    private void updateTotals() {
-        double grandTotal = 0.0;
-        for (HistoryData item : records) {
-            grandTotal += item.getAmount();
+    private void loadMedicines() {
+        allMedicines.setAll(MedicineDAO.getAllMedicines());
+        primaryCombo.setItems(allMedicines);
+        substituteCombo.setItems(allMedicines);
+    }
+
+    private void loadData() {
+        subList.setAll(subDao.getAllSubstitutes());
+        lblTotalItems.setText(String.valueOf(subList.size()));
+    }
+
+    @FXML
+    private void handleSave(ActionEvent event) {
+        Medicine pMed = primaryCombo.getValue();
+        Medicine sMed = substituteCombo.getValue();
+
+        if (pMed == null || sMed == null) {
+            showAlert("Error", "Please select both Primary and Substitute medicines.");
+            return;
         }
-        lblTotalItems.setText(String.valueOf(records.size()));
-        lblGrandTotal.setText(String.format("%.2f", grandTotal));
+        
+        if (pMed.getMedicineId() == sMed.getMedicineId()) {
+            showAlert("Error", "Primary and Substitute cannot be the same.");
+            return;
+        }
+
+        Substitute sub = new Substitute();
+        sub.setMedicineId(pMed.getMedicineId());
+        sub.setSubstituteMedicineId(sMed.getMedicineId());
+        
+        if (subDao.addSubstitute(sub)) {
+            handleClear(null);
+            loadData();
+        } else {
+            showAlert("Error", "Failed to add substitute (Might already exist).");
+        }
+    }
+
+    @FXML
+    private void handleClear(ActionEvent event) {
+        primaryCombo.setValue(null);
+        substituteCombo.setValue(null);
+    }
+
+    private void showAlert(String title, String message) {
+        Alert alert = new Alert(Alert.AlertType.INFORMATION);
+        alert.setTitle(title);
+        alert.setHeaderText(null);
+        alert.setContentText(message);
+        alert.showAndWait();
+    }
+
+    @FXML
+    private void handleDashboard(ActionEvent event) {
+        SidebarController sidebar = new SidebarController();
+        sidebar.navigateTo(event, "/fxml/Dashboard.fxml");
     }
 }

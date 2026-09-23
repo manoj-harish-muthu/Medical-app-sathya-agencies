@@ -23,7 +23,8 @@ public class PosDAO {
                      "JOIN medicine_batches mb ON m.medicine_id = mb.medicine_id " +
                      "LEFT JOIN medicine_companies comp ON m.company_id = comp.company_id " +
                      "WHERE mb.batch_number = ? OR m.medicine_name = ? OR m.medicine_name LIKE ? OR m.salt_name LIKE ? " +
-                     "ORDER BY (m.medicine_name = ?) DESC, (mb.current_quantity > 0) DESC, mb.expiry_date ASC LIMIT 1";
+                     "ORDER BY CASE WHEN m.medicine_name = ? THEN 1 ELSE 0 END DESC, " +
+                     "CASE WHEN mb.current_quantity > 0 THEN 1 ELSE 0 END DESC, mb.expiry_date ASC LIMIT 1";
 
         try (Connection conn = DatabaseManager.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
@@ -72,12 +73,13 @@ public class PosDAO {
 
         String sql = "SELECT m.medicine_id, m.medicine_name, m.hsn_code, COALESCE(NULLIF(m.cgst + m.sgst, 0), m.gst_rate, 0) as gst_rate, m.schedule_type, m.packing, " +
                      "comp.company_name, " +
-                     "mb.batch_id, mb.batch_number, mb.mrp, mb.selling_rate, mb.expiry_date " +
+                     "mb.batch_id, mb.batch_number, mb.mrp, mb.selling_rate, mb.expiry_date, mb.current_quantity " +
                      "FROM medicines m " +
                      "JOIN medicine_batches mb ON m.medicine_id = mb.medicine_id " +
                      "LEFT JOIN medicine_companies comp ON m.company_id = comp.company_id " +
                      "WHERE mb.batch_number = ? OR m.medicine_name LIKE ? OR m.salt_name LIKE ? OR comp.company_name LIKE ? " +
-                     "ORDER BY (m.medicine_name LIKE ?) DESC, (mb.current_quantity > 0) DESC, m.medicine_name ASC, mb.expiry_date ASC LIMIT 15";
+                     "ORDER BY CASE WHEN m.medicine_name LIKE ? THEN 1 ELSE 0 END DESC, " +
+                     "CASE WHEN mb.current_quantity > 0 THEN 1 ELSE 0 END DESC, m.medicine_name ASC, mb.expiry_date ASC LIMIT 15";
 
         try (Connection conn = DatabaseManager.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
@@ -106,6 +108,7 @@ public class PosDAO {
                     item.setBatchNumber(rs.getString("batch_number") != null ? rs.getString("batch_number") : "");
                     java.sql.Date expDate = rs.getDate("expiry_date");
                     item.setExpiryDateStr(expDate != null ? new java.text.SimpleDateFormat("MM/yy").format(expDate) : "");
+                    item.setAvailableStock(rs.getInt("current_quantity"));
                     item.setMrp(rs.getBigDecimal("mrp") != null ? rs.getBigDecimal("mrp") : java.math.BigDecimal.ZERO);
                     item.setSellingRate(rs.getBigDecimal("selling_rate") != null ? rs.getBigDecimal("selling_rate") : java.math.BigDecimal.ZERO);
                     
@@ -138,6 +141,10 @@ public class PosDAO {
     }
 
     public boolean saveSale(String invoiceNo, String customerName, String customerPhone, String doctorName, String paymentMode, java.util.List<CartItem> cartItems, java.math.BigDecimal paidAmount, java.math.BigDecimal balanceAmount) {
+        return saveSale(invoiceNo, customerName, customerPhone, doctorName, paymentMode, cartItems, paidAmount, balanceAmount, "COMPLETED");
+    }
+
+    public boolean saveSale(String invoiceNo, String customerName, String customerPhone, String doctorName, String paymentMode, java.util.List<CartItem> cartItems, java.math.BigDecimal paidAmount, java.math.BigDecimal balanceAmount, String status) {
         if (cartItems == null || cartItems.isEmpty()) {
             logger.warn("Cannot save sale: cartItems is empty");
             return false;
@@ -150,6 +157,7 @@ public class PosDAO {
         }
         String safeDoctor = doctorName != null ? doctorName.trim() : "";
         String safePayment = (paymentMode != null && !paymentMode.trim().isEmpty()) ? paymentMode.trim() : "Cash";
+        String safeStatus = (status != null && !status.trim().isEmpty()) ? status.trim() : "COMPLETED";
 
         String insertSaleSql = "INSERT INTO sales (invoice_no, customer_name, customer_phone, doctor_name, payment_mode, subtotal, total_discount, total_cgst, total_sgst, grand_total, paid_amount, balance_amount, status) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
         String insertItemSql = "INSERT INTO sale_items (sale_id, medicine_id, batch_id, quantity, mrp, selling_rate, discount_percentage, cgst_amount, sgst_amount, net_amount) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
@@ -197,7 +205,7 @@ public class PosDAO {
                 saleStmt.setBigDecimal(10, grandTotal);
                 saleStmt.setBigDecimal(11, finalPaid);
                 saleStmt.setBigDecimal(12, finalBalance);
-                saleStmt.setString(13, "COMPLETED");
+                saleStmt.setString(13, safeStatus);
                 saleStmt.executeUpdate();
 
                 try (ResultSet rs = saleStmt.getGeneratedKeys()) {
@@ -212,7 +220,7 @@ public class PosDAO {
                 return false;
             }
 
-            if (finalPaid.compareTo(java.math.BigDecimal.ZERO) > 0) {
+            if (!"QUOTATION".equals(safeStatus) && finalPaid.compareTo(java.math.BigDecimal.ZERO) > 0) {
                 try (PreparedStatement payStmt = conn.prepareStatement(insertPaymentSql)) {
                     payStmt.setInt(1, saleId);
                     payStmt.setString(2, safePhone);
@@ -239,14 +247,18 @@ public class PosDAO {
                     itemStmt.setBigDecimal(10, item.getNetAmount());
                     itemStmt.addBatch();
 
-                    // Update Inventory
-                    updateStmt.setInt(1, item.getQuantity());
-                    updateStmt.setInt(2, item.getBatchId());
-                    updateStmt.addBatch();
+                    // Update Inventory (Skip for Quotations)
+                    if (!"QUOTATION".equals(safeStatus)) {
+                        updateStmt.setInt(1, item.getQuantity());
+                        updateStmt.setInt(2, item.getBatchId());
+                        updateStmt.addBatch();
+                    }
                 }
 
                 itemStmt.executeBatch();
-                updateStmt.executeBatch();
+                if (!"QUOTATION".equals(safeStatus)) {
+                    updateStmt.executeBatch();
+                }
             }
 
             conn.commit();

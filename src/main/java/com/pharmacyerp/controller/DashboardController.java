@@ -193,6 +193,11 @@ public class DashboardController {
     }
 
     @FXML
+    private void handleManageUsers(ActionEvent event) {
+        navigateTo(event, "/fxml/UserManagement.fxml");
+    }
+
+    @FXML
     private void handleLogout(ActionEvent event) {
         AuthService.logout();
         navigateTo(event, "/fxml/Login.fxml");

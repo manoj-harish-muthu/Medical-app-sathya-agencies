@@ -13,7 +13,7 @@ public class DashboardDAO {
     private static final Logger logger = LoggerFactory.getLogger(DashboardDAO.class);
 
     public int getTodaysBillsCount() {
-        String sql = "SELECT COUNT(*) FROM sales WHERE DATE(sale_date) = CURRENT_DATE";
+        String sql = "SELECT COUNT(*) FROM sales WHERE DATE(sale_date) = CURRENT_DATE AND status = 'COMPLETED'";
         try (Connection conn = DatabaseManager.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql);
              ResultSet rs = stmt.executeQuery()) {
@@ -27,7 +27,7 @@ public class DashboardDAO {
     }
 
     public BigDecimal getTodaysSalesTotal() {
-        String sql = "SELECT SUM(grand_total) FROM sales WHERE DATE(sale_date) = CURRENT_DATE";
+        String sql = "SELECT SUM(grand_total) FROM sales WHERE DATE(sale_date) = CURRENT_DATE AND status = 'COMPLETED'";
         try (Connection conn = DatabaseManager.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql);
              ResultSet rs = stmt.executeQuery()) {
@@ -119,7 +119,7 @@ public class DashboardDAO {
     public java.util.Map<String, BigDecimal> getSalesTrend(int days) {
         java.util.Map<String, BigDecimal> trend = new java.util.LinkedHashMap<>();
         String sql = "SELECT DATE(sale_date) as sdate, SUM(grand_total) as stotal FROM sales " +
-                     "WHERE sale_date >= ? " +
+                     "WHERE sale_date >= ? AND status = 'COMPLETED' " +
                      "GROUP BY DATE(sale_date) ORDER BY sdate ASC";
         try (Connection conn = DatabaseManager.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {

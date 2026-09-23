@@ -8,6 +8,7 @@ import javafx.fxml.FXMLLoader;
 import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.control.*;
+import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.stage.Stage;
 
 import com.pharmacyerp.model.Category;
@@ -22,9 +23,12 @@ public class CategoryController {
     @FXML private TextField searchField;
     
     @FXML private TableView<Category> categoryTable;
+    @FXML private TableColumn<Category, Integer> colId;
     @FXML private TableColumn<Category, String> colName;
     @FXML private TableColumn<Category, String> colDesc;
     @FXML private TableColumn<Category, Void> colAction;
+    
+    @FXML private Label lblTotalItems;
 
     private CategoryDAO cDao = new CategoryDAO();
     private ObservableList<Category> masterList = FXCollections.observableArrayList();
@@ -32,6 +36,8 @@ public class CategoryController {
 
     @FXML
     public void initialize() {
+        colId.setCellValueFactory(new PropertyValueFactory<>("categoryId"));
+        
         // Setup Action Column
         colAction.setCellFactory(param -> new TableCell<Category, Void>() {
             private final Button editBtn = new Button("Edit");
@@ -62,6 +68,9 @@ public class CategoryController {
     private void loadData() {
         masterList.setAll(cDao.getAllCategories());
         categoryTable.setItems(masterList);
+        if (lblTotalItems != null) {
+            lblTotalItems.setText(String.valueOf(masterList.size()));
+        }
     }
 
     private void filterList(String query) {
@@ -95,10 +104,10 @@ public class CategoryController {
             
             if (cDao.addCategory(c)) {
                 showAlert(Alert.AlertType.INFORMATION, "Category added successfully!");
-                handleClear();
+                handleClear(null);
                 loadData();
             } else {
-                showAlert(Alert.AlertType.ERROR, "Failed to add category. Name might be duplicate.");
+                showAlert(Alert.AlertType.ERROR, "Error adding category.");
             }
         } else {
             // Update
@@ -107,40 +116,32 @@ public class CategoryController {
             
             if (cDao.updateCategory(selectedCategory)) {
                 showAlert(Alert.AlertType.INFORMATION, "Category updated successfully!");
-                handleClear();
+                handleClear(null);
                 loadData();
             } else {
-                showAlert(Alert.AlertType.ERROR, "Failed to update category.");
+                showAlert(Alert.AlertType.ERROR, "Error updating category.");
             }
         }
     }
 
     @FXML
-    private void handleClear() {
+    public void handleClear(ActionEvent event) {
         selectedCategory = null;
         nameField.clear();
         descriptionArea.clear();
     }
 
-    @FXML
-    private void handleDashboard(ActionEvent event) {
-        navigateTo(event, "/fxml/Dashboard.fxml");
-    }
-
-    private void navigateTo(ActionEvent event, String fxmlPath) {
-        try {
-            FXMLLoader loader = new FXMLLoader(getClass().getResource(fxmlPath));
-            Parent root = loader.load();
-            Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
-            stage.getScene().setRoot(root);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
-    
     private void showAlert(Alert.AlertType type, String message) {
         Alert alert = new Alert(type);
+        alert.setTitle(type.name());
+        alert.setHeaderText(null);
         alert.setContentText(message);
         alert.showAndWait();
+    }
+
+    @FXML
+    private void handleDashboard(ActionEvent event) {
+        SidebarController sidebar = new SidebarController();
+        sidebar.navigateTo(event, "/fxml/Dashboard.fxml");
     }
 }

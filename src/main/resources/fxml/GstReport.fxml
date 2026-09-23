@@ -1,0 +1,94 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.cell.PropertyValueFactory?>
+
+<BorderPane xmlns:fx="http://javafx.com/fxml" fx:controller="com.pharmacyerp.controller.GstReportController" styleClass="root" stylesheets="@../css/style.css">
+    
+    <left>
+        <fx:include source="Sidebar.fxml"/>
+    </left>
+    
+    <center>
+        <VBox spacing="20">
+            <padding>
+                <Insets top="20" right="30" bottom="20" left="30"/>
+            </padding>
+            
+            <HBox alignment="CENTER_LEFT" spacing="10">
+                <Label text="Monthly GST Summary (GSTR-3B)" styleClass="page-title"/>
+                <Region HBox.hgrow="ALWAYS"/>
+                <Button text="Print / Export" onAction="#handlePrintReport" styleClass="button-primary"/>
+            </HBox>
+            
+            <!-- Filters -->
+            <HBox spacing="15" alignment="CENTER_LEFT" styleClass="card">
+                <padding>
+                    <Insets top="15" right="15" bottom="15" left="15"/>
+                </padding>
+                <Label text="Select Month:" styleClass="form-label" style="-fx-font-weight: bold;"/>
+                <ComboBox fx:id="monthCombo" prefWidth="100"/>
+                
+                <Label text="Year:" styleClass="form-label" style="-fx-font-weight: bold;"/>
+                <ComboBox fx:id="yearCombo" prefWidth="100"/>
+                
+                <Button text="Generate Report" onAction="#loadData" styleClass="button-primary"/>
+            </HBox>
+            
+            <HBox spacing="20" VBox.vgrow="ALWAYS">
+                <!-- Sales (Outward) Section -->
+                <VBox spacing="10" HBox.hgrow="ALWAYS" styleClass="card">
+                    <padding>
+                        <Insets top="15" right="15" bottom="15" left="15"/>
+                    </padding>
+                    <Label text="Outward Supplies (Sales Tax)" style="-fx-font-size: 16px; -fx-font-weight: bold; -fx-text-fill: #1f2937;"/>
+                    <TableView fx:id="tblSales" VBox.vgrow="ALWAYS" minHeight="250">
+                        <columns>
+                            <TableColumn fx:id="colSalesRate" text="GST Rate" prefWidth="80"/>
+                            <TableColumn fx:id="colSalesTaxable" text="Taxable Value" prefWidth="120"/>
+                            <TableColumn fx:id="colSalesCgst" text="CGST" prefWidth="90"/>
+                            <TableColumn fx:id="colSalesSgst" text="SGST" prefWidth="90"/>
+                            <TableColumn fx:id="colSalesTotal" text="Total Amount" prefWidth="120"/>
+                        </columns>
+                    </TableView>
+                    <HBox alignment="CENTER_RIGHT" spacing="10">
+                        <Label text="Total Sales Tax (CGST+SGST):" styleClass="form-label"/>
+                        <Label fx:id="lblTotalSalesTax" text="₹ 0.00" style="-fx-font-weight: bold; -fx-text-fill: #b91c1c;"/>
+                    </HBox>
+                </VBox>
+                
+                <!-- Purchases (Inward) Section -->
+                <VBox spacing="10" HBox.hgrow="ALWAYS" styleClass="card">
+                    <padding>
+                        <Insets top="15" right="15" bottom="15" left="15"/>
+                    </padding>
+                    <Label text="Inward Supplies (Purchase ITC)" style="-fx-font-size: 16px; -fx-font-weight: bold; -fx-text-fill: #1f2937;"/>
+                    <TableView fx:id="tblPurchases" VBox.vgrow="ALWAYS" minHeight="250">
+                        <columns>
+                            <TableColumn fx:id="colPurRate" text="GST Rate" prefWidth="80"/>
+                            <TableColumn fx:id="colPurTaxable" text="Taxable Value" prefWidth="120"/>
+                            <TableColumn fx:id="colPurCgst" text="CGST" prefWidth="90"/>
+                            <TableColumn fx:id="colPurSgst" text="SGST" prefWidth="90"/>
+                            <TableColumn fx:id="colPurTotal" text="Total Amount" prefWidth="120"/>
+                        </columns>
+                    </TableView>
+                    <HBox alignment="CENTER_RIGHT" spacing="10">
+                        <Label text="Total Input Tax Credit:" styleClass="form-label"/>
+                        <Label fx:id="lblTotalPurchaseTax" text="₹ 0.00" style="-fx-font-weight: bold; -fx-text-fill: #15803d;"/>
+                    </HBox>
+                </VBox>
+            </HBox>
+            
+            <!-- Final Calculation -->
+            <HBox alignment="CENTER_RIGHT" spacing="20" styleClass="card">
+                <padding>
+                    <Insets top="20" right="20" bottom="20" left="20"/>
+                </padding>
+                <Label text="Net GST Payable for the Month:" style="-fx-font-size: 18px; -fx-font-weight: bold; -fx-text-fill: #1f2937;"/>
+                <Label fx:id="lblTaxPayable" text="₹ 0.00" style="-fx-font-size: 24px; -fx-font-weight: bold;"/>
+            </HBox>
+            
+        </VBox>
+    </center>
+</BorderPane>

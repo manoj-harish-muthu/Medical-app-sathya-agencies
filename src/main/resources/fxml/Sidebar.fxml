@@ -3,7 +3,7 @@
 <?import javafx.scene.control.*?>
 <?import javafx.geometry.Insets?>
 
-<VBox xmlns:fx="http://javafx.com/fxml" fx:controller="com.pharmacyerp.controller.SidebarController" styleClass="sidebar" prefWidth="250">
+<VBox xmlns:fx="http://javafx.com/fxml" fx:controller="com.pharmacyerp.controller.SidebarController" styleClass="sidebar" prefWidth="250" minWidth="250" maxWidth="250">
     <padding>
         <Insets top="20" right="0" bottom="20" left="0"/>
     </padding>
@@ -16,7 +16,7 @@
         <Label text="Premium Pharmacy System" styleClass="sidebar-brand-subtitle"/>
     </VBox>
     
-    <ScrollPane fitToWidth="true" style="-fx-background-color: transparent; -fx-border-color: transparent;" VBox.vgrow="ALWAYS">
+    <ScrollPane fx:id="scrollPane" fitToWidth="true" style="-fx-background-color: transparent; -fx-border-color: transparent;" VBox.vgrow="ALWAYS">
         <VBox spacing="2" fx:id="menuContainer">
             <!-- Dashboard -->
             <Button text="🏠 Dashboard" onAction="#handleDashboard" styleClass="sidebar-button" maxWidth="Infinity" alignment="BASELINE_LEFT"/>

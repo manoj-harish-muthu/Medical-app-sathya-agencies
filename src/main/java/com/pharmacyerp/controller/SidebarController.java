@@ -26,12 +26,56 @@ public class SidebarController {
     @FXML private VBox suppliersSubMenu;
     @FXML private VBox onlineOrdersSubMenu;
     @FXML private VBox reportsSubMenu;
+    @FXML private VBox accountsSubMenu;
+    @FXML private VBox alertsSubMenu;
+    @FXML private VBox staffSubMenu;
+    @FXML private javafx.scene.control.ScrollPane scrollPane;
+
+    private static class SidebarState {
+        static boolean billingOpen = false;
+        static boolean medicinesOpen = false;
+        static boolean inventoryOpen = false;
+        static boolean purchasesOpen = false;
+        static boolean customersOpen = false;
+        static boolean doctorsOpen = false;
+        static boolean suppliersOpen = false;
+        static boolean onlineOrdersOpen = false;
+        static boolean reportsOpen = false;
+        static boolean accountsOpen = false;
+        static boolean alertsOpen = false;
+        static boolean staffOpen = false;
+        static double scrollVValue = 0.0;
+    }
+
+    @FXML
+    public void initialize() {
+        if (billingSubMenu != null) { billingSubMenu.setVisible(SidebarState.billingOpen); billingSubMenu.setManaged(SidebarState.billingOpen); }
+        if (medicinesSubMenu != null) { medicinesSubMenu.setVisible(SidebarState.medicinesOpen); medicinesSubMenu.setManaged(SidebarState.medicinesOpen); }
+        if (inventorySubMenu != null) { inventorySubMenu.setVisible(SidebarState.inventoryOpen); inventorySubMenu.setManaged(SidebarState.inventoryOpen); }
+        if (purchasesSubMenu != null) { purchasesSubMenu.setVisible(SidebarState.purchasesOpen); purchasesSubMenu.setManaged(SidebarState.purchasesOpen); }
+        if (customersSubMenu != null) { customersSubMenu.setVisible(SidebarState.customersOpen); customersSubMenu.setManaged(SidebarState.customersOpen); }
+        if (doctorsSubMenu != null) { doctorsSubMenu.setVisible(SidebarState.doctorsOpen); doctorsSubMenu.setManaged(SidebarState.doctorsOpen); }
+        if (suppliersSubMenu != null) { suppliersSubMenu.setVisible(SidebarState.suppliersOpen); suppliersSubMenu.setManaged(SidebarState.suppliersOpen); }
+        if (onlineOrdersSubMenu != null) { onlineOrdersSubMenu.setVisible(SidebarState.onlineOrdersOpen); onlineOrdersSubMenu.setManaged(SidebarState.onlineOrdersOpen); }
+        if (reportsSubMenu != null) { reportsSubMenu.setVisible(SidebarState.reportsOpen); reportsSubMenu.setManaged(SidebarState.reportsOpen); }
+        if (accountsSubMenu != null) { accountsSubMenu.setVisible(SidebarState.accountsOpen); accountsSubMenu.setManaged(SidebarState.accountsOpen); }
+        if (alertsSubMenu != null) { alertsSubMenu.setVisible(SidebarState.alertsOpen); alertsSubMenu.setManaged(SidebarState.alertsOpen); }
+        if (staffSubMenu != null) { staffSubMenu.setVisible(SidebarState.staffOpen); staffSubMenu.setManaged(SidebarState.staffOpen); }
+        
+        if (scrollPane != null) {
+            // Defer scroll value until layout is done
+            javafx.application.Platform.runLater(() -> {
+                scrollPane.setVvalue(SidebarState.scrollVValue);
+            });
+        }
+    }
 
     @FXML
     private void toggleBilling(ActionEvent event) {
         boolean isVisible = billingSubMenu.isVisible();
         billingSubMenu.setVisible(!isVisible);
         billingSubMenu.setManaged(!isVisible);
+        SidebarState.billingOpen = !isVisible;
     }
 
     @FXML
@@ -39,6 +83,7 @@ public class SidebarController {
         boolean isVisible = medicinesSubMenu.isVisible();
         medicinesSubMenu.setVisible(!isVisible);
         medicinesSubMenu.setManaged(!isVisible);
+        SidebarState.medicinesOpen = !isVisible;
     }
 
     @FXML
@@ -46,6 +91,7 @@ public class SidebarController {
         boolean isVisible = inventorySubMenu.isVisible();
         inventorySubMenu.setVisible(!isVisible);
         inventorySubMenu.setManaged(!isVisible);
+        SidebarState.inventoryOpen = !isVisible;
     }
 
     @FXML
@@ -53,6 +99,7 @@ public class SidebarController {
         boolean isVisible = purchasesSubMenu.isVisible();
         purchasesSubMenu.setVisible(!isVisible);
         purchasesSubMenu.setManaged(!isVisible);
+        SidebarState.purchasesOpen = !isVisible;
     }
 
     @FXML
@@ -60,6 +107,7 @@ public class SidebarController {
         boolean isVisible = customersSubMenu.isVisible();
         customersSubMenu.setVisible(!isVisible);
         customersSubMenu.setManaged(!isVisible);
+        SidebarState.customersOpen = !isVisible;
     }
 
     @FXML
@@ -67,6 +115,7 @@ public class SidebarController {
         boolean isVisible = doctorsSubMenu.isVisible();
         doctorsSubMenu.setVisible(!isVisible);
         doctorsSubMenu.setManaged(!isVisible);
+        SidebarState.doctorsOpen = !isVisible;
     }
 
     @FXML
@@ -74,6 +123,7 @@ public class SidebarController {
         boolean isVisible = suppliersSubMenu.isVisible();
         suppliersSubMenu.setVisible(!isVisible);
         suppliersSubMenu.setManaged(!isVisible);
+        SidebarState.suppliersOpen = !isVisible;
     }
 
     @FXML
@@ -81,6 +131,7 @@ public class SidebarController {
         boolean isVisible = onlineOrdersSubMenu.isVisible();
         onlineOrdersSubMenu.setVisible(!isVisible);
         onlineOrdersSubMenu.setManaged(!isVisible);
+        SidebarState.onlineOrdersOpen = !isVisible;
     }
 
     @FXML
@@ -88,17 +139,15 @@ public class SidebarController {
         boolean isVisible = reportsSubMenu.isVisible();
         reportsSubMenu.setVisible(!isVisible);
         reportsSubMenu.setManaged(!isVisible);
+        SidebarState.reportsOpen = !isVisible;
     }
-
-    @FXML private VBox accountsSubMenu;
-    @FXML private VBox alertsSubMenu;
-    @FXML private VBox staffSubMenu;
 
     @FXML
     private void toggleAccounts(ActionEvent event) {
         boolean isVisible = accountsSubMenu.isVisible();
         accountsSubMenu.setVisible(!isVisible);
         accountsSubMenu.setManaged(!isVisible);
+        SidebarState.accountsOpen = !isVisible;
     }
 
     @FXML
@@ -106,6 +155,7 @@ public class SidebarController {
         boolean isVisible = alertsSubMenu.isVisible();
         alertsSubMenu.setVisible(!isVisible);
         alertsSubMenu.setManaged(!isVisible);
+        SidebarState.alertsOpen = !isVisible;
     }
 
     @FXML
@@ -113,6 +163,7 @@ public class SidebarController {
         boolean isVisible = staffSubMenu.isVisible();
         staffSubMenu.setVisible(!isVisible);
         staffSubMenu.setManaged(!isVisible);
+        SidebarState.staffOpen = !isVisible;
     }
 
 
@@ -164,7 +215,7 @@ public class SidebarController {
 
     @FXML
     private void handleBillingQuotation(ActionEvent event) {
-        navigateTo(event, "/fxml/Pos.fxml");
+        navigateTo(event, "/fxml/BillingQuotation.fxml");
     }
 
     @FXML
@@ -179,7 +230,6 @@ public class SidebarController {
 
     @FXML
     private void handleBillingSalesReturn(ActionEvent event) {
-        // Return could eventually be its own screen, but Pos is fine for now
         navigateTo(event, "/fxml/Pos.fxml");
     }
 
@@ -190,12 +240,12 @@ public class SidebarController {
 
     @FXML
     private void handleBillingHoldBills(ActionEvent event) {
-        navigateTo(event, "/fxml/Pos.fxml");
+        navigateTo(event, "/fxml/BillingHoldBills.fxml");
     }
 
     @FXML
     private void handleBillingSuspendedBills(ActionEvent event) {
-        navigateTo(event, "/fxml/Pos.fxml");
+        navigateTo(event, "/fxml/BillingSuspendedBills.fxml");
     }
 
     @FXML
@@ -345,6 +395,11 @@ public class SidebarController {
     }
 
     @FXML
+    private void handleGstReports(ActionEvent event) {
+        navigateTo(event, "/fxml/GstReport.fxml");
+    }
+
+    @FXML
     private void handleDoctorMaster(ActionEvent event) {
         navigateTo(event, "/fxml/DoctorMaster.fxml");
     }
@@ -436,7 +491,7 @@ public class SidebarController {
 
     @FXML
     private void handleReportGST(ActionEvent event) {
-        navigateTo(event, "/fxml/ReportGST.fxml");
+        navigateTo(event, "/fxml/GstReport.fxml");
     }
 
     @FXML
@@ -584,7 +639,10 @@ public class SidebarController {
         alert.showAndWait();
     }
 
-    private void navigateTo(ActionEvent event, String fxmlPath) {
+    public void navigateTo(ActionEvent event, String fxmlPath) {
+        if (scrollPane != null) {
+            SidebarState.scrollVValue = scrollPane.getVvalue();
+        }
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource(fxmlPath));
             Parent root = loader.load();

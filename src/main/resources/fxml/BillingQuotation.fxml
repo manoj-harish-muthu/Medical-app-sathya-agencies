@@ -17,69 +17,67 @@
             </padding>
             
             <HBox alignment="CENTER_LEFT" spacing="10">
-                <Label text="Quotation" styleClass="page-title"/>
+                <Label text="Quotations" styleClass="page-title"/>
                 <Region HBox.hgrow="ALWAYS"/>
-                <Label text="Draft" style="-fx-font-weight: bold; -fx-text-fill: #b91c1c; -fx-font-size: 14px;"/>
             </HBox>
             
-            <!-- Customer Details -->
+            <!-- Filters -->
             <HBox spacing="15" alignment="CENTER_LEFT" styleClass="card">
                 <padding>
                     <Insets top="15" right="15" bottom="15" left="15"/>
                 </padding>
                 <VBox spacing="5" HBox.hgrow="ALWAYS">
-                    <Label text="Select Customer" styleClass="form-label"/>
-                    <ComboBox fx:id="cmbCustomer" maxWidth="Infinity" promptText="-- Select Customer --"/>
+                    <Label text="Search Quotation No / Customer" styleClass="form-label"/>
+                    <TextField fx:id="txtSearch" promptText="Type to search..."/>
                 </VBox>
                 <VBox spacing="5" HBox.hgrow="ALWAYS">
-                    <Label text="Select Doctor" styleClass="form-label"/>
-                    <ComboBox fx:id="cmbDoctor" maxWidth="Infinity" promptText="-- Select Doctor --"/>
+                    <Label text="From Date" styleClass="form-label"/>
+                    <DatePicker fx:id="dpFrom" maxWidth="Infinity"/>
                 </VBox>
                 <VBox spacing="5" HBox.hgrow="ALWAYS">
-                    <Label text="Date" styleClass="form-label"/>
-                    <DatePicker fx:id="dpDate" maxWidth="Infinity"/>
+                    <Label text="To Date" styleClass="form-label"/>
+                    <DatePicker fx:id="dpTo" maxWidth="Infinity"/>
+                </VBox>
+                <VBox alignment="BOTTOM_CENTER">
+                    <Button text="Search" styleClass="button-primary"/>
                 </VBox>
             </HBox>
             
-            <!-- Cart Table -->
-            <TableView fx:id="tblCart" VBox.vgrow="ALWAYS" minHeight="200" editable="true">
+            <!-- History Table -->
+            <TableView fx:id="tblHistory" VBox.vgrow="ALWAYS" minHeight="200">
                 <columns>
-                    <TableColumn fx:id="colMedicine" text="Medicine" prefWidth="250">
-                        <cellValueFactory><PropertyValueFactory property="medicineName"/></cellValueFactory>
+                    <TableColumn text="Date" prefWidth="120">
+                        <cellValueFactory><PropertyValueFactory property="saleDate"/></cellValueFactory>
                     </TableColumn>
-                    <TableColumn fx:id="colBatch" text="Batch" prefWidth="120">
-                        <cellValueFactory><PropertyValueFactory property="batchNumber"/></cellValueFactory>
+                    <TableColumn text="Customer" prefWidth="250">
+                        <cellValueFactory><PropertyValueFactory property="customerName"/></cellValueFactory>
                     </TableColumn>
-                    <TableColumn fx:id="colQty" text="Qty" prefWidth="80">
-                        <cellValueFactory><PropertyValueFactory property="quantity"/></cellValueFactory>
+                    <TableColumn text="Invoice No" prefWidth="150">
+                        <cellValueFactory><PropertyValueFactory property="invoiceNo"/></cellValueFactory>
                     </TableColumn>
-                    <TableColumn fx:id="colRate" text="Rate (₹)" prefWidth="100">
-                        <cellValueFactory><PropertyValueFactory property="sellingRate"/></cellValueFactory>
+                    <TableColumn text="Amount (₹)" prefWidth="120">
+                        <cellValueFactory><PropertyValueFactory property="grandTotal"/></cellValueFactory>
                     </TableColumn>
-                    <TableColumn fx:id="colTotal" text="Net Amt" prefWidth="120">
-                        <cellValueFactory><PropertyValueFactory property="netAmount"/></cellValueFactory>
+                    <TableColumn text="Status" prefWidth="100">
+                        <cellValueFactory><PropertyValueFactory property="status"/></cellValueFactory>
                     </TableColumn>
+                    <TableColumn fx:id="colAction" text="Action" prefWidth="100"/>
                 </columns>
             </TableView>
             
-            <!-- Totals & Actions -->
+            <!-- Totals -->
             <HBox spacing="20" alignment="CENTER_RIGHT" styleClass="card">
                 <padding>
                     <Insets top="15" right="15" bottom="15" left="15"/>
                 </padding>
                 
-                <Label text="Items:" styleClass="form-label"/>
+                <Label text="Total Quotations:" styleClass="form-label"/>
                 <Label fx:id="lblTotalItems" text="0" style="-fx-font-weight: bold; -fx-font-size: 16px;"/>
                 
                 <Region prefWidth="30"/>
                 
-                <Label text="Grand Total (₹):" styleClass="form-label"/>
+                <Label text="Total Amount (₹):" styleClass="form-label"/>
                 <Label fx:id="lblGrandTotal" text="0.00" style="-fx-font-weight: bold; -fx-font-size: 24px; -fx-text-fill: #15803d;"/>
-                
-                <Region prefWidth="30"/>
-                
-                <Button text="Cancel" styleClass="button-outline" onAction="#handleDashboard"/>
-                <Button text="Save / Print" styleClass="button-primary" onAction="#handleSave" prefHeight="40" prefWidth="150" style="-fx-font-size: 16px;"/>
             </HBox>
             
         </VBox>

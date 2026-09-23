@@ -1,69 +1,95 @@
 package com.pharmacyerp.controller;
 
-import javafx.beans.property.SimpleDoubleProperty;
-import javafx.beans.property.SimpleStringProperty;
+import com.pharmacyerp.dao.InventoryDAO;
+import com.pharmacyerp.model.ExpiryReportRow;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
-import javafx.fxml.Initializable;
 import javafx.scene.control.*;
+import javafx.scene.control.cell.PropertyValueFactory;
 
-import java.net.URL;
 import java.time.LocalDate;
-import java.util.ResourceBundle;
+import java.util.List;
 
-public class ReportExpiryController implements Initializable {
+public class ReportExpiryController {
 
-    public static class HistoryData {
-        private final SimpleStringProperty date;
-        private final SimpleStringProperty name;
-        private final SimpleStringProperty description;
-        private final SimpleDoubleProperty amount;
-
-        public HistoryData(String date, String name, String description, double amount) {
-            this.date = new SimpleStringProperty(date);
-            this.name = new SimpleStringProperty(name);
-            this.description = new SimpleStringProperty(description);
-            this.amount = new SimpleDoubleProperty(amount);
-        }
-
-        public String getDate() { return date.get(); }
-        public String getName() { return name.get(); }
-        public String getDescription() { return description.get(); }
-        public double getAmount() { return amount.get(); }
-    }
+    @FXML private ComboBox<String> timeframeCombo;
+    @FXML private TableView<ExpiryReportRow> tblExpiry;
     
-    @FXML private TextField txtSearch;
-    @FXML private DatePicker dpFrom;
-    @FXML private DatePicker dpTo;
-    
-    @FXML private TableView<HistoryData> tblHistory;
-    
-    @FXML private Label lblTotalItems;
-    @FXML private Label lblGrandTotal;
+    @FXML private TableColumn<ExpiryReportRow, String> colMedicine;
+    @FXML private TableColumn<ExpiryReportRow, String> colBatch;
+    @FXML private TableColumn<ExpiryReportRow, String> colExpiryDate;
+    @FXML private TableColumn<ExpiryReportRow, Integer> colStock;
+    @FXML private TableColumn<ExpiryReportRow, String> colCompany;
+    @FXML private TableColumn<ExpiryReportRow, String> colStatus;
 
-    private ObservableList<HistoryData> records = FXCollections.observableArrayList();
+    private InventoryDAO inventoryDAO = new InventoryDAO();
+    private ObservableList<ExpiryReportRow> expiryData = FXCollections.observableArrayList();
 
-    @Override
-    public void initialize(URL location, ResourceBundle resources) {
-        dpFrom.setValue(LocalDate.now().minusDays(30));
-        dpTo.setValue(LocalDate.now());
+    @FXML
+    public void initialize() {
+        timeframeCombo.setItems(FXCollections.observableArrayList(
+                "Already Expired (0 Months)",
+                "Next 1 Month",
+                "Next 3 Months",
+                "Next 6 Months"
+        ));
+        timeframeCombo.getSelectionModel().select("Next 3 Months");
         
-        loadDummyData();
-        tblHistory.setItems(records);
-        updateTotals();
+        timeframeCombo.setOnAction(e -> loadData());
+
+        colMedicine.setCellValueFactory(new PropertyValueFactory<>("medicineName"));
+        colBatch.setCellValueFactory(new PropertyValueFactory<>("batchNumber"));
+        colExpiryDate.setCellValueFactory(new PropertyValueFactory<>("expiryDateStr"));
+        colStock.setCellValueFactory(new PropertyValueFactory<>("currentQuantity"));
+        colCompany.setCellValueFactory(new PropertyValueFactory<>("companyName"));
+        colStatus.setCellValueFactory(new PropertyValueFactory<>("status"));
+
+        tblExpiry.setItems(expiryData);
+
+        // Highlight rows based on status
+        tblExpiry.setRowFactory(tv -> new TableRow<ExpiryReportRow>() {
+            @Override
+            protected void updateItem(ExpiryReportRow item, boolean empty) {
+                super.updateItem(item, empty);
+                if (item == null || empty) {
+                    setStyle("");
+                } else {
+                    if ("Expired".equals(item.getStatus())) {
+                        setStyle("-fx-background-color: #fee2e2;"); // Light red
+                    } else if ("Expiring Soon".equals(item.getStatus())) {
+                        setStyle("-fx-background-color: #fef3c7;"); // Light yellow
+                    } else {
+                        setStyle("");
+                    }
+                }
+            }
+        });
+
+        loadData();
     }
 
-    private void loadDummyData() {
-        // Dummy data removed as per user request
+    @FXML
+    private void loadData() {
+        expiryData.clear();
+        String selection = timeframeCombo.getValue();
+        int months = 3;
+        if (selection.contains("0")) months = 0;
+        else if (selection.contains("1")) months = 1;
+        else if (selection.contains("3")) months = 3;
+        else if (selection.contains("6")) months = 6;
+
+        List<ExpiryReportRow> rows = inventoryDAO.getExpiringBatches(months);
+        expiryData.addAll(rows);
     }
 
-    private void updateTotals() {
-        double grandTotal = 0.0;
-        for (HistoryData item : records) {
-            grandTotal += item.getAmount();
-        }
-        lblTotalItems.setText(String.valueOf(records.size()));
-        lblGrandTotal.setText(String.format("%.2f", grandTotal));
+    @FXML
+    private void handleExport() {
+        Alert alert = new Alert(Alert.AlertType.INFORMATION);
+        alert.setTitle("Export");
+        alert.setHeaderText(null);
+        alert.setContentText("Export to CSV feature pending.");
+        alert.showAndWait();
     }
 }

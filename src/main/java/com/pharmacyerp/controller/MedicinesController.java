@@ -47,8 +47,11 @@ public class MedicinesController implements Initializable {
     @FXML private ComboBox<String> cmbItemType;
     
     // Categorization
-    @FXML private ComboBox<String> cmbCompany;
-    @FXML private ComboBox<String> cmbSalt;
+    @FXML private ComboBox<com.pharmacyerp.model.Manufacturer> cmbCompany;
+    @FXML private ComboBox<com.pharmacyerp.model.Category> cmbCategory;
+    @FXML private ComboBox<com.pharmacyerp.model.GenericSalt> cmbSalt;
+    @FXML private ComboBox<com.pharmacyerp.model.Brand> cmbBrand;
+    @FXML private ComboBox<com.pharmacyerp.model.Schedule> cmbSchedule;
     @FXML private TextField txtHsn;
     
     // Taxes
@@ -72,6 +75,9 @@ public class MedicinesController implements Initializable {
     @FXML private ComboBox<String> cmbNegative;
     
     @FXML private Label lblStatus;
+    
+    private int editingMedicineId = -1;
+    private com.pharmacyerp.repository.MedicineRepository repository = new com.pharmacyerp.repository.MedicineRepository();
     
     public static class MedicineData {
         private int id;
@@ -111,20 +117,41 @@ public class MedicinesController implements Initializable {
         colExtra1.setCellValueFactory(new PropertyValueFactory<>("extra1"));
         colExtra2.setCellValueFactory(new PropertyValueFactory<>("extra2"));
         
-        // Add Edit Action Column
+        // Add Edit & Delete Action Column
         javafx.util.Callback<TableColumn<MedicineData, Void>, TableCell<MedicineData, Void>> cellFactory = new javafx.util.Callback<TableColumn<MedicineData, Void>, TableCell<MedicineData, Void>>() {
             @Override
             public TableCell<MedicineData, Void> call(final TableColumn<MedicineData, Void> param) {
                 return new TableCell<MedicineData, Void>() {
-                    private final Button btn = new Button("Edit");
+                    private final Button editBtn = new Button("Edit");
+                    private final Button delBtn = new Button("Del");
+                    private final javafx.scene.layout.HBox pane = new javafx.scene.layout.HBox(5, editBtn, delBtn);
 
                     {
-                        btn.setOnAction((ActionEvent event) -> {
+                        editBtn.setStyle("-fx-background-color: #0d9488; -fx-text-fill: white; -fx-cursor: hand; -fx-font-size: 11px;");
+                        delBtn.setStyle("-fx-background-color: #ef4444; -fx-text-fill: white; -fx-cursor: hand; -fx-font-size: 11px;");
+
+                        editBtn.setOnAction((ActionEvent event) -> {
                             MedicineData data = getTableView().getItems().get(getIndex());
-                            System.out.println("Editing medicine: " + data.getName());
-                            // TODO: Add logic to fetch Medicine by ID and populate the formView here
+                            Medicine m = com.pharmacyerp.dao.MedicineDAO.getMedicineById(data.getId());
+                            if (m != null) {
+                                editingMedicineId = m.getMedicineId();
+                                populateForm(m);
+                                showFormView();
+                            }
                         });
-                        btn.setStyle("-fx-background-color: #0d9488; -fx-text-fill: white; -fx-cursor: hand;");
+
+                        delBtn.setOnAction((ActionEvent event) -> {
+                            MedicineData data = getTableView().getItems().get(getIndex());
+                            Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
+                            alert.setTitle("Confirm Deletion");
+                            alert.setHeaderText("Delete Medicine: " + data.getName());
+                            alert.setContentText("Are you sure you want to delete this medicine?");
+                            if (alert.showAndWait().orElse(ButtonType.CANCEL) == ButtonType.OK) {
+                                if (MedicineDAO.deleteMedicine(data.getId())) {
+                                    loadData();
+                                }
+                            }
+                        });
                     }
 
                     @Override
@@ -133,7 +160,7 @@ public class MedicinesController implements Initializable {
                         if (empty) {
                             setGraphic(null);
                         } else {
-                            setGraphic(btn);
+                            setGraphic(pane);
                         }
                     }
                 };
@@ -142,6 +169,61 @@ public class MedicinesController implements Initializable {
         colAction.setCellFactory(cellFactory);
 
         tblData.setItems(records);
+    }
+    
+    private void populateForm(Medicine m) {
+        txtProduct.setText(m.getMedicineName());
+        txtPacking.setText(m.getPacking());
+        txtUnit1.setText(m.getUnit1st());
+        txtUnit2.setText(m.getUnit2nd());
+        txtHsn.setText(m.getHsnCode());
+        
+        txtSgst.setText(String.format("%.2f", m.getSgst()));
+        txtCgst.setText(String.format("%.2f", m.getCgst()));
+        txtIgst.setText(String.format("%.2f", m.getIgst()));
+        
+        txtMrp.setText(String.format("%.2f", m.getMrp()));
+        txtPRate.setText(String.format("%.2f", m.getPurchaseRate()));
+        txtCost.setText(String.format("%.5f", m.getCostPerPcs()));
+        txtRateA.setText(String.format("%.2f", m.getRateA()));
+        txtRateB.setText(String.format("%.2f", m.getRateB()));
+        txtRateC.setText(String.format("%.2f", m.getRateC()));
+        
+        txtConvStri.setText(String.valueOf(m.getConvStr()));
+        txtConvCas.setText(String.valueOf(m.getConvCas()));
+        
+        if (m.getCompanyId() > 0) {
+            for (com.pharmacyerp.model.Manufacturer c : cmbCompany.getItems()) {
+                if (c.getCompanyId() == m.getCompanyId()) { cmbCompany.setValue(c); break; }
+            }
+        }
+        if (m.getCategoryId() > 0) {
+            for (com.pharmacyerp.model.Category c : cmbCategory.getItems()) {
+                if (c.getCategoryId() == m.getCategoryId()) { cmbCategory.setValue(c); break; }
+            }
+        }
+        if (m.getBrandId() > 0) {
+            for (com.pharmacyerp.model.Brand b : cmbBrand.getItems()) {
+                if (b.getBrandId() == m.getBrandId()) { cmbBrand.setValue(b); break; }
+            }
+        }
+        if (m.getScheduleId() > 0) {
+            for (com.pharmacyerp.model.Schedule s : cmbSchedule.getItems()) {
+                if (s.getScheduleId() == m.getScheduleId()) { cmbSchedule.setValue(s); break; }
+            }
+        }
+        if (m.getSaltName() != null && !m.getSaltName().isEmpty()) {
+            for (com.pharmacyerp.model.GenericSalt s : cmbSalt.getItems()) {
+                if (s.getSaltName().equalsIgnoreCase(m.getSaltName())) { cmbSalt.setValue(s); break; }
+            }
+        }
+        
+        if (m.getDecimalAllowed() != null) cmbDecimal.setValue(m.getDecimalAllowed());
+        if (m.getColorType() != null) cmbColorType.setValue(m.getColorType());
+        if (m.getItemType() != null) cmbItemType.setValue(m.getItemType());
+        if (m.getLocalTaxType() != null) cmbLocal.setValue(m.getLocalTaxType());
+        if (m.getCentralTaxType() != null) cmbCentral.setValue(m.getCentralTaxType());
+        if (m.getNegativeAllowed() != null) cmbNegative.setValue(m.getNegativeAllowed());
     }
 
     @FXML
@@ -190,9 +272,41 @@ public class MedicinesController implements Initializable {
         cmbNegative.setItems(FXCollections.observableArrayList("No", "Yes"));
         cmbNegative.getSelectionModel().selectFirst();
         
-        // Dummy data for Company and Salt for now
-        cmbCompany.setItems(FXCollections.observableArrayList("AMRUTANJAN HEALTH CARE", "CIPLA", "SUN PHARMA"));
-        cmbSalt.setItems(FXCollections.observableArrayList("AYURVEDIC*", "PARACETAMOL 500MG"));
+        // Load Masters from DB
+        com.pharmacyerp.dao.ManufacturerDAO mDao = new com.pharmacyerp.dao.ManufacturerDAO();
+        cmbCompany.setItems(javafx.collections.FXCollections.observableArrayList(mDao.getAllManufacturers()));
+        cmbCompany.setConverter(new javafx.util.StringConverter<com.pharmacyerp.model.Manufacturer>() {
+            @Override public String toString(com.pharmacyerp.model.Manufacturer m) { return m == null ? "" : m.getCompanyName(); }
+            @Override public com.pharmacyerp.model.Manufacturer fromString(String s) { return null; }
+        });
+
+        com.pharmacyerp.dao.CategoryDAO cDao = new com.pharmacyerp.dao.CategoryDAO();
+        cmbCategory.setItems(javafx.collections.FXCollections.observableArrayList(cDao.getAllCategories()));
+        cmbCategory.setConverter(new javafx.util.StringConverter<com.pharmacyerp.model.Category>() {
+            @Override public String toString(com.pharmacyerp.model.Category c) { return c == null ? "" : c.getCategoryName(); }
+            @Override public com.pharmacyerp.model.Category fromString(String s) { return null; }
+        });
+
+        com.pharmacyerp.dao.GenericSaltDAO sDao = new com.pharmacyerp.dao.GenericSaltDAO();
+        cmbSalt.setItems(javafx.collections.FXCollections.observableArrayList(sDao.getAllSalts()));
+        cmbSalt.setConverter(new javafx.util.StringConverter<com.pharmacyerp.model.GenericSalt>() {
+            @Override public String toString(com.pharmacyerp.model.GenericSalt s) { return s == null ? "" : s.getSaltName(); }
+            @Override public com.pharmacyerp.model.GenericSalt fromString(String s) { return null; }
+        });
+
+        com.pharmacyerp.dao.BrandDAO bDao = new com.pharmacyerp.dao.BrandDAO();
+        cmbBrand.setItems(javafx.collections.FXCollections.observableArrayList(bDao.getAllBrands()));
+        cmbBrand.setConverter(new javafx.util.StringConverter<com.pharmacyerp.model.Brand>() {
+            @Override public String toString(com.pharmacyerp.model.Brand b) { return b == null ? "" : b.getBrandName(); }
+            @Override public com.pharmacyerp.model.Brand fromString(String s) { return null; }
+        });
+
+        com.pharmacyerp.dao.ScheduleDAO schDao = new com.pharmacyerp.dao.ScheduleDAO();
+        cmbSchedule.setItems(javafx.collections.FXCollections.observableArrayList(schDao.getAllSchedules()));
+        cmbSchedule.setConverter(new javafx.util.StringConverter<com.pharmacyerp.model.Schedule>() {
+            @Override public String toString(com.pharmacyerp.model.Schedule s) { return s == null ? "" : s.getScheduleName(); }
+            @Override public com.pharmacyerp.model.Schedule fromString(String s) { return null; }
+        });
     }
 
     @FXML
@@ -205,32 +319,68 @@ public class MedicinesController implements Initializable {
         }
 
         try {
-            boolean success = MedicineDAO.saveErpMedicine(
-                cmbStatus.getValue(), cmbType.getValue(), cmbHide.getValue(),
-                product, txtPacking.getText(), txtUnit1.getText(), txtUnit2.getText(), cmbDecimal.getValue(),
-                cmbColorType.getValue(), cmbItemType.getValue(), cmbCompany.getValue(), cmbSalt.getValue(), txtHsn.getText(),
-                cmbLocal.getValue(), cmbCentral.getValue(),
-                parseDouble(txtSgst.getText()), parseDouble(txtIgst.getText()), parseDouble(txtCgst.getText()),
-                parseDouble(txtMrp.getText()), parseDouble(txtPRate.getText()), parseDouble(txtCost.getText()),
-                parseDouble(txtRateA.getText()), parseDouble(txtRateB.getText()), parseDouble(txtRateC.getText()),
-                parseInt(txtConvStri.getText()), parseInt(txtConvCas.getText()), cmbNegative.getValue()
-            );
+            com.pharmacyerp.model.Medicine med = new com.pharmacyerp.model.Medicine();
+            med.setMedicineName(product.trim().toUpperCase());
+            
+            if (cmbCompany.getValue() != null) med.setCompanyId(cmbCompany.getValue().getCompanyId());
+            if (cmbCategory.getValue() != null) med.setCategoryId(cmbCategory.getValue().getCategoryId());
+            if (cmbBrand.getValue() != null) med.setBrandId(cmbBrand.getValue().getBrandId());
+            if (cmbSchedule.getValue() != null) med.setScheduleId(cmbSchedule.getValue().getScheduleId());
+            if (cmbSalt.getValue() != null) med.setSaltName(cmbSalt.getValue().getSaltName());
+
+            med.setPacking(txtPacking.getText().trim().toUpperCase());
+            med.setUnit1st(txtUnit1.getText().trim().toUpperCase());
+            med.setUnit2nd(txtUnit2.getText().trim().toUpperCase());
+            med.setDecimalAllowed(cmbDecimal.getValue());
+            med.setColorType(cmbColorType.getValue());
+            med.setItemType(cmbItemType.getValue());
+            med.setHsnCode(txtHsn.getText().trim());
+
+            med.setCgst(parseDouble(txtCgst.getText()));
+            med.setSgst(parseDouble(txtSgst.getText()));
+            med.setIgst(parseDouble(txtIgst.getText()));
+
+            med.setLocalTaxType(cmbLocal.getValue());
+            med.setCentralTaxType(cmbCentral.getValue());
+            med.setNegativeAllowed(cmbNegative.getValue());
+
+            // Default Batch Details
+            med.setBatchNumber("OPENING");
+            med.setQuantity(0); // Assuming 0 for new ERP item opening stock
+            med.setMrp(parseDouble(txtMrp.getText()));
+            med.setPurchaseRate(parseDouble(txtPRate.getText()));
+            med.setSellingRate(parseDouble(txtRateA.getText()));
+            med.setRateA(parseDouble(txtRateA.getText()));
+            med.setRateB(parseDouble(txtRateB.getText()));
+            med.setRateC(parseDouble(txtRateC.getText()));
+            med.setCostPerPcs(parseDouble(txtCost.getText()));
+            med.setConvStr(parseInt(txtConvStri.getText()));
+            med.setConvCas(parseInt(txtConvCas.getText()));
+
+            boolean success;
+            if (editingMedicineId != -1) {
+                med.setMedicineId(editingMedicineId);
+                success = repository.updateMedicineWithBatch(med);
+            } else {
+                success = repository.saveMedicineWithBatch(med);
+            }
 
             if (success) {
-                // Success! Switch back to list view and refresh
                 showListView();
             } else {
                 lblStatus.setText("Failed to save product.");
                 lblStatus.setStyle("-fx-text-fill: #dc2626; -fx-font-weight: bold;");
             }
         } catch (Exception e) {
-            lblStatus.setText("Invalid number format in pricing or taxes.");
+            lblStatus.setText("Error: " + e.getMessage());
             lblStatus.setStyle("-fx-text-fill: #dc2626; -fx-font-weight: bold;");
+            e.printStackTrace();
         }
     }
 
     @FXML
     private void clearForm() {
+        editingMedicineId = -1;
         txtProduct.clear();
         txtPacking.clear();
         txtUnit1.clear();
@@ -252,7 +402,10 @@ public class MedicinesController implements Initializable {
         txtConvCas.setText("0");
         
         cmbCompany.getSelectionModel().clearSelection();
+        cmbCategory.getSelectionModel().clearSelection();
         cmbSalt.getSelectionModel().clearSelection();
+        cmbBrand.getSelectionModel().clearSelection();
+        cmbSchedule.getSelectionModel().clearSelection();
         
         initComboBoxes();
         lblStatus.setText("");

@@ -12,7 +12,7 @@ import java.util.List;
 public class MedicineRepository {
 
     private static final String BASE_SELECT = 
-        "SELECT m.*, c.category_name, comp.company_name, " +
+        "SELECT m.*, c.category_name, comp.company_name, b.brand_name, s.schedule_name, " +
         "(SELECT COALESCE(SUM(current_quantity), 0) FROM medicine_batches WHERE medicine_id = m.medicine_id AND (expiry_date IS NULL OR expiry_date >= CURRENT_DATE)) as total_stock, " +
         "(SELECT mrp FROM medicine_batches WHERE medicine_id = m.medicine_id ORDER BY (current_quantity > 0) DESC, expiry_date ASC LIMIT 1) as current_mrp, " +
         "(SELECT batch_number FROM medicine_batches WHERE medicine_id = m.medicine_id ORDER BY (current_quantity > 0) DESC, expiry_date ASC LIMIT 1) as batch_number, " +
@@ -28,6 +28,8 @@ public class MedicineRepository {
         "FROM medicines m " +
         "LEFT JOIN medicine_categories c ON m.category_id = c.category_id " +
         "LEFT JOIN medicine_companies comp ON m.company_id = comp.company_id " +
+        "LEFT JOIN medicine_brands b ON m.brand_id = b.brand_id " +
+        "LEFT JOIN medicine_schedules s ON m.schedule_id = s.schedule_id " +
         "WHERE m.active = 1 ";
 
     public List<Medicine> getAllActiveMedicines() {
@@ -95,6 +97,10 @@ public class MedicineRepository {
         
         med.setCategoryName(rs.getString("category_name") != null ? rs.getString("category_name") : "");
         med.setCompanyName(rs.getString("company_name") != null ? rs.getString("company_name") : "");
+        med.setBrandId(rs.getInt("brand_id"));
+        med.setScheduleId(rs.getInt("schedule_id"));
+        med.setBrandName(rs.getString("brand_name") != null ? rs.getString("brand_name") : "");
+        med.setScheduleName(rs.getString("schedule_name") != null ? rs.getString("schedule_name") : "");
         med.setTotalStock(rs.getInt("total_stock"));
         med.setCurrentMrp(rs.getDouble("current_mrp"));
 
@@ -130,7 +136,7 @@ public class MedicineRepository {
     }
 
     public boolean saveMedicineWithBatch(Medicine med) {
-        String insertMedicineSql = "INSERT INTO medicines (medicine_name, salt_name, active, packing, unit_1st, unit_2nd, decimal_allowed, color_type, item_type, cgst, sgst, igst, local_tax_type, central_tax_type, negative_allowed) VALUES (?, ?, 1, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+        String insertMedicineSql = "INSERT INTO medicines (medicine_name, salt_name, company_id, category_id, brand_id, schedule_id, active, packing, unit_1st, unit_2nd, decimal_allowed, color_type, item_type, cgst, sgst, igst, local_tax_type, central_tax_type, negative_allowed) VALUES (?, ?, ?, ?, ?, ?, 1, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
         String insertBatchSql = "INSERT INTO medicine_batches (medicine_id, batch_number, expiry_date, purchase_rate, mrp, selling_rate, current_quantity, rate_a, rate_b, rate_c, cost_per_pcs, conv_str, conv_cas) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
         
         Connection conn = null;
@@ -142,18 +148,24 @@ public class MedicineRepository {
             try (PreparedStatement stmt = conn.prepareStatement(insertMedicineSql, PreparedStatement.RETURN_GENERATED_KEYS)) {
                 stmt.setString(1, med.getMedicineName());
                 stmt.setString(2, med.getSaltName());
-                stmt.setString(3, med.getPacking());
-                stmt.setString(4, med.getUnit1st());
-                stmt.setString(5, med.getUnit2nd());
-                stmt.setString(6, med.getDecimalAllowed());
-                stmt.setString(7, med.getColorType());
-                stmt.setString(8, med.getItemType());
-                stmt.setDouble(9, med.getCgst());
-                stmt.setDouble(10, med.getSgst());
-                stmt.setDouble(11, med.getIgst());
-                stmt.setString(12, med.getLocalTaxType());
-                stmt.setString(13, med.getCentralTaxType());
-                stmt.setString(14, med.getNegativeAllowed());
+                
+                if (med.getCompanyId() > 0) stmt.setInt(3, med.getCompanyId()); else stmt.setNull(3, java.sql.Types.INTEGER);
+                if (med.getCategoryId() > 0) stmt.setInt(4, med.getCategoryId()); else stmt.setNull(4, java.sql.Types.INTEGER);
+                if (med.getBrandId() > 0) stmt.setInt(5, med.getBrandId()); else stmt.setNull(5, java.sql.Types.INTEGER);
+                if (med.getScheduleId() > 0) stmt.setInt(6, med.getScheduleId()); else stmt.setNull(6, java.sql.Types.INTEGER);
+                
+                stmt.setString(7, med.getPacking());
+                stmt.setString(8, med.getUnit1st());
+                stmt.setString(9, med.getUnit2nd());
+                stmt.setString(10, med.getDecimalAllowed());
+                stmt.setString(11, med.getColorType());
+                stmt.setString(12, med.getItemType());
+                stmt.setDouble(13, med.getCgst());
+                stmt.setDouble(14, med.getSgst());
+                stmt.setDouble(15, med.getIgst());
+                stmt.setString(16, med.getLocalTaxType());
+                stmt.setString(17, med.getCentralTaxType());
+                stmt.setString(18, med.getNegativeAllowed());
                 stmt.executeUpdate();
                 
                 try (ResultSet rs = stmt.getGeneratedKeys()) {
@@ -210,7 +222,7 @@ public class MedicineRepository {
     }
 
     public boolean updateMedicineWithBatch(Medicine med) {
-        String updateMedicineSql = "UPDATE medicines SET medicine_name=?, salt_name=?, packing=?, unit_1st=?, unit_2nd=?, decimal_allowed=?, color_type=?, item_type=?, cgst=?, sgst=?, igst=?, local_tax_type=?, central_tax_type=?, negative_allowed=? WHERE medicine_id=?";
+        String updateMedicineSql = "UPDATE medicines SET medicine_name=?, salt_name=?, company_id=?, category_id=?, brand_id=?, schedule_id=?, packing=?, unit_1st=?, unit_2nd=?, decimal_allowed=?, color_type=?, item_type=?, cgst=?, sgst=?, igst=?, local_tax_type=?, central_tax_type=?, negative_allowed=? WHERE medicine_id=?";
         String updateBatchSql = "UPDATE medicine_batches SET batch_number=?, expiry_date=?, purchase_rate=?, mrp=?, selling_rate=?, current_quantity=?, rate_a=?, rate_b=?, rate_c=?, cost_per_pcs=?, conv_str=?, conv_cas=? WHERE medicine_id=?";
         
         Connection conn = null;
@@ -221,19 +233,25 @@ public class MedicineRepository {
             try (PreparedStatement stmt = conn.prepareStatement(updateMedicineSql)) {
                 stmt.setString(1, med.getMedicineName());
                 stmt.setString(2, med.getSaltName());
-                stmt.setString(3, med.getPacking());
-                stmt.setString(4, med.getUnit1st());
-                stmt.setString(5, med.getUnit2nd());
-                stmt.setString(6, med.getDecimalAllowed());
-                stmt.setString(7, med.getColorType());
-                stmt.setString(8, med.getItemType());
-                stmt.setDouble(9, med.getCgst());
-                stmt.setDouble(10, med.getSgst());
-                stmt.setDouble(11, med.getIgst());
-                stmt.setString(12, med.getLocalTaxType());
-                stmt.setString(13, med.getCentralTaxType());
-                stmt.setString(14, med.getNegativeAllowed());
-                stmt.setInt(15, med.getMedicineId());
+                
+                if (med.getCompanyId() > 0) stmt.setInt(3, med.getCompanyId()); else stmt.setNull(3, java.sql.Types.INTEGER);
+                if (med.getCategoryId() > 0) stmt.setInt(4, med.getCategoryId()); else stmt.setNull(4, java.sql.Types.INTEGER);
+                if (med.getBrandId() > 0) stmt.setInt(5, med.getBrandId()); else stmt.setNull(5, java.sql.Types.INTEGER);
+                if (med.getScheduleId() > 0) stmt.setInt(6, med.getScheduleId()); else stmt.setNull(6, java.sql.Types.INTEGER);
+                
+                stmt.setString(7, med.getPacking());
+                stmt.setString(8, med.getUnit1st());
+                stmt.setString(9, med.getUnit2nd());
+                stmt.setString(10, med.getDecimalAllowed());
+                stmt.setString(11, med.getColorType());
+                stmt.setString(12, med.getItemType());
+                stmt.setDouble(13, med.getCgst());
+                stmt.setDouble(14, med.getSgst());
+                stmt.setDouble(15, med.getIgst());
+                stmt.setString(16, med.getLocalTaxType());
+                stmt.setString(17, med.getCentralTaxType());
+                stmt.setString(18, med.getNegativeAllowed());
+                stmt.setInt(19, med.getMedicineId());
                 stmt.executeUpdate();
             }
             

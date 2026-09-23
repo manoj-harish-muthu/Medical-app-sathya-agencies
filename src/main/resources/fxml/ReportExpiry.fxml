@@ -5,17 +5,21 @@
 <?import javafx.scene.control.cell.PropertyValueFactory?>
 
 <BorderPane xmlns:fx="http://javafx.com/fxml" fx:controller="com.pharmacyerp.controller.ReportExpiryController" styleClass="root" stylesheets="@../css/style.css">
+    
     <left>
         <fx:include source="Sidebar.fxml"/>
     </left>
+    
     <center>
-        <VBox spacing="15">
+        <VBox spacing="20">
             <padding>
-                <Insets top="20" right="20" bottom="20" left="20"/>
+                <Insets top="20" right="30" bottom="20" left="30"/>
             </padding>
+            
             <HBox alignment="CENTER_LEFT" spacing="10">
-                <Label text="Expiry Report" styleClass="page-title"/>
+                <Label text="Batch-wise Expiry Report" styleClass="page-title"/>
                 <Region HBox.hgrow="ALWAYS"/>
+                <Button text="Export to Excel" onAction="#handleExport" styleClass="button-primary"/>
             </HBox>
             
             <!-- Filters -->
@@ -23,50 +27,35 @@
                 <padding>
                     <Insets top="15" right="15" bottom="15" left="15"/>
                 </padding>
-                <VBox spacing="5" HBox.hgrow="ALWAYS">
-                    <Label text="Search Filter" styleClass="form-label"/>
-                    <TextField fx:id="txtSearch" promptText="Type to filter..."/>
-                </VBox>
-                <VBox spacing="5" HBox.hgrow="ALWAYS">
-                    <Label text="From Date" styleClass="form-label"/>
-                    <DatePicker fx:id="dpFrom" maxWidth="Infinity"/>
-                </VBox>
-                <VBox spacing="5" HBox.hgrow="ALWAYS">
-                    <Label text="To Date" styleClass="form-label"/>
-                    <DatePicker fx:id="dpTo" maxWidth="Infinity"/>
-                </VBox>
-                <VBox alignment="BOTTOM_CENTER">
-                    <Button text="Search" styleClass="button-primary"/>
-                </VBox>
+                <Label text="Show Batches:" styleClass="form-label" style="-fx-font-weight: bold;"/>
+                <ComboBox fx:id="timeframeCombo" prefWidth="250"/>
+                
+                <Region HBox.hgrow="ALWAYS"/>
+                
+                <!-- Legend for highlights -->
+                <HBox spacing="10" alignment="CENTER_RIGHT">
+                    <Label text="Legend:" style="-fx-font-weight: bold;"/>
+                    <Label text=" Already Expired " style="-fx-background-color: #fee2e2; -fx-padding: 3px;"/>
+                    <Label text=" Expiring Soon (&lt;1M) " style="-fx-background-color: #fef3c7; -fx-padding: 3px;"/>
+                </HBox>
             </HBox>
             
-            <TableView fx:id="tblHistory" VBox.vgrow="ALWAYS" minHeight="200">
-                <columns>
-                    <TableColumn text="Date / Ref" prefWidth="120">
-                        <cellValueFactory><PropertyValueFactory property="date"/></cellValueFactory>
-                    </TableColumn>
-                    <TableColumn text="Entity / Name" prefWidth="250">
-                        <cellValueFactory><PropertyValueFactory property="name"/></cellValueFactory>
-                    </TableColumn>
-                    <TableColumn text="Details" prefWidth="300">
-                        <cellValueFactory><PropertyValueFactory property="description"/></cellValueFactory>
-                    </TableColumn>
-                    <TableColumn text="Value / Amount" prefWidth="150">
-                        <cellValueFactory><PropertyValueFactory property="amount"/></cellValueFactory>
-                    </TableColumn>
-                </columns>
-            </TableView>
-            
-            <HBox spacing="20" alignment="CENTER_RIGHT" styleClass="card">
+            <VBox VBox.vgrow="ALWAYS" styleClass="card">
                 <padding>
                     <Insets top="15" right="15" bottom="15" left="15"/>
                 </padding>
-                <Label text="Total Items/Records:" styleClass="form-label"/>
-                <Label fx:id="lblTotalItems" text="0" style="-fx-font-weight: bold; -fx-font-size: 16px;"/>
-                <Region prefWidth="30"/>
-                <Label text="Total Value (₹):" styleClass="form-label"/>
-                <Label fx:id="lblGrandTotal" text="0.00" style="-fx-font-weight: bold; -fx-font-size: 24px; -fx-text-fill: #15803d;"/>
-            </HBox>
+                <TableView fx:id="tblExpiry" VBox.vgrow="ALWAYS">
+                    <columns>
+                        <TableColumn fx:id="colMedicine" text="Medicine Name" prefWidth="250"/>
+                        <TableColumn fx:id="colCompany" text="Company" prefWidth="180"/>
+                        <TableColumn fx:id="colBatch" text="Batch No." prefWidth="120"/>
+                        <TableColumn fx:id="colExpiryDate" text="Expiry Date" prefWidth="120"/>
+                        <TableColumn fx:id="colStock" text="Current Stock" prefWidth="120"/>
+                        <TableColumn fx:id="colStatus" text="Status" prefWidth="120"/>
+                    </columns>
+                </TableView>
+            </VBox>
+            
         </VBox>
     </center>
 </BorderPane>

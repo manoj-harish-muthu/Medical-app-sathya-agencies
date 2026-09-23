@@ -12,6 +12,24 @@ import java.util.List;
 
 public class MedicineDAO {
     
+    public static List<Medicine> getAllMedicines() {
+        List<Medicine> medicines = new ArrayList<>();
+        String sql = "SELECT medicine_id, medicine_name FROM medicines ORDER BY medicine_name ASC";
+        try (Connection conn = DatabaseManager.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql);
+             ResultSet rs = stmt.executeQuery()) {
+            while (rs.next()) {
+                Medicine m = new Medicine();
+                m.setMedicineId(rs.getInt("medicine_id"));
+                m.setMedicineName(rs.getString("medicine_name"));
+                medicines.add(m);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return medicines;
+    }
+
     public static List<Medicine> searchMedicines(String query) {
         List<Medicine> medicines = new ArrayList<>();
         String sql = "SELECT m.medicine_id, m.medicine_name, m.salt_name, m.hsn_code, c.company_name " +
@@ -123,6 +141,89 @@ public class MedicineDAO {
             if (conn != null) {
                 try { conn.setAutoCommit(true); conn.close(); } catch (Exception ignored) {}
             }
+        }
+    }
+
+    public static Medicine getMedicineById(int id) {
+        String sql = "SELECT m.*, c.company_name, " +
+                     "mb.batch_number, mb.expiry_date, mb.quantity, mb.purchase_rate, mb.mrp, mb.selling_rate, " +
+                     "mb.rate_a, mb.rate_b, mb.rate_c, mb.cost_per_pcs, mb.conv_str, mb.conv_cas " +
+                     "FROM medicines m " +
+                     "LEFT JOIN medicine_companies c ON m.company_id = c.company_id " +
+                     "LEFT JOIN medicine_batches mb ON m.medicine_id = mb.medicine_id " +
+                     "WHERE m.medicine_id = ? " +
+                     "ORDER BY mb.batch_id DESC LIMIT 1";
+        try (Connection conn = DatabaseManager.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+            stmt.setInt(1, id);
+            try (ResultSet rs = stmt.executeQuery()) {
+                if (rs.next()) {
+                    Medicine m = new Medicine();
+                    m.setMedicineId(rs.getInt("medicine_id"));
+                    m.setMedicineName(rs.getString("medicine_name"));
+                    m.setSaltName(rs.getString("salt_name"));
+                    m.setHsnCode(rs.getString("hsn_code"));
+                    m.setCompanyName(rs.getString("company_name"));
+                    m.setPacking(rs.getString("packing"));
+                    m.setUnit1st(rs.getString("unit_1st"));
+                    m.setUnit2nd(rs.getString("unit_2nd"));
+                    m.setDecimalAllowed(rs.getString("decimal_allowed"));
+                    m.setColorType(rs.getString("color_type"));
+                    m.setItemType(rs.getString("item_type"));
+                    m.setLocalTaxType(rs.getString("local_tax_type"));
+                    m.setCentralTaxType(rs.getString("central_tax_type"));
+                    
+                    java.math.BigDecimal sgst = rs.getBigDecimal("sgst");
+                    java.math.BigDecimal cgst = rs.getBigDecimal("cgst");
+                    java.math.BigDecimal igst = rs.getBigDecimal("igst");
+                    m.setSgst(sgst != null ? sgst.doubleValue() : 0.0);
+                    m.setCgst(cgst != null ? cgst.doubleValue() : 0.0);
+                    m.setIgst(igst != null ? igst.doubleValue() : 0.0);
+                    
+                    m.setNegativeAllowed(rs.getString("negative_allowed"));
+                    
+                    // Batch fields
+                    m.setBatchNumber(rs.getString("batch_number"));
+                    java.sql.Date expDate = rs.getDate("expiry_date");
+                    if (expDate != null) m.setExpiryDate(expDate.toLocalDate());
+                    
+                    java.math.BigDecimal purchaseRate = rs.getBigDecimal("purchase_rate");
+                    java.math.BigDecimal mrp = rs.getBigDecimal("mrp");
+                    java.math.BigDecimal sellingRate = rs.getBigDecimal("selling_rate");
+                    java.math.BigDecimal rateA = rs.getBigDecimal("rate_a");
+                    java.math.BigDecimal rateB = rs.getBigDecimal("rate_b");
+                    java.math.BigDecimal rateC = rs.getBigDecimal("rate_c");
+                    java.math.BigDecimal costPerPcs = rs.getBigDecimal("cost_per_pcs");
+                    
+                    m.setPurchaseRate(purchaseRate != null ? purchaseRate.doubleValue() : 0.0);
+                    m.setMrp(mrp != null ? mrp.doubleValue() : 0.0);
+                    m.setSellingRate(sellingRate != null ? sellingRate.doubleValue() : 0.0);
+                    m.setRateA(rateA != null ? rateA.doubleValue() : 0.0);
+                    m.setRateB(rateB != null ? rateB.doubleValue() : 0.0);
+                    m.setRateC(rateC != null ? rateC.doubleValue() : 0.0);
+                    m.setCostPerPcs(costPerPcs != null ? costPerPcs.doubleValue() : 0.0);
+                    
+                    m.setConvStr(rs.getInt("conv_str"));
+                    m.setConvCas(rs.getInt("conv_cas"));
+                    
+                    return m;
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    public static boolean deleteMedicine(int id) {
+        String sql = "DELETE FROM medicines WHERE medicine_id = ?";
+        try (Connection conn = DatabaseManager.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+            stmt.setInt(1, id);
+            return stmt.executeUpdate() > 0;
+        } catch (Exception e) {
+            e.printStackTrace();
+            return false;
         }
     }
 }

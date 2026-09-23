@@ -16,7 +16,7 @@ public class SalesDAO {
 
     public List<Sale> getAllSales() {
         List<Sale> sales = new ArrayList<>();
-        String sql = "SELECT * FROM sales ORDER BY sale_date DESC LIMIT 100";
+        String sql = "SELECT * FROM sales WHERE status != 'QUOTATION' ORDER BY sale_date DESC LIMIT 100";
 
         try (Connection conn = DatabaseManager.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql);
@@ -41,9 +41,37 @@ public class SalesDAO {
         return sales;
     }
 
+    public List<Sale> getSalesByStatus(String status) {
+        List<Sale> sales = new ArrayList<>();
+        String sql = "SELECT * FROM sales WHERE status = ? ORDER BY sale_date DESC";
+
+        try (Connection conn = DatabaseManager.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+            stmt.setString(1, status);
+            try (ResultSet rs = stmt.executeQuery()) {
+                while (rs.next()) {
+                    Sale sale = new Sale();
+                    sale.setSaleId(rs.getInt("sale_id"));
+                    sale.setInvoiceNo(rs.getString("invoice_no"));
+                    sale.setSaleDate(rs.getTimestamp("sale_date"));
+                    sale.setCustomerName(rs.getString("customer_name"));
+                    sale.setCustomerPhone(rs.getString("customer_phone"));
+                    sale.setDoctorName(rs.getString("doctor_name"));
+                    sale.setPaymentMode(rs.getString("payment_mode"));
+                    sale.setGrandTotal(rs.getBigDecimal("grand_total"));
+                    sale.setStatus(rs.getString("status"));
+                    sales.add(sale);
+                }
+            }
+        } catch (Exception e) {
+            logger.error("Error fetching sales by status", e);
+        }
+        return sales;
+    }
+
     public List<Sale> getDailySales(java.time.LocalDate date) {
         List<Sale> sales = new ArrayList<>();
-        String sql = "SELECT * FROM sales WHERE DATE(sale_date) = ? ORDER BY sale_date DESC";
+        String sql = "SELECT * FROM sales WHERE DATE(sale_date) = CAST(? AS DATE) AND status != 'QUOTATION' ORDER BY sale_date DESC";
 
         try (Connection conn = DatabaseManager.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
@@ -72,7 +100,7 @@ public class SalesDAO {
     public com.pharmacyerp.model.DailySummary getDailySummary(java.time.LocalDate date) {
         com.pharmacyerp.model.DailySummary summary = new com.pharmacyerp.model.DailySummary();
         String sql = "SELECT payment_mode, COUNT(sale_id) as invoices, SUM(grand_total) as amount " +
-                     "FROM sales WHERE DATE(sale_date) = ? AND status = 'COMPLETED' " +
+                     "FROM sales WHERE DATE(sale_date) = CAST(? AS DATE) AND status = 'COMPLETED' " +
                      "GROUP BY payment_mode";
 
         try (Connection conn = DatabaseManager.getConnection();
@@ -156,5 +184,64 @@ public class SalesDAO {
             logger.error("Error fetching sale items", e);
         }
         return items;
+    }
+
+    public boolean deleteSale(int saleId) {
+        return deleteSale(saleId, false);
+    }
+
+    public boolean deleteSale(int saleId, boolean restoreInventory) {
+        String selectItems = "SELECT batch_id, quantity FROM sale_items WHERE sale_id = ?";
+        String updateBatch = "UPDATE medicine_batches SET current_quantity = current_quantity + ? WHERE batch_id = ?";
+        String deletePayments = "DELETE FROM customer_payments WHERE sale_id = ?";
+        String deleteItems = "DELETE FROM sale_items WHERE sale_id = ?";
+        String deleteSale = "DELETE FROM sales WHERE sale_id = ?";
+        
+        Connection conn = null;
+        try {
+            conn = DatabaseManager.getConnection();
+            conn.setAutoCommit(false);
+            
+            if (restoreInventory) {
+                try (PreparedStatement selStmt = conn.prepareStatement(selectItems);
+                     PreparedStatement updStmt = conn.prepareStatement(updateBatch)) {
+                    selStmt.setInt(1, saleId);
+                    try (ResultSet rs = selStmt.executeQuery()) {
+                        while (rs.next()) {
+                            updStmt.setInt(1, rs.getInt("quantity"));
+                            updStmt.setInt(2, rs.getInt("batch_id"));
+                            updStmt.addBatch();
+                        }
+                        updStmt.executeBatch();
+                    }
+                }
+            }
+            
+            try (PreparedStatement stmt1 = conn.prepareStatement(deletePayments)) {
+                stmt1.setInt(1, saleId);
+                stmt1.executeUpdate();
+            }
+            try (PreparedStatement stmt2 = conn.prepareStatement(deleteItems)) {
+                stmt2.setInt(1, saleId);
+                stmt2.executeUpdate();
+            }
+            try (PreparedStatement stmt3 = conn.prepareStatement(deleteSale)) {
+                stmt3.setInt(1, saleId);
+                stmt3.executeUpdate();
+            }
+            
+            conn.commit();
+            return true;
+        } catch (Exception e) {
+            logger.error("Error deleting sale ID: " + saleId, e);
+            if (conn != null) {
+                try { conn.rollback(); } catch (Exception ex) {}
+            }
+            return false;
+        } finally {
+            if (conn != null) {
+                try { conn.setAutoCommit(true); conn.close(); } catch (Exception ex) {}
+            }
+        }
     }
 }

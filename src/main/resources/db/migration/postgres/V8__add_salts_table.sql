@@ -1,0 +1,7 @@
+CREATE TABLE medicine_salts (
+    salt_id SERIAL PRIMARY KEY,
+    salt_name VARCHAR(255) NOT NULL UNIQUE,
+    description TEXT,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
