@@ -13,7 +13,14 @@ from agents.tools import (
     get_missing_details,
     is_order_complete,
     confirm_order,
+    recall_customer_memory,
+    save_customer_preference,
     set_current_customer,
+)
+from services.memory_db import (
+    get_customer_profile,
+    get_customer_preferences,
+    normalize_phone,
 )
 
 load_dotenv()
@@ -348,13 +355,59 @@ Report the actual result to the customer
 _chat_sessions = {}
 
 
+def build_system_instruction(customer_id: str = "current_customer") -> str:
+    """Build dynamic system prompt enriched with returning customer memory from PostgreSQL."""
+    prompt = SYSTEM_PROMPT
+    phone = normalize_phone(customer_id) or customer_id
+
+    try:
+        profile = get_customer_profile(phone)
+        prefs = get_customer_preferences(phone)
+
+        memory_sections = []
+        if profile and profile.get("address"):
+            saved_name = profile.get("name") or "Customer"
+            saved_addr = profile.get("address")
+            memory_sections.append(f"""
+# RETURNING CUSTOMER PROFILE & SAVED MEMORY (Keyed by Phone Number):
+- Customer Phone / Identifier: {phone}
+- Registered Name: {saved_name}
+- Saved Delivery Address: {saved_addr}
+
+CRITICAL SAVED ADDRESS REUSE RULES:
+1. This customer already has a saved delivery address on file: "{saved_addr}".
+2. DO NOT ask them for their address or pincode again!
+3. When confirming the order or delivery details, politely ask:
+   "Should I deliver to your saved address: {saved_addr}, or a different address?"
+4. If the customer agrees (e.g. says "yes", "same address", "deliver to my house", "ok"), retain and use this saved address immediately without asking for any further address details.
+5. Only prompt for a new door number, street, or pincode if the customer explicitly requests delivery to a new or different address.
+""")
+
+        if prefs:
+            prefs_list = "\n".join([f"- {p}" for p in prefs])
+            memory_sections.append(f"""
+# CUSTOMER SAVED PREFERENCES & PAST MEDICAL NOTES (Tier 2 pgvector Memory):
+{prefs_list}
+- Respect these preferences and past notes during the conversation.
+""")
+
+        if memory_sections:
+            prompt += "\n" + "\n".join(memory_sections)
+
+    except Exception:
+        pass
+
+    return prompt
+
+
 def get_chat_session(customer_id: str = "current_customer"):
     """Get or create an isolated Gemini chat session per customer."""
     if customer_id not in _chat_sessions:
+        instruction = build_system_instruction(customer_id)
         _chat_sessions[customer_id] = client.chats.create(
             model="gemini-3.1-flash-lite",
             config={
-                "system_instruction": SYSTEM_PROMPT,
+                "system_instruction": instruction,
                 "tools": [
                     add_medicine,
                     update_medicine,
@@ -366,6 +419,8 @@ def get_chat_session(customer_id: str = "current_customer"):
                     get_missing_details,
                     is_order_complete,
                     confirm_order,
+                    recall_customer_memory,
+                    save_customer_preference,
                 ]
             }
         )

@@ -1,19 +1,36 @@
 import os
 import json
+from services.memory_db import (
+    normalize_phone,
+    get_customer_profile,
+    save_customer_profile,
+    store_memory,
+)
+
 class Order:
     def __init__(self, customer_id = "current_customer"):
         self.customer_id = customer_id
         self.customer_name = None
-        # Pre-seed 10-digit Indian phone if customer_id is WhatsApp ID (e.g. 917708035227 -> 7708035227)
-        if isinstance(customer_id, str) and customer_id.isdigit() and len(customer_id) >= 10:
-            self.phone = customer_id[2:] if (len(customer_id) == 12 and customer_id.startswith("91")) else customer_id
-        else:
-            self.phone = None
+        # Normalize phone number from customer_id (e.g. 917708035227 -> 7708035227)
+        self.phone = normalize_phone(customer_id) or None
         self.address = None
         self.items = []
         self.confirmed = False
         self.is_checked_by_admin = False
         self.admin_status = "pending"
+
+        # Check PostgreSQL memory for returning customer profile (Tier 1 Memory)
+        try:
+            profile = get_customer_profile(self.phone or self.customer_id)
+            if profile:
+                if profile.get("name") and not self.customer_name:
+                    self.customer_name = profile["name"]
+                if profile.get("address") and not self.address:
+                    self.address = profile["address"]
+                if profile.get("phone") and not self.phone:
+                    self.phone = profile["phone"]
+        except Exception:
+            pass
 
     def is_valid_address(self) -> bool:
         """
@@ -39,7 +56,7 @@ class Order:
             self.customer_name = name
 
         if phone:
-            self.phone = phone
+            self.phone = normalize_phone(phone) or phone
 
         if address:
             import re
@@ -61,7 +78,19 @@ class Order:
             else:
                 self.address = new_addr
 
+        # Persist to local JSON cache
         self.save()
+
+        # Persist customer profile to PostgreSQL (Tier 1 Memory)
+        try:
+            save_customer_profile(
+                phone_or_customer_id=self.phone or self.customer_id,
+                name=self.customer_name,
+                address=self.address,
+                customer_id=self.customer_id,
+            )
+        except Exception:
+            pass
 
 
     def archive_confirmed_order(self):
@@ -441,6 +470,35 @@ class Order:
         self.confirmed=True
         self.save()
 
+        # Tier 1: Ensure customer profile (name, phone, address) is synced to PostgreSQL customers table
+        try:
+            save_customer_profile(
+                phone_or_customer_id=self.phone or self.customer_id,
+                name=self.customer_name,
+                address=self.address,
+                customer_id=self.customer_id,
+            )
+        except Exception:
+            pass
+
+        # Tier 2: Save confirmed order memory with pgvector embedding
+        try:
+            desc_list = []
+            for it in self.items:
+                v = f", {it['volume_ml']}" if it.get("volume_ml") else ""
+                desc_list.append(f"{it.get('medicine')} ({it.get('quantity')} {it.get('unit', '')}{v})".strip())
+            items_summary = ", ".join(desc_list)
+            mem_text = f"Confirmed Order: {items_summary}. Delivery Address: {self.address}."
+            store_memory(
+                phone_or_customer_id=self.phone or self.customer_id,
+                content=mem_text,
+                memory_type="order_history",
+                metadata={"items": self.items, "address": self.address, "customer_name": self.customer_name},
+                customer_id=self.customer_id,
+            )
+        except Exception:
+            pass
+
         return True
 
     def get_order(self):
@@ -490,18 +548,27 @@ class Order:
         
         order = cls(customer_id)
 
-        order.customer_name = data.get("customer_name")
+        order.customer_name = data.get("customer_name") or order.customer_name
         # Load saved phone or fallback to pre-seeded 10-digit WhatsApp phone
-        order.phone = data.get("phone") or (
-            order.customer_id[2:] if (isinstance(order.customer_id, str) and order.customer_id.isdigit() and len(order.customer_id) == 12 and order.customer_id.startswith("91"))
-            else (order.customer_id if (isinstance(order.customer_id, str) and order.customer_id.isdigit() and len(order.customer_id) >= 10) else None)
-        )
-        order.address = data.get("address")
+        order.phone = data.get("phone") or order.phone
+        order.address = data.get("address") or order.address
         order.items = data.get("items", [])
         order.confirmed = data.get("confirmed", False)
         order.is_checked_by_admin = data.get("is_checked_by_admin", False)
         order.admin_status = data.get("admin_status", "pending")
         order.packing_started = data.get("packing_started", False)
+
+        # Fallback to PostgreSQL profile if address or name missing
+        if not order.address or not order.customer_name:
+            try:
+                prof = get_customer_profile(order.phone or customer_id)
+                if prof:
+                    if not order.customer_name and prof.get("name"):
+                        order.customer_name = prof["name"]
+                    if not order.address and prof.get("address"):
+                        order.address = prof["address"]
+            except Exception:
+                pass
 
         return order
 

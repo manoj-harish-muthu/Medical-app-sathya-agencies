@@ -1,6 +1,13 @@
 import contextvars
-from typing import Optional, Union
+from typing import Optional, Union, List, Dict, Any
 from agents.order import Order
+from services.memory_db import (
+    search_memories,
+    store_memory,
+    get_customer_profile,
+    get_customer_preferences,
+    normalize_phone,
+)
 
 # ContextVar to maintain active customer ID per request/thread
 _current_customer_var = contextvars.ContextVar("current_customer_id", default="current_customer")
@@ -249,4 +256,64 @@ def get_customer_order() -> dict:
     """
     Get the current customer order details.
     """
-    return get_order()
+    return get_order()
+
+
+def recall_customer_memory(query: str) -> dict:
+    """
+    Search semantic memory (pgvector) for the current customer to recall:
+    - Previous orders / past medicines they purchased ("What did I order last time?", "Send the usual")
+    - Special medical instructions, preferences, or doctor notes
+    - Specific medicine dosages or brands used previously
+    """
+    cust = get_current_customer()
+    order = Order.load(cust)
+    phone = order.phone or cust
+
+    matches = search_memories(phone_or_customer_id=phone, query=query, limit=4, threshold=0.40)
+    if matches:
+        return {
+            "found": True,
+            "count": len(matches),
+            "memories": [
+                {
+                    "content": m["content"],
+                    "type": m["memory_type"],
+                    "date": m["created_at"],
+                    "relevance": m["similarity"],
+                }
+                for m in matches
+            ],
+        }
+    return {
+        "found": False,
+        "message": f"No past records or memories found matching '{query}' for this customer.",
+    }
+
+
+def save_customer_preference(preference: str, category: str = "preference") -> dict:
+    """
+    Save an explicit customer preference, special delivery instruction, or medical note
+    into persistent memory (pgvector).
+    Examples:
+    - "Customer is diabetic, only dispense sugar-free syrups"
+    - "Customer prefers morning delivery between 9 AM and 11 AM"
+    - "Customer allergic to sulfa drugs"
+    - "Call before arriving at the gate"
+    """
+    cust = get_current_customer()
+    order = Order.load(cust)
+    phone = order.phone or cust
+
+    mem_id = store_memory(
+        phone_or_customer_id=phone,
+        content=preference.strip(),
+        memory_type=category,
+        customer_id=cust,
+    )
+    return {
+        "success": bool(mem_id),
+        "message": "Customer preference saved to persistent memory.",
+        "preference": preference.strip(),
+    }
+

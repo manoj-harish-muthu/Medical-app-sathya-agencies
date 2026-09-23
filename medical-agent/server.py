@@ -114,6 +114,8 @@ def webhook():
                     order.save()
 
                     print(f"\n💬 [Incoming Message] Sender: {sender} | Type: {msg_type}")
+                    if order.address:
+                        print(f"🧠 [Customer Memory] Returning customer: {order.customer_name or 'Customer'} | Address: {order.address}")
 
                     was_confirmed_before = order.confirmed
 
