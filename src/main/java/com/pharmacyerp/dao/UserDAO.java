@@ -30,6 +30,7 @@ public class UserDAO {
                 user.setFullName(rs.getString("full_name"));
                 user.setRole(rs.getString("role"));
                 user.setBranchId(rs.getInt("branch_id"));
+                user.setPermissions(rs.getString("permissions"));
                 users.add(user);
             }
         } catch (Exception e) {
@@ -38,8 +39,8 @@ public class UserDAO {
         return users;
     }
 
-    public boolean createUser(String username, String plainPassword, String fullName, String role) {
-        String sql = "INSERT INTO users (username, password_hash, full_name, role, branch_id) VALUES (?, ?, ?, ?, ?)";
+    public boolean createUser(String username, String plainPassword, String fullName, String role, String permissions) {
+        String sql = "INSERT INTO users (username, password_hash, full_name, role, branch_id, permissions) VALUES (?, ?, ?, ?, ?, ?)";
         try (Connection conn = DatabaseManager.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
 
@@ -50,6 +51,7 @@ public class UserDAO {
             stmt.setString(3, fullName);
             stmt.setString(4, role);
             stmt.setInt(5, 1); // Default branch_id
+            stmt.setString(6, permissions);
 
             int affected = stmt.executeUpdate();
             return affected > 0;

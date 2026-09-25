@@ -29,6 +29,7 @@ public class InventoryController {
 
     private InventoryDAO inventoryDAO = new InventoryDAO();
     private ObservableList<InventoryItem> inventoryList = FXCollections.observableArrayList();
+    public static String currentFilter = "All";
 
     @FXML
     public void initialize() {
@@ -57,7 +58,12 @@ public class InventoryController {
             };
         });
 
-        handleShowAll();
+        if ("NearExpiry".equals(currentFilter)) {
+            handleShowNearExpiry();
+        } else {
+            handleShowAll();
+        }
+        currentFilter = "All"; // Reset after applying
     }
 
     @FXML

@@ -55,7 +55,20 @@ public class AccountReceivablesController implements Initializable {
     }
 
     private void loadDummyData() {
-        // Dummy data removed as per user request
+        records.clear();
+        java.util.List<com.pharmacyerp.dao.AccountDAO.AccountRow> data = com.pharmacyerp.dao.AccountDAO.getReceivables();
+        String query = txtSearch.getText();
+        for (com.pharmacyerp.dao.AccountDAO.AccountRow row : data) {
+            if (query == null || query.isEmpty() || row.name.toLowerCase().contains(query.toLowerCase()) || row.description.toLowerCase().contains(query.toLowerCase())) {
+                records.add(new HistoryData(row.date, row.name, row.description, row.amount));
+            }
+        }
+    }
+
+    @FXML
+    public void handleSearch() {
+        loadDummyData();
+        updateTotals();
     }
 
     private void updateTotals() {

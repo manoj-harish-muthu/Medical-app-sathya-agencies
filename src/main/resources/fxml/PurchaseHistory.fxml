@@ -18,14 +18,14 @@
             </HBox>
             <VBox styleClass="card" VBox.vgrow="ALWAYS" spacing="15">
                 <Label text="History" styleClass="section-title"/>
-                <TableView VBox.vgrow="ALWAYS">
+                <TableView fx:id="tblPurchaseHistory" VBox.vgrow="ALWAYS">
                     <columns>
-                        <TableColumn text="Invoice Number" prefWidth="150"/>
-                        <TableColumn text="Date" prefWidth="120"/>
-                        <TableColumn text="Supplier" prefWidth="250"/>
-                        <TableColumn text="Total Amount" prefWidth="150"/>
-                        <TableColumn text="Status" prefWidth="100"/>
-                        <TableColumn text="Payment" prefWidth="100"/>
+                        <TableColumn fx:id="colInvoice" text="Invoice Number" prefWidth="150"/>
+                        <TableColumn fx:id="colDate" text="Date" prefWidth="120"/>
+                        <TableColumn fx:id="colSupplier" text="Supplier" prefWidth="250"/>
+                        <TableColumn fx:id="colAmount" text="Total Amount" prefWidth="150"/>
+                        <TableColumn fx:id="colStatus" text="Status" prefWidth="100"/>
+                        <TableColumn fx:id="colPayment" text="Payment" prefWidth="100"/>
                     </columns>
                 </TableView>
             </VBox>

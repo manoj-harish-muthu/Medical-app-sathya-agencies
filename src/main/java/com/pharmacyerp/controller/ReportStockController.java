@@ -48,14 +48,38 @@ public class ReportStockController implements Initializable {
     public void initialize(URL location, ResourceBundle resources) {
         dpFrom.setValue(LocalDate.now().minusDays(30));
         dpTo.setValue(LocalDate.now());
+        if (txtSearch != null) txtSearch.textProperty().addListener((obs, oldV, newV) -> loadDummyData());
         
         loadDummyData();
         tblHistory.setItems(records);
         updateTotals();
     }
 
+    @FXML
     private void loadDummyData() {
-        // Dummy data removed as per user request
+        records.clear();
+        String sql = "SELECT m.medicine_name, mb.batch_number, mb.current_quantity, mb.purchase_rate, (mb.current_quantity * mb.purchase_rate) as total_value " +
+                     "FROM medicines m " +
+                     "JOIN medicine_batches mb ON m.medicine_id = mb.medicine_id " +
+                     "WHERE mb.current_quantity > 0 " +
+                     "ORDER BY m.medicine_name";
+
+        try (java.sql.Connection conn = com.pharmacyerp.database.DatabaseManager.getConnection();
+             java.sql.PreparedStatement stmt = conn.prepareStatement(sql);
+             java.sql.ResultSet rs = stmt.executeQuery()) {
+             
+            String today = LocalDate.now().format(java.time.format.DateTimeFormatter.ofPattern("dd/MM/yyyy"));
+            
+            while (rs.next()) {
+                String name = rs.getString("medicine_name");
+                String batch = rs.getString("batch_number");
+                int qty = rs.getInt("current_quantity");
+                double value = rs.getDouble("total_value");
+                records.add(new HistoryData(today, name, "Batch: " + batch + " (Qty: " + qty + ")", value));
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     private void updateTotals() {

@@ -8,9 +8,15 @@ import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.*;
 
-import java.net.URL;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.ResourceBundle;
+import java.net.URL;
+
+import com.pharmacyerp.database.DatabaseManager;
 
 public class SupplierOutstandingController implements Initializable {
 
@@ -54,8 +60,25 @@ public class SupplierOutstandingController implements Initializable {
         updateTotals();
     }
 
+    @FXML
     private void loadDummyData() {
-        // Dummy data removed as per user request
+        records.clear();
+        String sql = "SELECT supplier_name, SUM(balance_amount) as total_due " +
+                     "FROM purchases GROUP BY supplier_name HAVING SUM(balance_amount) > 0";
+        
+        try (Connection conn = DatabaseManager.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql);
+             ResultSet rs = stmt.executeQuery()) {
+            
+            String today = LocalDate.now().format(DateTimeFormatter.ofPattern("dd/MM/yyyy"));
+            while (rs.next()) {
+                String name = rs.getString("supplier_name");
+                double amt = rs.getDouble("total_due");
+                records.add(new HistoryData(today, name != null ? name : "Unknown", "Total Pending Credit Balance", amt));
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     private void updateTotals() {
@@ -65,5 +88,35 @@ public class SupplierOutstandingController implements Initializable {
         }
         lblTotalItems.setText(String.valueOf(records.size()));
         lblGrandTotal.setText(String.format("%.2f", grandTotal));
+    }
+
+    @FXML
+    private void handleShareWhatsApp() {
+        if (records.isEmpty()) {
+            Alert alert = new Alert(Alert.AlertType.WARNING, "No outstanding records to share.");
+            alert.showAndWait();
+            return;
+        }
+
+        StringBuilder message = new StringBuilder("*Supplier Outstanding Report*%0A%0A");
+        for (HistoryData item : records) {
+            message.append("• ").append(item.getName())
+                   .append(": Rs.").append(String.format("%.2f", item.getAmount()))
+                   .append("%0A");
+        }
+        message.append("%0A*Total Pending:* Rs.").append(lblGrandTotal.getText());
+
+        try {
+            String url = "https://wa.me/?text=" + message.toString().replace(" ", "%20");
+            if (java.awt.Desktop.isDesktopSupported() && java.awt.Desktop.getDesktop().isSupported(java.awt.Desktop.Action.BROWSE)) {
+                java.awt.Desktop.getDesktop().browse(new java.net.URI(url));
+            } else {
+                new ProcessBuilder("rundll32", "url.dll,FileProtocolHandler", url).start();
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            Alert alert = new Alert(Alert.AlertType.ERROR, "Failed to open WhatsApp.");
+            alert.showAndWait();
+        }
     }
 }

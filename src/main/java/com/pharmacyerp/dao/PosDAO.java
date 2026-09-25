@@ -140,6 +140,98 @@ public class PosDAO {
         return null;
     }
 
+    public static class LastProductSale {
+        public String date;
+        public java.math.BigDecimal rate;
+    }
+
+    public LastProductSale getLastSaleOfProduct(String customerName, int medicineId) {
+        if (customerName == null || customerName.trim().isEmpty()) return null;
+        String sql = "SELECT TO_CHAR(s.sale_date, 'DD/MM/YYYY') as date, si.selling_rate " +
+                     "FROM sales s " +
+                     "JOIN sale_items si ON s.sale_id = si.sale_id " +
+                     "WHERE s.customer_name = ? AND si.medicine_id = ? " +
+                     "ORDER BY s.sale_date DESC LIMIT 1";
+        try (Connection conn = DatabaseManager.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+            stmt.setString(1, customerName.trim());
+            stmt.setInt(2, medicineId);
+            try (ResultSet rs = stmt.executeQuery()) {
+                if (rs.next()) {
+                    LastProductSale lps = new LastProductSale();
+                    lps.date = rs.getString("date");
+                    lps.rate = rs.getBigDecimal("selling_rate");
+                    return lps;
+                }
+            }
+        } catch (Exception e) {
+            logger.error("Error fetching last sale of product", e);
+        }
+        return null;
+    }
+
+    public String getCustomerPhoneByName(String name) {
+        if (name == null || name.trim().isEmpty()) return null;
+        String sql = "SELECT phone FROM customers WHERE name = ? UNION SELECT customer_phone FROM sales WHERE customer_name = ? AND customer_phone != '' LIMIT 1";
+        try (Connection conn = DatabaseManager.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+            stmt.setString(1, name.trim());
+            stmt.setString(2, name.trim());
+            try (ResultSet rs = stmt.executeQuery()) {
+                if (rs.next()) {
+                    return rs.getString(1);
+                }
+            }
+        } catch (Exception e) {
+            logger.error("Error looking up customer name", e);
+        }
+        return null;
+    }
+
+    public static class CustomerHistory {
+        public String invoiceNo;
+        public String date;
+        public java.math.BigDecimal amount;
+    }
+
+    public java.util.List<CustomerHistory> getCustomerHistory(String name) {
+        java.util.List<CustomerHistory> history = new java.util.ArrayList<>();
+        if (name == null || name.trim().isEmpty()) return history;
+        String sql = "SELECT invoice_no, TO_CHAR(sale_date, 'DD/MM/YYYY') as date, grand_total " +
+                     "FROM sales WHERE customer_name = ? ORDER BY sale_date DESC LIMIT 5";
+        try (Connection conn = DatabaseManager.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+            stmt.setString(1, name.trim());
+            try (ResultSet rs = stmt.executeQuery()) {
+                while (rs.next()) {
+                    CustomerHistory h = new CustomerHistory();
+                    h.invoiceNo = rs.getString("invoice_no");
+                    h.date = rs.getString("date");
+                    h.amount = rs.getBigDecimal("grand_total");
+                    history.add(h);
+                }
+            }
+        } catch (Exception e) {
+            logger.error("Error fetching customer history", e);
+        }
+        return history;
+    }
+
+    public java.util.List<String> getAllCustomerNames() {
+        java.util.List<String> names = new java.util.ArrayList<>();
+        String sql = "SELECT name FROM customers WHERE name IS NOT NULL AND name != '' UNION SELECT name FROM patients WHERE name IS NOT NULL AND name != '' ORDER BY name ASC";
+        try (Connection conn = DatabaseManager.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql);
+             ResultSet rs = stmt.executeQuery()) {
+            while (rs.next()) {
+                names.add(rs.getString(1));
+            }
+        } catch (Exception e) {
+            logger.error("Error loading customer names", e);
+        }
+        return names;
+    }
+
     public boolean saveSale(String invoiceNo, String customerName, String customerPhone, String doctorName, String paymentMode, java.util.List<CartItem> cartItems, java.math.BigDecimal paidAmount, java.math.BigDecimal balanceAmount) {
         return saveSale(invoiceNo, customerName, customerPhone, doctorName, paymentMode, cartItems, paidAmount, balanceAmount, "COMPLETED");
     }

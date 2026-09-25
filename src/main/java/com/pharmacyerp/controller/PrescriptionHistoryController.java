@@ -49,13 +49,63 @@ public class PrescriptionHistoryController implements Initializable {
         dpFrom.setValue(LocalDate.now().minusDays(30));
         dpTo.setValue(LocalDate.now());
         
+        
+        if (txtSearch != null) {
+            txtSearch.textProperty().addListener((obs, oldV, newV) -> loadDummyData());
+        }
+        if (dpFrom != null) {
+            dpFrom.valueProperty().addListener((obs, oldV, newV) -> loadDummyData());
+        }
+        if (dpTo != null) {
+            dpTo.valueProperty().addListener((obs, oldV, newV) -> loadDummyData());
+        }
+
         loadDummyData();
         tblHistory.setItems(records);
         updateTotals();
     }
 
-    private void loadDummyData() {
-        // Dummy data removed as per user request
+    @FXML
+    public void loadDummyData() {
+        records.clear();
+        String search = txtSearch.getText() == null ? "" : txtSearch.getText().trim();
+        LocalDate from = dpFrom.getValue() != null ? dpFrom.getValue() : LocalDate.now().minusDays(30);
+        LocalDate to = dpTo.getValue() != null ? dpTo.getValue() : LocalDate.now();
+        
+        String sql = "SELECT sale_date, customer_name, doctor_name, invoice_no, grand_total " +
+                     "FROM sales " +
+                     "WHERE doctor_name IS NOT NULL AND doctor_name != '' " +
+                     "  AND DATE(sale_date) BETWEEN ? AND ? " +
+                     "  AND (customer_name LIKE ? OR doctor_name LIKE ? OR invoice_no LIKE ?) " +
+                     "ORDER BY sale_date DESC";
+                     
+        try (java.sql.Connection conn = com.pharmacyerp.database.DatabaseManager.getConnection();
+             java.sql.PreparedStatement stmt = conn.prepareStatement(sql)) {
+            stmt.setDate(1, java.sql.Date.valueOf(from));
+            stmt.setDate(2, java.sql.Date.valueOf(to));
+            stmt.setString(3, "%" + search + "%");
+            stmt.setString(4, "%" + search + "%");
+            stmt.setString(5, "%" + search + "%");
+            
+            java.time.format.DateTimeFormatter formatter = java.time.format.DateTimeFormatter.ofPattern("dd/MM/yyyy");
+            
+            try (java.sql.ResultSet rs = stmt.executeQuery()) {
+                while (rs.next()) {
+                    java.sql.Timestamp ts = rs.getTimestamp("sale_date");
+                    String dateStr = ts != null ? ts.toLocalDateTime().format(formatter) : "";
+                    String cust = rs.getString("customer_name");
+                    String doc = rs.getString("doctor_name");
+                    String name = (cust != null ? cust : "Walk-in") + " (Dr. " + doc + ")";
+                    String inv = rs.getString("invoice_no");
+                    double total = rs.getDouble("grand_total");
+                    
+                    records.add(new HistoryData(dateStr, name, "Invoice: " + inv, total));
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        updateTotals();
     }
 
     private void updateTotals() {

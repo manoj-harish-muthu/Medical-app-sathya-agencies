@@ -24,6 +24,12 @@ public class UserManagementController {
     @FXML private PasswordField passwordField;
     @FXML private ComboBox<String> roleCombo;
     @FXML private Label lblError;
+    
+    @FXML private CheckBox chkBilling;
+    @FXML private CheckBox chkInventory;
+    @FXML private CheckBox chkReports;
+    @FXML private CheckBox chkMasters;
+    @FXML private CheckBox chkAccounts;
 
     private UserDAO userDAO = new UserDAO();
     private ObservableList<User> userList = FXCollections.observableArrayList();
@@ -62,8 +68,22 @@ public class UserManagementController {
             showError("All fields are required.");
             return;
         }
+        
+        StringBuilder perms = new StringBuilder();
+        if (chkBilling.isSelected()) perms.append("BILLING,");
+        if (chkInventory.isSelected()) perms.append("INVENTORY,");
+        if (chkReports.isSelected()) perms.append("REPORTS,");
+        if (chkMasters.isSelected()) perms.append("MASTERS,");
+        if (chkAccounts.isSelected()) perms.append("ACCOUNTS,");
+        
+        String permissions = perms.toString();
+        if (permissions.length() > 0) {
+            permissions = permissions.substring(0, permissions.length() - 1);
+        } else {
+            permissions = "NONE";
+        }
 
-        boolean success = userDAO.createUser(uname.trim(), pass, name.trim(), role);
+        boolean success = userDAO.createUser(uname.trim(), pass, name.trim(), role, permissions);
         if (success) {
             fullNameField.clear();
             usernameField.clear();

@@ -36,7 +36,7 @@
                     <DatePicker fx:id="dpTo" maxWidth="Infinity"/>
                 </VBox>
                 <VBox alignment="BOTTOM_CENTER">
-                    <Button text="Search" styleClass="button-primary"/>
+                    <Button text="Search" styleClass="button-primary" onAction="#loadDummyData"/>
                 </VBox>
             </HBox>
             
@@ -66,6 +66,8 @@
                 <Region prefWidth="30"/>
                 <Label text="Total Value (₹):" styleClass="form-label"/>
                 <Label fx:id="lblGrandTotal" text="0.00" style="-fx-font-weight: bold; -fx-font-size: 24px; -fx-text-fill: #15803d;"/>
+                <Region prefWidth="30"/>
+                <Button text="Share WhatsApp" styleClass="button-primary" style="-fx-background-color: #25D366; -fx-text-fill: white;" onAction="#handleShareWhatsApp"/>
             </HBox>
         </VBox>
     </center>

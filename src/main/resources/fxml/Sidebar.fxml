@@ -70,21 +70,8 @@
                 <Button text="📦 Inventory" onAction="#toggleInventory" styleClass="sidebar-button" maxWidth="Infinity" alignment="BASELINE_LEFT"/>
                 <VBox fx:id="inventorySubMenu" managed="false" visible="false">
                     <Button text="Current Stock" onAction="#handleInventory" styleClass="sidebar-sub-button" maxWidth="Infinity" alignment="BASELINE_LEFT"/>
-                    <Button text="Batch-wise Stock" onAction="#handleInventory" styleClass="sidebar-sub-button" maxWidth="Infinity" alignment="BASELINE_LEFT"/>
-                    <Button text="Near Expiry" onAction="#handleInventory" styleClass="sidebar-sub-button" maxWidth="Infinity" alignment="BASELINE_LEFT"/>
-                    <Button text="Expired Stock" onAction="#handleInventory" styleClass="sidebar-sub-button" maxWidth="Infinity" alignment="BASELINE_LEFT"/>
-                    <Button text="Negative Stock" onAction="#handleInventory" styleClass="sidebar-sub-button" maxWidth="Infinity" alignment="BASELINE_LEFT"/>
-                    <Button text="Zero Stock" onAction="#handleInventory" styleClass="sidebar-sub-button" maxWidth="Infinity" alignment="BASELINE_LEFT"/>
-                    <Button text="Medicine Master" onAction="#handleInventory" styleClass="sidebar-sub-button" maxWidth="Infinity" alignment="BASELINE_LEFT"/>
-                    <Button text="Item Master" onAction="#handleInventoryItemMaster" styleClass="sidebar-sub-button" maxWidth="Infinity" alignment="BASELINE_LEFT"/>
-                    <Button text="Salt Master" onAction="#handleInventorySaltMaster" styleClass="sidebar-sub-button" maxWidth="Infinity" alignment="BASELINE_LEFT"/>
-                    <Button text="Company Master" onAction="#handleManufacturer" styleClass="sidebar-sub-button" maxWidth="Infinity" alignment="BASELINE_LEFT"/>
-                    <Button text="Category Master" onAction="#handleInventoryCategoryMaster" styleClass="sidebar-sub-button" maxWidth="Infinity" alignment="BASELINE_LEFT"/>
-                    <Button text="Batch Details" onAction="#handleInventoryBatchDetails" styleClass="sidebar-sub-button" maxWidth="Infinity" alignment="BASELINE_LEFT"/>
-                    <Button text="Stock Journal" onAction="#handleInventoryStockJournal" styleClass="sidebar-sub-button" maxWidth="Infinity" alignment="BASELINE_LEFT"/>
-                    <Button text="Physical Stock" onAction="#handleInventoryPhysicalStock" styleClass="sidebar-sub-button" maxWidth="Infinity" alignment="BASELINE_LEFT"/>
-                    <Button text="Shortage Items" onAction="#handleInventoryShortageItems" styleClass="sidebar-sub-button" maxWidth="Infinity" alignment="BASELINE_LEFT"/>
-                    <Button text="Expired Items" onAction="#handleInventoryExpiredItems" styleClass="sidebar-sub-button" maxWidth="Infinity" alignment="BASELINE_LEFT"/>
+                    <Button text="Batch-wise Stock" onAction="#handleInventoryBatchWise" styleClass="sidebar-sub-button" maxWidth="Infinity" alignment="BASELINE_LEFT"/>
+                    <Button text="Near Expiry" onAction="#handleInventoryNearExpiry" styleClass="sidebar-sub-button" maxWidth="Infinity" alignment="BASELINE_LEFT"/>
                 </VBox>
             </VBox>
 

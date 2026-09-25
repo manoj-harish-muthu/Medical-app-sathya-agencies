@@ -16,15 +16,24 @@
                 <Label text="Supplier Bills" styleClass="page-title"/>
                 <Region HBox.hgrow="ALWAYS"/>
             </HBox>
+            <HBox spacing="15" alignment="CENTER_LEFT" styleClass="card">
+                <padding>
+                    <Insets top="15" right="15" bottom="15" left="15"/>
+                </padding>
+                <Label text="Select Supplier:" styleClass="form-label"/>
+                <ComboBox fx:id="cmbSupplier" prefWidth="300" promptText="-- Select Supplier --"/>
+                <Region HBox.hgrow="ALWAYS"/>
+            </HBox>
+            
             <VBox styleClass="card" VBox.vgrow="ALWAYS" spacing="15">
-                <Label text="Bills" styleClass="section-title"/>
-                <TableView VBox.vgrow="ALWAYS">
+                <Label text="Supplier Bills History" styleClass="section-title"/>
+                <TableView fx:id="tblBills" VBox.vgrow="ALWAYS">
                     <columns>
-                        <TableColumn text="Bill No" prefWidth="150"/>
-                        <TableColumn text="Date" prefWidth="120"/>
-                        <TableColumn text="Supplier" prefWidth="250"/>
-                        <TableColumn text="Total" prefWidth="150"/>
-                        <TableColumn text="Status" prefWidth="100"/>
+                        <TableColumn fx:id="colBillNo" text="Bill/Invoice No" prefWidth="150"/>
+                        <TableColumn fx:id="colDate" text="Date" prefWidth="150"/>
+                        <TableColumn fx:id="colTotal" text="Total Amount" prefWidth="150"/>
+                        <TableColumn fx:id="colStatus" text="Status" prefWidth="120"/>
+                        <TableColumn fx:id="colAction" text="Action" prefWidth="100"/>
                     </columns>
                 </TableView>
             </VBox>

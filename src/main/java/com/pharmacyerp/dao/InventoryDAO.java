@@ -152,7 +152,7 @@ public class InventoryDAO {
                      "JOIN medicines m ON mb.medicine_id = m.medicine_id " +
                      "LEFT JOIN medicine_companies comp ON m.company_id = comp.company_id " +
                      "WHERE mb.current_quantity > 0 " +
-                     "AND mb.expiry_date <= date('now', '+" + monthsUntilExpiry + " month') " +
+                     "AND mb.expiry_date <= CURRENT_DATE + INTERVAL '" + monthsUntilExpiry + " months' " +
                      "ORDER BY mb.expiry_date ASC";
 
         try (Connection conn = DatabaseManager.getConnection();

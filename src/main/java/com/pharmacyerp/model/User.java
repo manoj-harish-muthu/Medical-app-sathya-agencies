@@ -12,6 +12,7 @@ public class User {
     private String phone;
     private int branchId;
     private boolean active;
+    private String permissions;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 
@@ -48,4 +49,7 @@ public class User {
 
     public LocalDateTime getUpdatedAt() { return updatedAt; }
     public void setUpdatedAt(LocalDateTime updatedAt) { this.updatedAt = updatedAt; }
+    
+    public String getPermissions() { return permissions; }
+    public void setPermissions(String permissions) { this.permissions = permissions; }
 }

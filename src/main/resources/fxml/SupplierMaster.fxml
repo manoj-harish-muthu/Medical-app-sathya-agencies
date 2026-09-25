@@ -21,19 +21,19 @@
             
             <TableView fx:id="tblData" VBox.vgrow="ALWAYS" minHeight="200" editable="true">
                 <columns>
-                    <TableColumn fx:id="colId" text="ID" prefWidth="60">
+                    <TableColumn fx:id="colId" text="ID" prefWidth="60" visible="false">
                         <cellValueFactory><PropertyValueFactory property="id"/></cellValueFactory>
                     </TableColumn>
                     <TableColumn fx:id="colName" text="Supplier Name" prefWidth="250">
                         <cellValueFactory><PropertyValueFactory property="name"/></cellValueFactory>
                     </TableColumn>
-                    <TableColumn fx:id="colDetails" text="Contact Info" prefWidth="200">
+                    <TableColumn fx:id="colDetails" text="Contact Number" prefWidth="150">
                         <cellValueFactory><PropertyValueFactory property="details"/></cellValueFactory>
                     </TableColumn>
-                    <TableColumn fx:id="colExtra1" text="Extra Details 1" prefWidth="150">
+                    <TableColumn fx:id="colExtra1" text="Email" prefWidth="200">
                         <cellValueFactory><PropertyValueFactory property="extra1"/></cellValueFactory>
                     </TableColumn>
-                    <TableColumn fx:id="colExtra2" text="Extra Details 2" prefWidth="250">
+                    <TableColumn fx:id="colExtra2" text="Address" prefWidth="300">
                         <cellValueFactory><PropertyValueFactory property="extra2"/></cellValueFactory>
                     </TableColumn>
                 </columns>

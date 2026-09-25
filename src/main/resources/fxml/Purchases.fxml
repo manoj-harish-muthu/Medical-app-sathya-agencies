@@ -44,6 +44,16 @@
                     <DatePicker fx:id="dpPurchaseDate" maxWidth="Infinity"/>
                 </VBox>
             </HBox>
+            <!-- Medicine Search -->
+            <HBox spacing="15" alignment="CENTER_LEFT" styleClass="card">
+                <padding>
+                    <Insets top="15" right="15" bottom="15" left="15"/>
+                </padding>
+                <VBox spacing="5" HBox.hgrow="ALWAYS">
+                    <Label text="Search Medicine / Scan Barcode (F1)" styleClass="form-label"/>
+                    <TextField fx:id="medicineSearchField" promptText="Search by Name or Barcode..." style="-fx-font-size: 16px; -fx-background-color: #e6f2e6;"/>
+                </VBox>
+            </HBox>
             
             <!-- Cart Table -->
             <TableView fx:id="tblCart" VBox.vgrow="ALWAYS" minHeight="200" editable="true">
@@ -88,6 +98,11 @@
                 
                 <Label text="Grand Total (₹):" styleClass="form-label"/>
                 <Label fx:id="lblGrandTotal" text="0.00" style="-fx-font-weight: bold; -fx-font-size: 24px; -fx-text-fill: #15803d;"/>
+                
+                <Region prefWidth="20"/>
+                
+                <Label text="Amt Paid (₹):" styleClass="form-label"/>
+                <TextField fx:id="txtAmountPaid" prefWidth="100" promptText="0.00" style="-fx-font-size: 16px;"/>
                 
                 <Region prefWidth="30"/>
                 

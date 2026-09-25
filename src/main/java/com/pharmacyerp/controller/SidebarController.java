@@ -185,6 +185,19 @@ public class SidebarController {
 
     @FXML
     private void handleInventory(ActionEvent event) {
+        InventoryController.currentFilter = "All";
+        navigateTo(event, "/fxml/Inventory.fxml");
+    }
+
+    @FXML
+    private void handleInventoryBatchWise(ActionEvent event) {
+        InventoryController.currentFilter = "BatchWise";
+        navigateTo(event, "/fxml/Inventory.fxml");
+    }
+
+    @FXML
+    private void handleInventoryNearExpiry(ActionEvent event) {
+        InventoryController.currentFilter = "NearExpiry";
         navigateTo(event, "/fxml/Inventory.fxml");
     }
 
@@ -364,7 +377,6 @@ public class SidebarController {
     @FXML private void handleInventoryBatchDetails(ActionEvent event) { navigateTo(event, "/fxml/InventoryBatchDetails.fxml"); }
     @FXML private void handleInventoryShortageItems(ActionEvent event) { navigateTo(event, "/fxml/InventoryShortageItems.fxml"); }
     @FXML private void handleInventoryExpiredItems(ActionEvent event) { navigateTo(event, "/fxml/InventoryExpiredItems.fxml"); }
-    @FXML private void handleInventoryStockJournal(ActionEvent event) { navigateTo(event, "/fxml/InventoryStockJournal.fxml"); }
     @FXML private void handleInventoryPhysicalStock(ActionEvent event) { navigateTo(event, "/fxml/InventoryPhysicalStock.fxml"); }
     @FXML private void handleInventoryCategoryMaster(ActionEvent event) { navigateTo(event, "/fxml/InventoryCategoryMaster.fxml"); }
     @FXML private void handleInventorySaltMaster(ActionEvent event) { navigateTo(event, "/fxml/InventorySaltMaster.fxml"); }

@@ -16,11 +16,22 @@
                 <Insets top="15" right="20" bottom="15" left="20"/>
             </padding>
             
-            <HBox alignment="CENTER_LEFT" spacing="10">
+            <HBox alignment="CENTER_LEFT" spacing="15">
                 <Label text="New Sale (POS)" styleClass="page-title"/>
                 <Region HBox.hgrow="ALWAYS"/>
                 <Label fx:id="dateLabel" style="-fx-font-weight: bold; -fx-text-fill: #4B5563; -fx-font-size: 14px;"/>
-                <Button text="Dashboard" onAction="#handleDashboard" styleClass="button-outline"/>
+                
+                <!-- Account Switcher -->
+                <MenuButton fx:id="accountMenuButton" text="👤 Admin Account" styleClass="button-outline" style="-fx-background-color: #f8fafc; -fx-border-color: #cbd5e1; -fx-border-radius: 4px; -fx-cursor: hand;">
+                    <items>
+                        <MenuItem text="Switch to Rep Account" onAction="#handleSwitchToRep"/>
+                        <MenuItem text="Switch to Admin Account" onAction="#handleSwitchToAdmin"/>
+                        <SeparatorMenuItem />
+                        <MenuItem text="Logout" />
+                    </items>
+                </MenuButton>
+                
+                <Button text="Dashboard" onAction="#handleDashboard" styleClass="button-primary"/>
             </HBox>
             
             <!-- Customer Details -->
@@ -33,8 +44,11 @@
                     <TextField fx:id="customerPhoneField" promptText="Enter Mobile Number"/>
                 </VBox>
                 <VBox spacing="5" HBox.hgrow="ALWAYS">
-                    <Label text="Customer Name" styleClass="form-label"/>
-                    <TextField fx:id="customerNameField" promptText="Enter Customer Name"/>
+                    <HBox alignment="CENTER_LEFT" spacing="10">
+                        <Label text="Customer Name" styleClass="form-label"/>
+                        <Hyperlink fx:id="customerHistoryLink" text="View History" visible="false" onAction="#handleViewCustomerHistory" style="-fx-font-size: 11px; -fx-text-fill: #0ea5e9;"/>
+                    </HBox>
+                    <ComboBox fx:id="customerNameField" editable="true" promptText="Enter Customer Name" maxWidth="Infinity" style="-fx-font-size: 14px;"/>
                 </VBox>
                 <VBox spacing="5" HBox.hgrow="ALWAYS">
                     <Label text="Doctor Name" styleClass="form-label"/>
@@ -79,6 +93,7 @@
                 </padding>
                 
                 <VBox spacing="10">
+                    <Label fx:id="productHistoryLabel" text="" style="-fx-text-fill: #ea580c; -fx-font-weight: bold;"/>
                     <Label fx:id="itemsCountLabel" text="0 items in cart" style="-fx-font-weight: bold;"/>
                     <HBox spacing="10">
                         <Label text="Subtotal: "/>

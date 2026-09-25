@@ -43,4 +43,9 @@ public class Supplier {
 
     public LocalDateTime getUpdatedAt() { return updatedAt; }
     public void setUpdatedAt(LocalDateTime updatedAt) { this.updatedAt = updatedAt; }
+
+    @Override
+    public String toString() {
+        return supplierName != null ? supplierName : "Unknown Supplier";
+    }
 }

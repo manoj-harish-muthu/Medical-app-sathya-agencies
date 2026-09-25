@@ -48,14 +48,46 @@ public class ReportDailySalesController implements Initializable {
     public void initialize(URL location, ResourceBundle resources) {
         dpFrom.setValue(LocalDate.now().minusDays(30));
         dpTo.setValue(LocalDate.now());
+        if (dpFrom != null) dpFrom.valueProperty().addListener((obs, oldV, newV) -> loadDummyData());
+        if (dpTo != null) dpTo.valueProperty().addListener((obs, oldV, newV) -> loadDummyData());
         
         loadDummyData();
         tblHistory.setItems(records);
         updateTotals();
     }
 
+    @FXML
     private void loadDummyData() {
-        // Dummy data removed as per user request
+        records.clear();
+        LocalDate from = dpFrom.getValue() != null ? dpFrom.getValue() : LocalDate.now().minusDays(30);
+        LocalDate to = dpTo.getValue() != null ? dpTo.getValue() : LocalDate.now();
+
+        String sql = "SELECT DATE(sale_date) as sale_day, COUNT(sale_id) as total_bills, SUM(grand_total) as total_amount " +
+                     "FROM sales " +
+                     "WHERE DATE(sale_date) BETWEEN ? AND ? " +
+                     "GROUP BY DATE(sale_date) " +
+                     "ORDER BY sale_day DESC";
+
+        try (java.sql.Connection conn = com.pharmacyerp.database.DatabaseManager.getConnection();
+             java.sql.PreparedStatement stmt = conn.prepareStatement(sql)) {
+             
+            stmt.setDate(1, java.sql.Date.valueOf(from));
+            stmt.setDate(2, java.sql.Date.valueOf(to));
+            
+            java.time.format.DateTimeFormatter fmt = java.time.format.DateTimeFormatter.ofPattern("dd/MM/yyyy");
+            
+            try (java.sql.ResultSet rs = stmt.executeQuery()) {
+                while (rs.next()) {
+                    java.sql.Date sqlDate = rs.getDate("sale_day");
+                    String dateStr = sqlDate != null ? sqlDate.toLocalDate().format(fmt) : "";
+                    int totalBills = rs.getInt("total_bills");
+                    double amount = rs.getDouble("total_amount");
+                    records.add(new HistoryData(dateStr, "Daily Sales Summary", totalBills + " Bills Generated", amount));
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     private void updateTotals() {

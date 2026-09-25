@@ -36,7 +36,7 @@
                     <DatePicker fx:id="dpTo" maxWidth="Infinity"/>
                 </VBox>
                 <VBox alignment="BOTTOM_CENTER">
-                    <Button text="Search" styleClass="button-primary"/>
+                    <Button text="Search" styleClass="button-primary" onAction="#handleSearch"/>
                 </VBox>
             </HBox>
             

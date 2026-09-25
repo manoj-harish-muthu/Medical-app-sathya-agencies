@@ -33,8 +33,8 @@ public class GstDAO {
                      "JOIN sale_items si ON s.sale_id = si.sale_id " +
                      "JOIN medicines m ON si.medicine_id = m.medicine_id " +
                      "WHERE s.status != 'QUOTATION' " +
-                     "AND strftime('%m', s.sale_date) = ? " +
-                     "AND strftime('%Y', s.sale_date) = ? " +
+                     "AND TO_CHAR(s.sale_date, 'MM') = ? " +
+                     "AND TO_CHAR(s.sale_date, 'YYYY') = ? " +
                      "GROUP BY tax_rate_int " +
                      "ORDER BY tax_rate_int ASC";
 
@@ -81,8 +81,8 @@ public class GstDAO {
                      "SUM(pi.net_amount) as total_amount " +
                      "FROM purchases p " +
                      "JOIN purchase_items pi ON p.purchase_id = pi.purchase_id " +
-                     "WHERE strftime('%m', p.purchase_date) = ? " +
-                     "AND strftime('%Y', p.purchase_date) = ? " +
+                     "WHERE TO_CHAR(p.purchase_date, 'MM') = ? " +
+                     "AND TO_CHAR(p.purchase_date, 'YYYY') = ? " +
                      "GROUP BY tax_rate_int " +
                      "ORDER BY tax_rate_int ASC";
 

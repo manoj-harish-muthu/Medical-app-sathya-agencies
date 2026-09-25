@@ -216,11 +216,26 @@ public class MedicineDAO {
     }
 
     public static boolean deleteMedicine(int id) {
-        String sql = "DELETE FROM medicines WHERE medicine_id = ?";
-        try (Connection conn = DatabaseManager.getConnection();
-             PreparedStatement stmt = conn.prepareStatement(sql)) {
-            stmt.setInt(1, id);
-            return stmt.executeUpdate() > 0;
+        String sqlBatches = "DELETE FROM medicine_batches WHERE medicine_id = ?";
+        String sqlMedicine = "DELETE FROM medicines WHERE medicine_id = ?";
+        try (Connection conn = DatabaseManager.getConnection()) {
+            conn.setAutoCommit(false);
+            try (PreparedStatement stmtBatches = conn.prepareStatement(sqlBatches);
+                 PreparedStatement stmtMedicine = conn.prepareStatement(sqlMedicine)) {
+                
+                stmtBatches.setInt(1, id);
+                stmtBatches.executeUpdate();
+                
+                stmtMedicine.setInt(1, id);
+                int rows = stmtMedicine.executeUpdate();
+                
+                conn.commit();
+                return rows > 0;
+            } catch (Exception ex) {
+                conn.rollback();
+                ex.printStackTrace();
+                return false;
+            }
         } catch (Exception e) {
             e.printStackTrace();
             return false;

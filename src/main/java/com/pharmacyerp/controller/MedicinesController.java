@@ -134,9 +134,9 @@ public class MedicinesController implements Initializable {
                             MedicineData data = getTableView().getItems().get(getIndex());
                             Medicine m = com.pharmacyerp.dao.MedicineDAO.getMedicineById(data.getId());
                             if (m != null) {
+                                showFormView();
                                 editingMedicineId = m.getMedicineId();
                                 populateForm(m);
-                                showFormView();
                             }
                         });
 

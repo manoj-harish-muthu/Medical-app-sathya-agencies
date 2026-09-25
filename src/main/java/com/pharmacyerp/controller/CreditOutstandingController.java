@@ -49,13 +49,50 @@ public class CreditOutstandingController implements Initializable {
         dpFrom.setValue(LocalDate.now().minusDays(30));
         dpTo.setValue(LocalDate.now());
         
+        
+        if (txtSearch != null) {
+            txtSearch.textProperty().addListener((obs, oldV, newV) -> loadDummyData());
+        }
+        
         loadDummyData();
         tblHistory.setItems(records);
         updateTotals();
     }
 
-    private void loadDummyData() {
-        // Dummy data removed as per user request
+    @FXML
+    public void loadDummyData() {
+        records.clear();
+        String search = txtSearch.getText() == null ? "" : txtSearch.getText().trim();
+        
+        String sql = "SELECT MAX(sale_date) as last_date, customer_name, customer_phone, SUM(balance_amount) as outstanding " +
+                     "FROM sales " +
+                     "WHERE balance_amount > 0 AND (customer_name LIKE ? OR customer_phone LIKE ?) " +
+                     "GROUP BY customer_name, customer_phone " +
+                     "HAVING SUM(balance_amount) > 0 " +
+                     "ORDER BY outstanding DESC";
+                     
+        try (java.sql.Connection conn = com.pharmacyerp.database.DatabaseManager.getConnection();
+             java.sql.PreparedStatement stmt = conn.prepareStatement(sql)) {
+            stmt.setString(1, "%" + search + "%");
+            stmt.setString(2, "%" + search + "%");
+            
+            java.time.format.DateTimeFormatter formatter = java.time.format.DateTimeFormatter.ofPattern("dd/MM/yyyy");
+            
+            try (java.sql.ResultSet rs = stmt.executeQuery()) {
+                while (rs.next()) {
+                    java.sql.Timestamp ts = rs.getTimestamp("last_date");
+                    String dateStr = ts != null ? ts.toLocalDateTime().format(formatter) : "";
+                    String cust = rs.getString("customer_name");
+                    String phone = rs.getString("customer_phone");
+                    double out = rs.getDouble("outstanding");
+                    
+                    records.add(new HistoryData(dateStr, cust != null && !cust.isEmpty() ? cust : "Walk-in", phone != null ? phone : "", out));
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        updateTotals();
     }
 
     private void updateTotals() {

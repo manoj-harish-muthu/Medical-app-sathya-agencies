@@ -8,9 +8,15 @@ import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.*;
 
-import java.net.URL;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.ResourceBundle;
+import java.net.URL;
+
+import com.pharmacyerp.database.DatabaseManager;
 
 public class SupplierLedgerController implements Initializable {
 
@@ -54,8 +60,32 @@ public class SupplierLedgerController implements Initializable {
         updateTotals();
     }
 
+    @FXML
     private void loadDummyData() {
-        // Dummy data removed as per user request
+        records.clear();
+        String sql = "SELECT purchase_date, supplier_name, invoice_no, grand_total " +
+                     "FROM purchases WHERE purchase_date >= ? AND purchase_date <= ? " +
+                     "ORDER BY purchase_date DESC";
+        
+        try (Connection conn = DatabaseManager.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+            
+            stmt.setString(1, dpFrom.getValue().toString() + " 00:00:00");
+            stmt.setString(2, dpTo.getValue().toString() + " 23:59:59");
+            
+            try (ResultSet rs = stmt.executeQuery()) {
+                DateTimeFormatter fmt = DateTimeFormatter.ofPattern("dd/MM/yyyy");
+                while (rs.next()) {
+                    String dateStr = rs.getTimestamp("purchase_date").toLocalDateTime().format(fmt);
+                    String name = rs.getString("supplier_name");
+                    String desc = "Purchase Invoice: " + rs.getString("invoice_no");
+                    double amt = rs.getDouble("grand_total");
+                    records.add(new HistoryData(dateStr, name != null ? name : "Unknown", desc, amt));
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     private void updateTotals() {

@@ -49,14 +49,17 @@ public class PosController {
     @FXML private TableColumn<CartItem, Void> colAction;
     
     @FXML private TextField customerPhoneField;
-    @FXML private TextField customerNameField;
+    @FXML private ComboBox<String> customerNameField;
+    @FXML private javafx.scene.control.Hyperlink customerHistoryLink;
     @FXML private TextField doctorNameField;
     
     @FXML private Label subtotalLabel;
     @FXML private Label discountLabel;
     @FXML private Label taxLabel;
     @FXML private Label totalLabel;
+    @FXML private Label productHistoryLabel;
     
+    @FXML private javafx.scene.control.MenuButton accountMenuButton;
     @FXML private TextField paidAmountField;
     
     private int editingSaleId = 0;
@@ -89,7 +92,7 @@ public class PosController {
             });
             customerPhoneField.setOnAction(e -> {
                 lookupCustomer();
-                if (customerNameField != null && customerNameField.getText().trim().isEmpty()) {
+                if (customerNameField != null && customerNameField.getEditor().getText().trim().isEmpty()) {
                     customerNameField.requestFocus();
                 } else if (medicineSearchField != null) {
                     medicineSearchField.requestFocus();
@@ -109,6 +112,26 @@ public class PosController {
             dateLabel.setText(java.time.LocalDate.now().format(java.time.format.DateTimeFormatter.ofPattern("dd/MM/yyyy")));
         }
         
+        if (customerNameField != null) {
+            java.util.List<String> names = posDAO.getAllCustomerNames();
+            customerNameField.getItems().setAll(names);
+            
+            customerNameField.valueProperty().addListener((obs, oldVal, newVal) -> {
+                if (newVal != null && !newVal.trim().isEmpty()) {
+                    String phone = posDAO.getCustomerPhoneByName(newVal);
+                    if (phone != null && !phone.trim().isEmpty() && customerPhoneField != null) {
+                        customerPhoneField.setText(phone);
+                    }
+                    
+                    if (customerHistoryLink != null) {
+                        java.util.List<com.pharmacyerp.dao.PosDAO.CustomerHistory> history = posDAO.getCustomerHistory(newVal);
+                        customerHistoryLink.setVisible(!history.isEmpty());
+                    }
+                } else if (customerHistoryLink != null) {
+                    customerHistoryLink.setVisible(false);
+                }
+            });
+        }
         setupTable();
         updateTotals();
         
@@ -309,6 +332,18 @@ public class PosController {
                 doctorNameField.setPromptText("Doctor Name (REQUIRED for Schedule H)");
             }
         }
+        
+        if (customerNameField != null && customerNameField.getValue() != null && !customerNameField.getValue().trim().isEmpty() && productHistoryLabel != null) {
+            com.pharmacyerp.dao.PosDAO.LastProductSale lastSale = posDAO.getLastSaleOfProduct(customerNameField.getValue(), item.getMedicineId());
+            if (lastSale != null) {
+                productHistoryLabel.setText("Last sale of " + item.getMedicineName() + " to " + customerNameField.getValue() + " was ₹" + lastSale.rate + " on " + lastSale.date);
+            } else {
+                productHistoryLabel.setText("");
+            }
+        } else if (productHistoryLabel != null) {
+            productHistoryLabel.setText("");
+        }
+
         cartTable.refresh();
         updateTotals();
     }
@@ -407,7 +442,7 @@ public class PosController {
     // Clear Bill with Confirmation
     @FXML
     private void handleClearBill(ActionEvent event) {
-        if (cartItems.isEmpty() && (customerNameField == null || customerNameField.getText().trim().isEmpty())) {
+        if (cartItems.isEmpty() && (customerNameField == null || customerNameField.getEditor().getText().trim().isEmpty())) {
             return;
         }
         javafx.scene.control.Alert alert = new javafx.scene.control.Alert(
@@ -448,7 +483,8 @@ public class PosController {
         if (phone.length() >= 7) {
             String name = posDAO.getCustomerNameByPhone(phone);
             if (name != null && !name.trim().isEmpty()) {
-                customerNameField.setText(name);
+                customerNameField.setValue(name);
+                customerNameField.getEditor().setText(name);
             }
         }
     }
@@ -459,7 +495,7 @@ public class PosController {
         editingInvoiceNo = null;
         cartItems.clear();
         cartTable.refresh();
-        if (customerNameField != null) customerNameField.clear();
+        if (customerNameField != null) { customerNameField.setValue(null); customerNameField.getEditor().clear(); }
         if (customerPhoneField != null) customerPhoneField.clear();
         if (doctorNameField != null) {
             doctorNameField.clear();
@@ -470,6 +506,7 @@ public class PosController {
         if (medicineSearchField != null) medicineSearchField.clear();
         if (paidAmountField != null) paidAmountField.clear();
         if (balanceLabel != null) balanceLabel.setText("₹ 0.00");
+        if (productHistoryLabel != null) productHistoryLabel.setText("");
         updateTotals();
     }
 
@@ -505,8 +542,8 @@ public class PosController {
         }
 
         String invoiceNo = "INV-" + System.currentTimeMillis();
-        String customer = (customerNameField != null && !customerNameField.getText().trim().isEmpty()) 
-                ? customerNameField.getText().trim() : "Walk-in Customer";
+        String customer = (customerNameField != null && !customerNameField.getEditor().getText().trim().isEmpty()) 
+                ? customerNameField.getEditor().getText().trim() : "Walk-in Customer";
         String customerPhone = (customerPhoneField != null) ? customerPhoneField.getText().trim() : "";
         String doctor = (doctorNameField != null) ? doctorNameField.getText().trim() : "";
         String paymentMode = (paymentModeCombo != null && paymentModeCombo.getValue() != null) 
@@ -622,7 +659,7 @@ public class PosController {
         }
 
         String invoiceNo = "QT-" + System.currentTimeMillis();
-        String customer = customerNameField != null ? customerNameField.getText().trim() : "";
+        String customer = customerNameField != null ? customerNameField.getEditor().getText().trim() : "";
         String customerPhone = customerPhoneField != null ? customerPhoneField.getText().trim() : "";
         String doctor = doctorNameField != null ? doctorNameField.getText().trim() : "";
 
@@ -653,7 +690,8 @@ public class PosController {
             customerPhoneField.setText(order.getPhone());
         }
         if (customerNameField != null && order.getCustomerName() != null && !order.getCustomerName().isBlank()) {
-            customerNameField.setText(order.getCustomerName());
+            customerNameField.setValue(order.getCustomerName());
+            customerNameField.getEditor().setText(order.getCustomerName());
         }
         if (order.getItems() != null && !order.getItems().isEmpty()) {
             for (com.pharmacyerp.model.AgentOrder.OrderItem it : order.getItems()) {
@@ -687,7 +725,8 @@ public class PosController {
             customerPhoneField.setText(sale.getCustomerPhone());
         }
         if (customerNameField != null && sale.getCustomerName() != null && !sale.getCustomerName().isBlank()) {
-            customerNameField.setText(sale.getCustomerName());
+            customerNameField.setValue(sale.getCustomerName());
+            customerNameField.getEditor().setText(sale.getCustomerName());
         }
         if (doctorNameField != null && sale.getDoctorName() != null && !sale.getDoctorName().isBlank()) {
             doctorNameField.setText(sale.getDoctorName());
@@ -713,6 +752,29 @@ public class PosController {
         navigateTo(event, "/fxml/Dashboard.fxml");
     }
 
+    @FXML
+    private void handleViewCustomerHistory(ActionEvent event) {
+        if (customerNameField != null && customerNameField.getValue() != null) {
+            String name = customerNameField.getValue();
+            java.util.List<com.pharmacyerp.dao.PosDAO.CustomerHistory> history = posDAO.getCustomerHistory(name);
+            if (!history.isEmpty()) {
+                StringBuilder sb = new StringBuilder();
+                sb.append("Recent Purchases for ").append(name).append(":\n\n");
+                for (com.pharmacyerp.dao.PosDAO.CustomerHistory h : history) {
+                    sb.append("Date: ").append(h.date)
+                      .append(" | Invoice: ").append(h.invoiceNo)
+                      .append(" | Amount: ₹").append(h.amount)
+                      .append("\n");
+                }
+                javafx.scene.control.Alert alert = new javafx.scene.control.Alert(javafx.scene.control.Alert.AlertType.INFORMATION);
+                alert.setTitle("Customer History");
+                alert.setHeaderText("Previous Bills");
+                alert.setContentText(sb.toString());
+                alert.showAndWait();
+            }
+        }
+    }
+
     private void navigateTo(ActionEvent event, String fxmlPath) {
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource(fxmlPath));
@@ -726,6 +788,34 @@ public class PosController {
             alert.setHeaderText("Unable to open screen: " + fxmlPath);
             alert.setContentText(e.getMessage() != null ? e.getMessage() : e.toString());
             alert.showAndWait();
+        }
+    }
+
+    @FXML
+    private void handleSwitchToRep(ActionEvent event) {
+        if (accountMenuButton != null) {
+            accountMenuButton.setText("👤 Rep Account");
+            accountMenuButton.setStyle("-fx-background-color: #f0fdf4; -fx-border-color: #86efac; -fx-border-radius: 4px; -fx-cursor: hand; -fx-text-fill: #166534; -fx-font-weight: bold;");
+            
+            javafx.scene.control.Alert alert = new javafx.scene.control.Alert(javafx.scene.control.Alert.AlertType.INFORMATION);
+            alert.setTitle("Account Switched");
+            alert.setHeaderText(null);
+            alert.setContentText("Successfully switched to Rep Account profile.");
+            alert.show();
+        }
+    }
+
+    @FXML
+    private void handleSwitchToAdmin(ActionEvent event) {
+        if (accountMenuButton != null) {
+            accountMenuButton.setText("👤 Admin Account");
+            accountMenuButton.setStyle("-fx-background-color: #f8fafc; -fx-border-color: #cbd5e1; -fx-border-radius: 4px; -fx-cursor: hand; -fx-text-fill: #0f172a;");
+            
+            javafx.scene.control.Alert alert = new javafx.scene.control.Alert(javafx.scene.control.Alert.AlertType.INFORMATION);
+            alert.setTitle("Account Switched");
+            alert.setHeaderText(null);
+            alert.setContentText("Successfully switched to Admin Account profile.");
+            alert.show();
         }
     }
 }

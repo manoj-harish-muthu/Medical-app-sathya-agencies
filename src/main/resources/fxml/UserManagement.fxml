@@ -71,6 +71,15 @@
                         <ComboBox fx:id="roleCombo" maxWidth="Infinity"/>
                     </VBox>
                     
+                    <VBox spacing="8" fx:id="permissionsBox">
+                        <Label text="Allowed Screens (Permissions)" styleClass="form-label"/>
+                        <CheckBox fx:id="chkBilling" text="Billing / POS" selected="true"/>
+                        <CheckBox fx:id="chkInventory" text="Inventory Management" selected="true"/>
+                        <CheckBox fx:id="chkReports" text="Reports &amp; Analytics" selected="true"/>
+                        <CheckBox fx:id="chkMasters" text="Master Data" selected="true"/>
+                        <CheckBox fx:id="chkAccounts" text="Accounts &amp; Ledger" selected="true"/>
+                    </VBox>
+                    
                     <Label fx:id="lblError" text="" style="-fx-text-fill: #dc2626; -fx-font-size: 12px;" visible="false"/>
                     
                     <Region VBox.vgrow="ALWAYS"/>

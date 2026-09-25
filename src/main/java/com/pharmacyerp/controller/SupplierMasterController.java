@@ -62,13 +62,14 @@ public class SupplierMasterController implements Initializable {
     private final String tableName = "suppliers";
     private final String col1 = "supplier_name"; // Name
     private final String col2 = "phone"; // Details
-    private final String col3 = "gstin"; // Extra1
+    private final String col3 = "email"; // Extra1
     private final String col4 = "address"; // Extra2
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
         tblData.setItems(records);
         tblData.setEditable(true);
+        tblData.getSelectionModel().setCellSelectionEnabled(true);
 
         setupColumn(colName, md -> md.getName(), (md, val) -> md.setName(val));
         setupColumn(colDetails, md -> md.getDetails(), (md, val) -> md.setDetails(val));
@@ -79,11 +80,78 @@ public class SupplierMasterController implements Initializable {
     }
 
     private void setupColumn(TableColumn<MasterData, String> col, java.util.function.Function<MasterData, String> getter, java.util.function.BiConsumer<MasterData, String> setter) {
-        col.setCellFactory(TextFieldTableCell.forTableColumn());
+        col.setCellFactory(c -> new EditCell());
         col.setOnEditCommit(event -> {
             setter.accept(event.getRowValue(), event.getNewValue());
             checkAndAddEmptyRow();
         });
+    }
+
+    private class EditCell extends TableCell<MasterData, String> {
+        private TextField textField;
+
+        @Override
+        public void startEdit() {
+            if (!isEmpty()) {
+                super.startEdit();
+                createTextField();
+                setText(null);
+                setGraphic(textField);
+                textField.selectAll();
+                textField.requestFocus();
+            }
+        }
+
+        @Override
+        public void cancelEdit() {
+            super.cancelEdit();
+            setText(getString());
+            setGraphic(null);
+        }
+
+        @Override
+        public void updateItem(String item, boolean empty) {
+            super.updateItem(item, empty);
+            if (empty) {
+                setText(null);
+                setGraphic(null);
+            } else {
+                if (isEditing()) {
+                    if (textField != null) {
+                        textField.setText(getString());
+                    }
+                    setText(null);
+                    setGraphic(textField);
+                } else {
+                    setText(getString());
+                    setGraphic(null);
+                }
+            }
+        }
+
+        private void createTextField() {
+            textField = new TextField(getString());
+            textField.setMinWidth(this.getWidth() - this.getGraphicTextGap()*2);
+            textField.focusedProperty().addListener((obs, wasFocused, isNowFocused) -> {
+                if (!isNowFocused) {
+                    commitEdit(textField.getText());
+                }
+            });
+            textField.setOnKeyPressed(t -> {
+                if (t.getCode() == javafx.scene.input.KeyCode.ENTER) {
+                    commitEdit(textField.getText());
+                    // Move to next column horizontally
+                    getTableView().getSelectionModel().selectRightCell();
+                    t.consume();
+                } else if (t.getCode() == javafx.scene.input.KeyCode.ESCAPE) {
+                    cancelEdit();
+                }
+            });
+        }
+
+        private String getString() {
+            return getItem() == null ? "" : getItem();
+        }
     }
 
     @FXML

@@ -44,6 +44,16 @@
                     <ComboBox fx:id="cmbReason" maxWidth="Infinity" promptText="Expired"/>
                 </VBox>
             </HBox>
+            <!-- Medicine Search -->
+            <HBox spacing="15" alignment="CENTER_LEFT" styleClass="card">
+                <padding>
+                    <Insets top="15" right="15" bottom="15" left="15"/>
+                </padding>
+                <VBox spacing="5" HBox.hgrow="ALWAYS">
+                    <Label text="Search Medicine / Scan Barcode (F1)" styleClass="form-label"/>
+                    <TextField fx:id="medicineSearchField" promptText="Search by Name or Barcode..." style="-fx-font-size: 16px; -fx-background-color: #e6f2e6;"/>
+                </VBox>
+            </HBox>
             
             <!-- Return Table -->
             <TableView fx:id="tblCart" VBox.vgrow="ALWAYS" minHeight="200" editable="true">
