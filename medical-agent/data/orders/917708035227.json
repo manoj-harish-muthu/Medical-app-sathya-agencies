@@ -1,26 +1,19 @@
 {
     "customer_id": "917708035227",
-    "customer_name": "ஹரிஷ்",
+    "customer_name": "Rajesh Kumar",
     "phone": "7708035227",
-    "address": "68A, கந்தபுரம் Street, மதுரை Road, விருதுநகர், 626001",
+    "address": "Flat 4B, Emerald Flats, 2nd Avenue, Anna Nagar, Chennai - 600040",
     "items": [
         {
-            "medicine": "Dolo 650",
-            "quantity": 1,
+            "medicine": "paracetamol",
+            "quantity": 2,
             "unit": "strip",
             "volume_ml": null,
             "pieces_per_unit": null
         },
         {
-            "medicine": "Paracetamol 500mg",
-            "quantity": 1,
-            "unit": "strip",
-            "volume_ml": null,
-            "pieces_per_unit": null
-        },
-        {
-            "medicine": "Met XL 25",
-            "quantity": 1,
+            "medicine": "dolo 650",
+            "quantity": 2,
             "unit": "strip",
             "volume_ml": null,
             "pieces_per_unit": null

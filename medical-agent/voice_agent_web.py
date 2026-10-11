@@ -14,6 +14,7 @@ import os
 import sys
 import json
 import asyncio
+import logging
 import argparse
 import webbrowser
 from pathlib import Path
@@ -28,9 +29,32 @@ load_dotenv()
 from google import genai
 from google.genai import types
 
+import websockets.exceptions
 from websockets.asyncio.server import serve
 from websockets.http11 import Response
 from websockets.datastructures import Headers
+
+
+class HandshakeNoiseFilter(logging.Filter):
+    """
+    Suppresses benign TCP disconnects / probe errors from polluting the console.
+    When Chrome, ngrok, or network probes preconnect or probe port 8080 and immediately
+    close the TCP connection before sending bytes, websockets raises an EOFError / InvalidMessage.
+    This is completely harmless and normal for web traffic, but websockets logs it as an ERROR with exc_info.
+    """
+    def filter(self, record: logging.LogRecord) -> bool:
+        if record.exc_info:
+            _, exc_val, _ = record.exc_info
+            curr = exc_val
+            while curr is not None:
+                if isinstance(curr, (EOFError, ConnectionResetError, ConnectionAbortedError)):
+                    return False
+                curr = getattr(curr, "__cause__", None) or getattr(curr, "__context__", None)
+        return True
+
+
+# Apply filter to websockets server logger to keep terminal clean of TCP probe/preconnect noise
+logging.getLogger("websockets.server").addFilter(HandshakeNoiseFilter())
 
 # Constants
 DEFAULT_PORT = 8080
@@ -81,6 +105,12 @@ def load_html_content() -> bytes:
 
 def process_http_request(connection, request):
     """Serve the Web UI over HTTP and pass through WebSocket upgrades."""
+    # Check if this is an explicit WebSocket upgrade request
+    upgrade = request.headers.get("Upgrade", "")
+    if upgrade.lower() == "websocket":
+        # Return None to instruct websockets library to proceed with WebSocket handshake
+        return None
+
     path = request.path.split("?")[0]
     if path in ("/", "/index.html"):
         html_bytes = load_html_content()
@@ -91,8 +121,10 @@ def process_http_request(connection, request):
         return Response(200, "OK", headers, html_bytes)
     elif path == "/favicon.ico":
         return Response(204, "No Content", Headers([]), b"")
-    # Return None so websockets library processes the WebSocket handshake on /ws or any other path
-    return None
+
+    # Clean 404 response for arbitrary HTTP requests (e.g. /robots.txt, /manifest.json)
+    # rather than attempting an invalid WebSocket upgrade (which triggers HTTP 426 Upgrade Required)
+    return Response(404, "Not Found", Headers([("Content-Type", "text/plain; charset=utf-8")]), b"Not Found")
 
 
 class BrowserVoiceSession:
@@ -131,6 +163,13 @@ class BrowserVoiceSession:
                         except Exception as e:
                             print(f"[Send to Gemini Error] {e}", flush=True)
 
+        except (websockets.exceptions.ConnectionClosedOK, asyncio.CancelledError):
+            pass
+        except websockets.exceptions.ConnectionClosed as e:
+            if getattr(e, "rcvd", None) and e.rcvd.code in (1000, 1001):
+                pass
+            else:
+                print(f"[WebSocket Connection Closed] {e}", flush=True)
         except Exception as e:
             print(f"[WebSocket Connection Closed] {e}", flush=True)
         finally:

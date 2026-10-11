@@ -1,0 +1,26 @@
+{
+    "customer_id": "917418062898",
+    "customer_name": "guttbrains",
+    "phone": "10147649",
+    "address": "4a, 8a street, Thirumagalam, Madurai - 626507",
+    "items": [
+        {
+            "medicine": "cough syrup",
+            "quantity": "60ml",
+            "unit": "tonic",
+            "volume_ml": "60ml",
+            "pieces_per_unit": null
+        },
+        {
+            "medicine": "paracetamol",
+            "quantity": 1,
+            "unit": "strip",
+            "volume_ml": null,
+            "pieces_per_unit": null
+        }
+    ],
+    "confirmed": true,
+    "is_checked_by_admin": false,
+    "admin_status": "pending",
+    "completed_at": "2026-09-30 16:01:21"
+}
